@@ -4,9 +4,17 @@
 // 실행 후 로그(보기 > 로그)에서 편집 링크와 응답(배포) 링크를 확인한다.
 // 참고 문서: docs/베이스라인테스트_진행안.md, docs/NH앱4개_카드검색_as-is결과.md
 
-var DRIVE_FOLDER_ID = '1_78Y57oD-fqPgRBus06YHUwX7XcH_H_j'; // 업로드한 "스크린샷" 폴더 ID
+// 스크린샷을 업로드한 구글 드라이브 폴더의 ID를 넣는다.
+// 찾는 법: 드라이브에서 해당 폴더를 열면 주소창이
+//   https://drive.google.com/drive/folders/<여기가_폴더_ID>
+// 형태이며, 마지막 경로 조각이 폴더 ID다.
+// 설문 응답자에게 이미지가 보이려면 그 폴더가 "링크가 있는 모든 사용자에게 공개"여야 한다.
+var DRIVE_FOLDER_ID = '';
 
 function buildForm() {
+  if (!DRIVE_FOLDER_ID) {
+    throw new Error('DRIVE_FOLDER_ID가 비어 있다. 이 파일 상단 주석을 보고 스크린샷 폴더 ID를 넣은 뒤 다시 실행한다.');
+  }
   var root = DriveApp.getFolderById(DRIVE_FOLDER_ID);
   var form = FormApp.create('NH 카드 찾기 베이스라인 테스트');
   form.setDescription(
