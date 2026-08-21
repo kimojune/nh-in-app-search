@@ -1,0 +1,1260 @@
+<title>서치브릿지</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Gothic+A1:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f5f7f3;
+    --surface:#ffffff;
+    --surface-2:#eef2ea;
+    --ink:#1a2420;
+    --ink-muted:#5c6a60;
+    --line:#dde3d8;
+    --line-strong:#c3ccbc;
+
+    --tool:#4a4fc7;
+    --tool-contrast:#ffffff;
+    --tool-soft:#e9e9fb;
+    --tool-ink:#2a2c6b;
+
+    --nh:#0f8a4f;
+    --nh-dark:#0b6b3d;
+    --nh-contrast:#ffffff;
+    --nh-soft:#e4f4ea;
+
+    --danger:#c0392b;
+    --danger-soft:#fbe7e4;
+    --warn:#b8862b;
+    --warn-soft:#faf1de;
+    --ok:#0f8a4f;
+    --ok-soft:#e4f4ea;
+
+    --shadow: 0 1px 2px rgba(20,30,20,.06), 0 8px 24px rgba(20,30,20,.08);
+
+    --font-ui: "IBM Plex Sans KR", -apple-system, "Malgun Gothic", sans-serif;
+    --font-app: "Gothic A1", "Apple SD Gothic Neo", -apple-system, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#12140f;
+      --surface:#1a1e16;
+      --surface-2:#20261b;
+      --ink:#e8ede2;
+      --ink-muted:#a3ae9a;
+      --line:#2b3324;
+      --line-strong:#3a4531;
+
+      --tool:#8b8ff0;
+      --tool-contrast:#12142e;
+      --tool-soft:#242766;
+      --tool-ink:#c8caf7;
+
+      --nh:#3fbf7f;
+      --nh-dark:#2f9d67;
+      --nh-contrast:#0b1b12;
+      --nh-soft:#123322;
+
+      --danger:#e4685a;
+      --danger-soft:#3a201d;
+      --warn:#d9ab5c;
+      --warn-soft:#3a2f18;
+      --ok:#3fbf7f;
+      --ok-soft:#123322;
+
+      --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#12140f;
+    --surface:#1a1e16;
+    --surface-2:#20261b;
+    --ink:#e8ede2;
+    --ink-muted:#a3ae9a;
+    --line:#2b3324;
+    --line-strong:#3a4531;
+
+    --tool:#8b8ff0;
+    --tool-contrast:#12142e;
+    --tool-soft:#242766;
+    --tool-ink:#c8caf7;
+
+    --nh:#3fbf7f;
+    --nh-dark:#2f9d67;
+    --nh-contrast:#0b1b12;
+    --nh-soft:#123322;
+
+    --danger:#e4685a;
+    --danger-soft:#3a201d;
+    --warn:#d9ab5c;
+    --warn-soft:#3a2f18;
+    --ok:#3fbf7f;
+    --ok-soft:#123322;
+
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 28px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+    padding:24px 12px 48px;
+  }
+  h1,h2,h3{text-wrap:balance; margin:0;}
+  button{font-family:inherit;}
+  :focus-visible{outline:2px solid var(--tool); outline-offset:2px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; transition-duration:.001ms !important;}
+  }
+
+  .masthead{
+    width:min(430px,94vw);
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    margin-bottom:4px;
+  }
+  .masthead .brand{
+    font-family:var(--font-ui);
+    font-weight:700;
+    font-size:1.05rem;
+    letter-spacing:.01em;
+    color:var(--tool-ink);
+  }
+  .masthead .sub{
+    color:var(--ink-muted);
+    font-size:.82rem;
+  }
+
+  /* phone shell */
+  .phone{
+    width:min(375px,92vw);
+    background:var(--surface);
+    border-radius:34px;
+    border:1px solid var(--line-strong);
+    box-shadow:var(--shadow);
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .phone-screen{
+    background:var(--surface);
+    border-radius:26px;
+    overflow:hidden;
+    min-height:700px;
+    display:flex;
+    flex-direction:column;
+    position:relative;
+  }
+  .statusbar{
+    height:30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    color:var(--ink-muted);
+    flex:0 0 auto;
+  }
+  .screen-body{
+    flex:1 1 auto;
+    display:flex;
+    flex-direction:column;
+    overflow-y:auto;
+  }
+
+  /* ---- tool chrome (facilitator-only screens) ---- */
+  .tool-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:.68rem;
+    font-weight:600;
+    letter-spacing:.04em;
+    color:var(--tool);
+    background:var(--tool-soft);
+    border-radius:999px;
+    padding:4px 10px;
+    align-self:flex-start;
+  }
+  .tool-screen{
+    padding:18px 20px 24px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    flex:1;
+  }
+  .tool-screen h2{
+    font-size:1.22rem;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .tool-screen p.desc{
+    color:var(--ink-muted);
+    font-size:.86rem;
+    line-height:1.5;
+    margin:0;
+  }
+  .field{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .field label{
+    font-size:.74rem;
+    font-weight:600;
+    color:var(--ink-muted);
+  }
+  .field input, .field .static-input{
+    border:1px solid var(--line-strong);
+    background:var(--surface-2);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:.9rem;
+    color:var(--ink);
+    font-family:var(--font-ui);
+  }
+  .chip-row{display:flex; flex-wrap:wrap; gap:6px;}
+  .chip{
+    background:var(--tool-soft);
+    color:var(--tool-ink);
+    border-radius:999px;
+    padding:6px 12px;
+    font-size:.78rem;
+    font-weight:600;
+  }
+  table.mapping{
+    width:100%;
+    border-collapse:collapse;
+    font-size:.78rem;
+  }
+  table.mapping th, table.mapping td{
+    border-bottom:1px solid var(--line);
+    text-align:left;
+    padding:8px 6px;
+    vertical-align:top;
+  }
+  table.mapping th{
+    color:var(--ink-muted);
+    font-weight:600;
+    font-size:.68rem;
+    letter-spacing:.03em;
+  }
+  .btn{
+    appearance:none;
+    border:none;
+    border-radius:12px;
+    padding:13px 16px;
+    font-size:.92rem;
+    font-weight:600;
+    font-family:var(--font-ui);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    transition:transform .06s ease, filter .15s ease;
+  }
+  .btn:active{transform:scale(.98);}
+  .btn-tool{background:var(--tool); color:var(--tool-contrast);}
+  .btn-tool:hover{filter:brightness(1.06);}
+  .btn-ghost{background:var(--surface-2); color:var(--ink); border:1px solid var(--line-strong);}
+  .btn-nh{background:var(--nh); color:var(--nh-contrast);}
+  .btn-nh:hover{filter:brightness(1.05);}
+  .btn-danger{background:var(--danger-soft); color:var(--danger);}
+  .btn-block{width:100%;}
+  .spacer{flex:1;}
+
+  .cond-card{
+    border:1px solid var(--line-strong);
+    background:var(--surface-2);
+    border-radius:14px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    cursor:pointer;
+    text-align:left;
+  }
+  .cond-card:hover{border-color:var(--tool);}
+  .cond-card .cond-title{font-weight:700; font-size:.95rem;}
+  .cond-card .cond-desc{font-size:.78rem; color:var(--ink-muted); line-height:1.4;}
+
+  /* ---- app chrome (participant-facing) ---- */
+  .app-topbar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--font-app);
+  }
+  .app-topbar .app-name{font-weight:700; font-size:1rem;}
+  .app-tabs{
+    display:flex;
+    gap:6px;
+    padding:8px 12px;
+    overflow-x:auto;
+    border-bottom:1px solid var(--line);
+    font-family:var(--font-app);
+  }
+  .app-tab{
+    flex:0 0 auto;
+    border:1px solid var(--line-strong);
+    background:var(--surface-2);
+    color:var(--ink-muted);
+    border-radius:999px;
+    padding:7px 12px;
+    font-size:.76rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .app-tab[aria-selected="true"]{
+    background:var(--nh-soft);
+    color:var(--nh-dark);
+    border-color:var(--nh);
+  }
+  .search-wrap{
+    padding:12px 14px 6px;
+    font-family:var(--font-app);
+  }
+  .search-box{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--surface-2);
+    border:1px solid var(--line-strong);
+    border-radius:12px;
+    padding:10px 12px;
+  }
+  .search-box input{
+    flex:1;
+    border:none;
+    background:transparent;
+    outline:none;
+    font-size:.92rem;
+    color:var(--ink);
+    font-family:var(--font-app);
+  }
+  .search-box .go{
+    background:var(--nh);
+    color:var(--nh-contrast);
+    border:none;
+    border-radius:8px;
+    padding:7px 12px;
+    font-size:.78rem;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .hint-row{
+    padding:0 14px 10px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+  }
+  .hint-chip{
+    font-size:.68rem;
+    color:var(--ink-muted);
+    background:var(--surface-2);
+    border-radius:999px;
+    padding:4px 10px;
+    cursor:pointer;
+    border:1px solid var(--line);
+  }
+  .result-area{
+    flex:1;
+    padding:4px 14px 18px;
+    font-family:var(--font-app);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .result-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:13px 14px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    cursor:pointer;
+  }
+  .result-item:hover{border-color:var(--nh);}
+  .result-item .ri-main{display:flex; flex-direction:column; gap:2px;}
+  .result-item .ri-title{font-weight:700; font-size:.88rem;}
+  .result-item .ri-sub{font-size:.72rem; color:var(--ink-muted);}
+  .result-item.noise{opacity:.7;}
+  .result-item.noise .ri-title{color:var(--ink-muted);}
+  .result-count{
+    font-size:.72rem;
+    color:var(--ink-muted);
+    padding:2px 2px 4px;
+  }
+  .empty-state{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    text-align:center;
+    gap:6px;
+    padding:34px 10px 18px;
+    color:var(--ink-muted);
+  }
+  .empty-state .big{font-size:1.9rem;}
+  .empty-state .msg{font-size:.86rem; font-weight:600; color:var(--ink);}
+  .empty-state .sub{font-size:.76rem;}
+
+  .guide-card{
+    margin:8px 14px 4px;
+    background:var(--nh-soft);
+    border:1px solid var(--nh);
+    border-radius:14px;
+    padding:16px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+  }
+  .guide-card .gc-title{font-weight:700; font-size:.9rem; color:var(--nh-dark);}
+  .guide-card .gc-sub{font-size:.78rem; color:var(--ink-muted);}
+  .guide-card .go-btn{
+    margin-top:6px;
+    background:var(--nh);
+    color:var(--nh-contrast);
+    border:none;
+    border-radius:10px;
+    padding:11px;
+    font-weight:700;
+    font-size:.84rem;
+    cursor:pointer;
+  }
+
+  .browser-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px 12px;
+    background:var(--surface-2);
+    border-bottom:1px solid var(--line);
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    color:var(--ink-muted);
+  }
+  .browser-bar .dot{width:7px;height:7px;border-radius:50%;background:var(--line-strong);}
+  .url-pill{
+    flex:1;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px 10px;
+    text-align:center;
+  }
+  .promo-banner{
+    margin:12px 14px 0;
+    background:linear-gradient(135deg, var(--warn-soft), var(--surface-2));
+    border:1px solid var(--warn);
+    border-radius:14px;
+    padding:14px;
+    font-family:var(--font-app);
+  }
+  .promo-banner .pb-title{font-weight:800; font-size:.92rem; color:var(--ink);}
+  .promo-banner .pb-sub{font-size:.76rem; color:var(--ink-muted); margin-top:2px;}
+
+  .destination-header{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:12px 14px;
+    border-bottom:1px solid var(--line);
+    font-family:var(--font-app);
+    font-weight:700;
+  }
+  .back-btn{
+    border:none;
+    background:transparent;
+    font-size:1.1rem;
+    color:var(--ink-muted);
+    cursor:pointer;
+    padding:2px 4px;
+  }
+
+  .success-card{
+    margin:16px 14px 6px;
+    background:var(--ok-soft);
+    border:1px solid var(--ok);
+    border-radius:16px;
+    padding:18px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-family:var(--font-app);
+  }
+  .success-card .sc-badge{font-size:1.6rem;}
+  .success-card .sc-title{font-weight:800; font-size:1rem; color:var(--ok);}
+  .product-mock{
+    margin:14px 14px 0;
+    border:1px solid var(--line-strong);
+    border-radius:16px;
+    overflow:hidden;
+    font-family:var(--font-app);
+  }
+  .product-mock .pm-art{
+    height:120px;
+    background:linear-gradient(135deg, var(--nh), var(--nh-dark));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--nh-contrast);
+    font-weight:800;
+    font-size:1.1rem;
+    letter-spacing:.02em;
+  }
+  .product-mock .pm-body{padding:14px; display:flex; flex-direction:column; gap:8px;}
+  .product-mock .pm-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:.8rem;
+    color:var(--ink-muted);
+  }
+
+  .facil-strip{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    background:var(--tool-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .facil-strip .ftag{
+    font-family:var(--font-mono);
+    font-size:.66rem;
+    font-weight:600;
+    color:var(--tool-ink);
+    background:transparent;
+  }
+  .facil-strip .timer{
+    font-family:var(--font-mono);
+    font-variant-numeric:tabular-nums;
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--tool-ink);
+    margin-left:auto;
+  }
+  .facil-strip button{
+    font-family:var(--font-mono);
+    font-size:.66rem;
+    border:1px solid var(--tool);
+    background:transparent;
+    color:var(--tool-ink);
+    border-radius:6px;
+    padding:3px 7px;
+    cursor:pointer;
+  }
+  .facil-panel{
+    padding:10px 14px;
+    background:var(--tool-soft);
+    border-bottom:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .facil-panel .fp-row{display:flex; gap:8px;}
+  .facil-panel .fp-row button{flex:1;}
+
+  /* summary */
+  .summary-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+  }
+  .stat-card{
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .stat-card .stat-label{font-size:.68rem; color:var(--ink-muted); font-weight:600;}
+  .stat-card .stat-value{
+    font-family:var(--font-mono);
+    font-variant-numeric:tabular-nums;
+    font-size:1.15rem;
+    font-weight:700;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-size:.72rem;
+    font-weight:700;
+    border-radius:999px;
+    padding:4px 10px;
+    width:fit-content;
+  }
+  .pill-ok{background:var(--ok-soft); color:var(--ok);}
+  .pill-fail{background:var(--danger-soft); color:var(--danger);}
+  .log-list{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+    max-height:150px;
+    overflow-y:auto;
+    font-family:var(--font-mono);
+    font-size:.68rem;
+    color:var(--ink-muted);
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:8px 10px;
+  }
+  .compare-row{
+    display:grid;
+    grid-template-columns:auto 1fr 1fr;
+    gap:6px 10px;
+    align-items:center;
+    font-size:.8rem;
+  }
+  .compare-row .ck{font-size:.7rem; color:var(--ink-muted);}
+  .compare-row .cv{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-weight:700;}
+</style>
+
+<div class="masthead">
+  <div class="brand">서치브릿지 · SearchBridge</div>
+  <div class="sub">여러 앱으로 흩어진 회사 검색을 하나로 연결하는 크로스앱 라우팅 도구</div>
+</div>
+
+<div class="phone">
+  <div class="phone-screen">
+    <div class="statusbar">
+      <span id="clock">09:41</span>
+      <span id="statusRight">● ● ●</span>
+    </div>
+    <div class="screen-body" id="app"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------------------------------------------------------------- */
+  /* data                                                               */
+  /* ---------------------------------------------------------------- */
+
+  var MAPPING_RULES = [
+    { term: "K-패스카드 / 경기패스카드", channel: "NHPAY (정확 매칭)", action: "그대로 유지, 노이즈만 제거" },
+    { term: "k패스 / 케이패스", channel: "콕뱅크 · 올원뱅크", action: "기존 메뉴로 연결" },
+    { term: "카드발급 / 카드신청", channel: "전체 4개 앱", action: "무관 결과 제거 + 메뉴 상단 노출" }
+  ];
+
+  var APPS = ["smart", "kok", "onebank", "nhpay"];
+  var APP_META = {
+    smart:   { name: "NH스마트뱅킹" },
+    kok:     { name: "NH콕뱅크" },
+    onebank: { name: "NH올원뱅크" },
+    nhpay:   { name: "NHPAY" }
+  };
+
+  function classify(raw){
+    var q = (raw || "").trim().toLowerCase().replace(/\s+/g, "");
+    if (!q) return null;
+    if (q.indexOf("패스카드") !== -1) return "EXACT";
+    if (q.indexOf("케이패스") !== -1 || q.indexOf("k패스") !== -1) return "SHORT";
+    if (q.indexOf("카드발급") !== -1) return "ISSUE";
+    if (q.indexOf("카드신청") !== -1) return "APPLY";
+    return "OTHER";
+  }
+
+  var SMART_NOISE = ["보안카드 재발급", "OTP 이용 안내", "간편비밀번호 변경"];
+
+  var RESPONSE_TABLE = {
+    smart: {
+      // 스마트뱅킹은 검색어와 무관하게 늘 실패한다 (상품 인덱스 자체가 없음)
+      ALL: {
+        before: { kind: "fail" },
+        after:  { kind: "emptyCard" }
+      }
+    },
+    kok: {
+      EXACT: { before: { kind: "zero" }, after: { kind: "menu" } },
+      SHORT: { before: { kind: "zero" }, after: { kind: "menu" } },
+      ISSUE: { before: { kind: "menu" }, after: { kind: "menu" } },
+      APPLY: { before: { kind: "menu" }, after: { kind: "menu" } },
+      OTHER: { before: { kind: "zero" }, after: { kind: "zero" } }
+    },
+    onebank: {
+      EXACT: { before: { kind: "menu" }, after: { kind: "menu" } },
+      SHORT: { before: { kind: "menu" }, after: { kind: "menu" } },
+      ISSUE: { before: { kind: "menu" }, after: { kind: "menu" } },
+      APPLY: { before: { kind: "noise" }, after: { kind: "menu" } },
+      OTHER: { before: { kind: "zero" }, after: { kind: "zero" } }
+    },
+    nhpay: {
+      EXACT: { before: { kind: "success" }, after: { kind: "success" } },
+      SHORT: { before: { kind: "success" }, after: { kind: "success" } },
+      ISSUE: { before: { kind: "menuList" }, after: { kind: "menuList" } },
+      APPLY: { before: { kind: "successNoise" }, after: { kind: "success" } },
+      OTHER: { before: { kind: "zero" }, after: { kind: "zero" } }
+    }
+  };
+
+  var MENU_LABEL = {
+    kok: "금융 > 카드 > NH농협카드 신청",
+    onebank: "NH금융그룹 > NH농협카드"
+  };
+
+  var KOK_ONEBANK_NOISE = {
+    onebank: ["개인연금 신청", "법원등기 열람 신청", "NH K-외국인신용대출"]
+  };
+
+  function lookupResponse(appId, cls, stage){
+    var table = RESPONSE_TABLE[appId];
+    var entry = table.ALL || table[cls] || table.OTHER;
+    return entry[stage];
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* state                                                              */
+  /* ---------------------------------------------------------------- */
+
+  var state = {
+    screen: "config1",
+    condition: null,     // 'A' | 'B'
+    stageIndex: 0,       // 0 | 1
+    stage: null,         // 'before' | 'after'
+    results: { before: null, after: null },
+    currentApp: "smart",
+    apps: {},
+    sub: "search",       // search | wrongChrome | wrongOnebank | common
+    log: [],
+    stageStartTs: 0,
+    facilOpen: false
+  };
+
+  function resetApps(){
+    state.apps = {};
+    APPS.forEach(function(id){
+      state.apps[id] = { query: "", response: null, class: null };
+    });
+    state.currentApp = "smart";
+    state.sub = "search";
+  }
+
+  function logEvent(type, detail){
+    state.log.push({
+      t: Date.now() - state.stageStartTs,
+      type: type,
+      detail: detail || ""
+    });
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* helpers                                                            */
+  /* ---------------------------------------------------------------- */
+
+  function esc(s){
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+      return { "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c];
+    });
+  }
+
+  function fmtTime(ms){
+    var s = Math.max(0, Math.round(ms / 1000));
+    var m = Math.floor(s / 60);
+    var r = s % 60;
+    return (m > 0 ? m + "분 " : "") + r + "초";
+  }
+
+  function stageLabel(s){ return s === "before" ? "Before (개선 전)" : "After (개선 후)"; }
+
+  var timerHandle = null;
+  function startTimerLoop(){
+    stopTimerLoop();
+    timerHandle = setInterval(function(){
+      var el = document.getElementById("liveTimer");
+      if (el) el.textContent = fmtTime(Date.now() - state.stageStartTs);
+    }, 500);
+  }
+  function stopTimerLoop(){
+    if (timerHandle){ clearInterval(timerHandle); timerHandle = null; }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* actions                                                            */
+  /* ---------------------------------------------------------------- */
+
+  function go(screen){ state.screen = screen; render(); }
+
+  function chooseCondition(cond){
+    state.condition = cond;
+    state.stageIndex = 0;
+    state.stage = (cond === "A") ? "before" : "after";
+    resetApps();
+    state.log = [];
+    state.stageStartTs = Date.now();
+    go("testing");
+    startTimerLoop();
+  }
+
+  function selectApp(id){
+    state.currentApp = id;
+    state.sub = "search";
+    logEvent("app_switch", APP_META[id].name);
+    render();
+  }
+
+  function submitSearch(id, rawQuery){
+    var cls = classify(rawQuery);
+    var appState = state.apps[id];
+    appState.query = rawQuery;
+    appState.class = cls;
+    if (!cls){
+      appState.response = { kind: "zero" };
+    } else {
+      appState.response = lookupResponse(id, cls, state.stage);
+    }
+    logEvent("search", APP_META[id].name + " · \"" + rawQuery + "\"");
+    state.sub = "results";
+    render();
+  }
+
+  function tapMenu(id){
+    logEvent("menu_tap", APP_META[id].name);
+    if (id === "kok"){
+      state.sub = (state.stage === "before") ? "wrongChrome" : "common";
+    } else if (id === "onebank"){
+      state.sub = (state.stage === "before") ? "wrongOnebank" : "common";
+    } else {
+      state.sub = "common";
+    }
+    if (state.sub === "common"){ logEvent("destination_common", id); }
+    else { logEvent("destination_wrong", id); }
+    render();
+  }
+
+  function tapSuccessItem(id){
+    logEvent("destination_common", id);
+    state.sub = "common";
+    render();
+  }
+
+  function backToResults(){
+    state.sub = "results";
+    render();
+  }
+
+  function endStage(){
+    stopTimerLoop();
+    var elapsed = Date.now() - state.stageStartTs;
+    var searchEvents = state.log.filter(function(e){ return e.type === "search"; });
+    var appSwitches = state.log.filter(function(e){ return e.type === "app_switch"; }).length;
+    var success = state.log.some(function(e){ return e.type === "destination_common"; });
+    var successAt = null;
+    for (var i=0;i<state.log.length;i++){
+      if (state.log[i].type === "destination_common"){ successAt = state.log[i].t; break; }
+    }
+    state.results[state.stage] = {
+      condition: state.condition,
+      elapsedMs: successAt != null ? successAt : elapsed,
+      totalMs: elapsed,
+      searchCount: searchEvents.length,
+      queries: searchEvents.map(function(e){ return e.detail; }),
+      appSwitches: appSwitches,
+      success: success,
+      log: state.log.slice()
+    };
+    go("stageSummary");
+  }
+
+  function goTransitionOrFinal(){
+    if (state.stageIndex === 0){
+      go("transition");
+    } else {
+      go("finalSummary");
+    }
+  }
+
+  function startSecondStage(){
+    state.stageIndex = 1;
+    state.stage = (state.condition === "A") ? "after" : "before";
+    resetApps();
+    state.log = [];
+    state.stageStartTs = Date.now();
+    go("testing");
+    startTimerLoop();
+  }
+
+  function restartAll(){
+    state.screen = "config1";
+    state.condition = null;
+    state.stageIndex = 0;
+    state.stage = null;
+    state.results = { before: null, after: null };
+    state.log = [];
+    resetApps();
+    render();
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* render: facilitator tool screens                                   */
+  /* ---------------------------------------------------------------- */
+
+  function renderConfig1(){
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 설정 1/2</span>' +
+        '<h2>회사 등록</h2>' +
+        '<p class="desc">서치브릿지에 검색 라우팅을 적용할 회사와, 그 회사가 갖고 있는 앱을 등록합니다.</p>' +
+        '<div class="field"><label>회사명</label><div class="static-input">NH농협</div></div>' +
+        '<div class="field"><label>보유 앱 목록</label>' +
+          '<div class="chip-row">' +
+            APPS.map(function(id){ return '<span class="chip">' + APP_META[id].name + '</span>'; }).join("") +
+          '</div>' +
+        '</div>' +
+        '<p class="desc">회사가 앱을 늘리거나 줄여도, 목록만 갱신하면 아래 매핑 설정은 그대로 재사용됩니다.</p>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn-tool btn-block" id="toConfig2">다음: 검색어 매핑 →</button>' +
+      '</div>'
+    );
+  }
+
+  function renderConfig2(){
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 설정 2/2</span>' +
+        '<h2>검색어 매핑 설정</h2>' +
+        '<p class="desc">as-is 조사에서 확인된 검색어별 처리 규칙입니다. 회사마다 이 표만 채우면 같은 방식이 재사용됩니다.</p>' +
+        '<table class="mapping"><thead><tr><th>검색어</th><th>담당 채널</th><th>처리 방식</th></tr></thead><tbody>' +
+          MAPPING_RULES.map(function(r){
+            return "<tr><td>" + esc(r.term) + "</td><td>" + esc(r.channel) + "</td><td>" + esc(r.action) + "</td></tr>";
+          }).join("") +
+        "</tbody></table>" +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn-tool btn-block" id="toCondition">설정 생성 → 테스트 조건 선택</button>' +
+      '</div>'
+    );
+  }
+
+  function renderCondition(){
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 테스트 준비</span>' +
+        '<h2>테스트 조건 선택</h2>' +
+        '<p class="desc">참가자에게 이 화면을 보여주지 마세요. 배정된 조건을 진행자가 직접 고른 뒤 참가자에게 넘겨주세요.</p>' +
+        '<button class="cond-card" id="condA">' +
+          '<span class="cond-title">조건 A · Before 먼저</span>' +
+          '<span class="cond-desc">개선 전 화면부터 진행 → 종료 후 개선 후 화면으로 이어집니다.</span>' +
+        '</button>' +
+        '<button class="cond-card" id="condB">' +
+          '<span class="cond-title">조건 B · After 먼저</span>' +
+          '<span class="cond-desc">개선 후 화면부터 진행 → 종료 후 개선 전 화면으로 이어집니다.</span>' +
+        '</button>' +
+        '<p class="desc">순서 효과를 확인하기 위해 참가자 절반은 A, 절반은 B로 배정하세요.</p>' +
+      '</div>'
+    );
+  }
+
+  function renderTransition(){
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 단계 전환</span>' +
+        '<h2>1단계 완료 — ' + esc(stageLabel(state.stage)) + '</h2>' +
+        '<p class="desc">같은 참가자가 이번엔 반대 조건(' + esc(stageLabel(state.condition === "A" ? "after" : "before")) + ')을 이어서 진행합니다.</p>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn-tool btn-block" id="toStage2">2단계 시작 →</button>' +
+      '</div>'
+    );
+  }
+
+  function statRow(label, value){
+    return '<div class="stat-card"><span class="stat-label">' + esc(label) + '</span><span class="stat-value">' + value + '</span></div>';
+  }
+
+  function renderStageSummary(){
+    var r = state.results[state.stage];
+    var pill = r.success
+      ? '<span class="pill pill-ok">✓ 목표 화면 도달</span>'
+      : '<span class="pill pill-fail">✕ 도달 못함</span>';
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 결과 요약</span>' +
+        '<h2>' + esc(stageLabel(state.stage)) + ' 결과</h2>' +
+        pill +
+        '<div class="summary-grid">' +
+          statRow("도달까지 걸린 시간", fmtTime(r.elapsedMs)) +
+          statRow("검색 시도 횟수", r.searchCount) +
+          statRow("앱 전환 횟수", r.appSwitches) +
+          statRow("전체 진행 시간", fmtTime(r.totalMs)) +
+        '</div>' +
+        '<div class="field"><label>시도한 검색어</label>' +
+          '<div class="log-list">' + (r.queries.length ? r.queries.map(esc).join("<br>") : "(검색을 시도하지 않음)") + '</div>' +
+        '</div>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn-tool btn-block" id="toNext">' + (state.stageIndex === 0 ? "다음 단계로 →" : "최종 비교 보기 →") + '</button>' +
+      '</div>'
+    );
+  }
+
+  function compareRow(label, beforeV, afterV){
+    return (
+      '<div class="compare-row">' +
+        '<span class="ck">' + esc(label) + '</span>' +
+        '<span class="cv">' + beforeV + '</span>' +
+        '<span class="cv">' + afterV + '</span>' +
+      '</div>'
+    );
+  }
+
+  function renderFinalSummary(){
+    var b = state.results.before, a = state.results.after;
+    return (
+      '<div class="tool-screen">' +
+        '<span class="tool-tag">진행자 전용 · 최종 비교</span>' +
+        '<h2>Before vs After</h2>' +
+        '<p class="desc">이 참가자(조건 ' + esc(state.condition) + ')의 두 단계 결과를 비교합니다.</p>' +
+        '<div class="compare-row" style="font-weight:700;color:var(--ink-muted);font-size:.7rem;">' +
+          '<span></span><span>BEFORE</span><span>AFTER</span>' +
+        '</div>' +
+        compareRow("목표 도달", b.success ? "✓ 성공" : "✕ 실패", a.success ? "✓ 성공" : "✕ 실패") +
+        compareRow("소요 시간", fmtTime(b.elapsedMs), fmtTime(a.elapsedMs)) +
+        compareRow("검색 시도", b.searchCount, a.searchCount) +
+        compareRow("앱 전환", b.appSwitches, a.appSwitches) +
+        '<p class="desc">진행자는 이 화면을 관찰 기록표에 그대로 옮겨 적으세요.</p>' +
+        '<div class="spacer"></div>' +
+        '<button class="btn btn-ghost btn-block" id="restart">다음 참가자 준비 (처음으로)</button>' +
+      '</div>'
+    );
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* render: participant-facing app screens                             */
+  /* ---------------------------------------------------------------- */
+
+  function facilStrip(){
+    return (
+      '<div class="facil-strip">' +
+        '<span class="ftag">조건 ' + esc(state.condition) + ' · ' + esc(stageLabel(state.stage)) + '</span>' +
+        '<span class="timer" id="liveTimer">' + fmtTime(Date.now() - state.stageStartTs) + '</span>' +
+        '<button id="facilToggle">' + (state.facilOpen ? "숨기기" : "진행자") + '</button>' +
+      '</div>' +
+      (state.facilOpen ?
+        '<div class="facil-panel">' +
+          '<div class="fp-row">' +
+            '<button class="btn btn-nh" id="markSuccess">목표 화면 도달로 기록</button>' +
+          '</div>' +
+          '<div class="fp-row">' +
+            '<button class="btn btn-danger" id="endStageBtn">이 단계 종료(포기/5분 경과)</button>' +
+          '</div>' +
+        '</div>' : "")
+    );
+  }
+
+  function renderResultsFor(id){
+    var meta = APP_META[id];
+    var appState = state.apps[id];
+    var res = appState.response;
+    var body = "";
+
+    if (!res){
+      body = '<div class="empty-state"><span class="big">🔎</span><span class="msg">검색어를 입력해보세요</span><span class="sub">예: K-패스카드, 카드발급, 케이패스</span></div>';
+    } else if (res.kind === "zero"){
+      body = '<div class="empty-state"><span class="big">🈳</span><span class="msg">검색 결과가 없습니다</span><span class="sub">"' + esc(appState.query) + '"에 대한 결과를 찾지 못했습니다</span></div>';
+    } else if (res.kind === "fail"){
+      body = '<div class="result-count">관련도순 결과 ' + SMART_NOISE.length + '건</div>' +
+        SMART_NOISE.map(function(t){
+          return '<div class="result-item noise"><div class="ri-main"><span class="ri-title">' + esc(t) + '</span><span class="ri-sub">전자금융 · 보안</span></div><span>›</span></div>';
+        }).join("");
+    } else if (res.kind === "emptyCard"){
+      body = '<div class="result-count">관련도순 결과 ' + SMART_NOISE.length + '건</div>' +
+        SMART_NOISE.map(function(t){
+          return '<div class="result-item noise"><div class="ri-main"><span class="ri-title">' + esc(t) + '</span><span class="ri-sub">전자금융 · 보안</span></div><span>›</span></div>';
+        }).join("") +
+        '<div class="guide-card">' +
+          '<span class="gc-title">찾으시는 카드를 다른 곳에서도 확인해보세요</span>' +
+          '<span class="gc-sub">NH페이(NHPAY)에서 카드 상품을 한눈에 볼 수 있어요</span>' +
+          '<button class="go-btn" id="guideGo">NHPAY에서 확인하기</button>' +
+        '</div>';
+    } else if (res.kind === "menu"){
+      body = '<div class="result-count">관련도순 결과 1건</div>' +
+        '<div class="result-item" id="menuItem"><div class="ri-main"><span class="ri-title">' + esc(MENU_LABEL[id]) + '</span><span class="ri-sub">메뉴 바로가기</span></div><span>›</span></div>';
+    } else if (res.kind === "noise"){
+      var noiseList = KOK_ONEBANK_NOISE[id] || [];
+      // 실제 as-is 경험대로 무관 결과가 먼저 쏟아지고 정답 항목은 맨 뒤에 나온다
+      body = '<div class="result-count">관련도순 결과 ' + (noiseList.length + 1) + '건</div>' +
+        noiseList.map(function(t){
+          return '<div class="result-item noise"><div class="ri-main"><span class="ri-title">' + esc(t) + '</span><span class="ri-sub">무관 서비스</span></div><span>›</span></div>';
+        }).join("") +
+        '<div class="result-item" id="menuItem"><div class="ri-main"><span class="ri-title">' + esc(MENU_LABEL[id]) + '</span><span class="ri-sub">메뉴 바로가기</span></div><span>›</span></div>';
+    } else if (res.kind === "success"){
+      body = '<div class="result-count">관련도순 결과 1건</div>' +
+        '<div class="result-item" id="successItem"><div class="ri-main"><span class="ri-title">K-패스카드(신용/체크)</span><span class="ri-sub">교통비 환급 · NH농협카드</span></div><span>›</span></div>';
+    } else if (res.kind === "successNoise"){
+      body = '<div class="result-count">관련도순 결과 2건</div>' +
+        '<div class="result-item" id="successItem"><div class="ri-main"><span class="ri-title">K-패스카드(신용/체크)</span><span class="ri-sub">교통비 환급 · NH농협카드</span></div><span>›</span></div>' +
+        '<div class="result-item noise" id="noiseItem"><div class="ri-main"><span class="ri-title">이응패스</span><span class="ri-sub">지역 한정 카드</span></div><span>›</span></div>';
+    } else if (res.kind === "menuList"){
+      body = '<div class="result-count">관련도순 결과 1건</div>' +
+        '<div class="result-item" id="successItem"><div class="ri-main"><span class="ri-title">카드신청 &gt; 전체카드</span><span class="ri-sub">카드 카테고리 바로가기</span></div><span>›</span></div>';
+    }
+
+    return (
+      '<div class="app-topbar"><span class="app-name">' + esc(meta.name) + '</span></div>' +
+      '<div class="app-tabs">' +
+        APPS.map(function(a){
+          return '<button class="app-tab" data-app="' + a + '" aria-selected="' + (a===id) + '">' + esc(APP_META[a].name) + '</button>';
+        }).join("") +
+      '</div>' +
+      '<div class="search-wrap">' +
+        '<div class="search-box">' +
+          '<span>🔍</span>' +
+          '<input id="searchInput" type="text" placeholder="카드 이름을 검색해보세요" value="' + esc(appState.query) + '">' +
+          '<button class="go">검색</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="hint-row">' +
+        ["K-패스카드","케이패스","카드발급","카드신청"].map(function(h){
+          return '<span class="hint-chip" data-hint="' + esc(h) + '">' + esc(h) + '</span>';
+        }).join("") +
+      '</div>' +
+      '<div class="result-area">' + body + '</div>'
+    );
+  }
+
+  function renderWrongChrome(){
+    return (
+      '<div class="browser-bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="url-pill">nonghyup.com/allcard</span></div>' +
+      '<div class="destination-header"><button class="back-btn" id="backBtn">‹</button><span>전체 카드</span></div>' +
+      '<div class="result-count" style="padding:0 14px;">신용카드 · 체크카드 · 프리미엄 · 공공복지카드 전체 79건</div>' +
+      '<div class="result-area">' +
+        ["NH올원체크카드","NH직장인신용카드","NH프리미엄카드","..."].map(function(t){
+          return '<div class="result-item noise"><div class="ri-main"><span class="ri-title">' + esc(t) + '</span><span class="ri-sub">일반 카드 목록</span></div><span>›</span></div>';
+        }).join("") +
+      '</div>'
+    );
+  }
+
+  function renderWrongOnebank(){
+    return (
+      '<div class="destination-header"><button class="back-btn" id="backBtn">‹</button><span>NH농협카드</span></div>' +
+      '<div class="promo-banner"><div class="pb-title">NH Pay 카드로 다양한 혜택 받기</div><div class="pb-sub">지금 카드를 등록하고 적립 혜택을 확인하세요</div></div>' +
+      '<div class="result-area"><div class="empty-state"><span class="big">🗂️</span><span class="msg">일반 카드 안내 화면입니다</span><span class="sub">K-패스카드 상세 정보는 여기에 없습니다</span></div></div>'
+    );
+  }
+
+  function renderCommon(){
+    return (
+      '<div class="destination-header"><span>NHPAY</span></div>' +
+      '<div class="success-card"><span class="sc-badge">✅</span><span class="sc-title">목표 화면에 도달했습니다</span></div>' +
+      '<div class="product-mock">' +
+        '<div class="pm-art">K-패스카드</div>' +
+        '<div class="pm-body">' +
+          '<div class="pm-row"><span>혜택</span><span>대중교통 요금 환급</span></div>' +
+          '<div class="pm-row"><span>연회비</span><span>없음</span></div>' +
+        '</div>' +
+      '</div>' +
+      '<div style="padding:14px;"><button class="btn btn-ghost btn-block" disabled>신청하기 (테스트에서는 실제 신청하지 않습니다)</button></div>'
+    );
+  }
+
+  function renderTesting(){
+    var inner;
+    if (state.sub === "wrongChrome") inner = renderWrongChrome();
+    else if (state.sub === "wrongOnebank") inner = renderWrongOnebank();
+    else if (state.sub === "common") inner = renderCommon();
+    else inner = renderResultsFor(state.currentApp);
+    return facilStrip() + inner;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* main render                                                        */
+  /* ---------------------------------------------------------------- */
+
+  function render(){
+    var html;
+    switch(state.screen){
+      case "config1": html = renderConfig1(); break;
+      case "config2": html = renderConfig2(); break;
+      case "condition": html = renderCondition(); break;
+      case "testing": html = renderTesting(); break;
+      case "transition": html = renderTransition(); break;
+      case "stageSummary": html = renderStageSummary(); break;
+      case "finalSummary": html = renderFinalSummary(); break;
+      default: html = renderConfig1();
+    }
+    document.getElementById("app").innerHTML = html;
+    wireEvents();
+  }
+
+  function wireEvents(){
+    var root = document.getElementById("app");
+
+    function on(id, evt, fn){
+      var el = document.getElementById(id);
+      if (el) el.addEventListener(evt, fn);
+    }
+
+    on("toConfig2", "click", function(){ go("config2"); });
+    on("toCondition", "click", function(){ go("condition"); });
+    on("condA", "click", function(){ chooseCondition("A"); });
+    on("condB", "click", function(){ chooseCondition("B"); });
+    on("toStage2", "click", function(){ startSecondStage(); });
+    on("toNext", "click", function(){ goTransitionOrFinal(); });
+    on("restart", "click", function(){ restartAll(); });
+    on("facilToggle", "click", function(){ state.facilOpen = !state.facilOpen; render(); });
+    on("markSuccess", "click", function(){ logEvent("destination_common", "진행자 수동 기록"); endStage(); });
+    on("endStageBtn", "click", function(){ endStage(); });
+    on("guideGo", "click", function(){ tapSuccessItem(state.currentApp); });
+    on("menuItem", "click", function(){ tapMenu(state.currentApp); });
+    on("successItem", "click", function(){ tapSuccessItem(state.currentApp); });
+    on("noiseItem", "click", function(){ /* 무관 결과는 이동하지 않음 */ });
+    on("backBtn", "click", function(){ backToResults(); });
+
+    var tabs = root.querySelectorAll(".app-tab");
+    tabs.forEach(function(t){
+      t.addEventListener("click", function(){ selectApp(t.getAttribute("data-app")); });
+    });
+
+    var searchBtn = root.querySelector(".search-box .go");
+    var searchInput = document.getElementById("searchInput");
+    if (searchBtn && searchInput){
+      searchBtn.addEventListener("click", function(){
+        submitSearch(state.currentApp, searchInput.value);
+      });
+      searchInput.addEventListener("keydown", function(e){
+        if (e.key === "Enter") submitSearch(state.currentApp, searchInput.value);
+      });
+    }
+    var hints = root.querySelectorAll(".hint-chip");
+    hints.forEach(function(h){
+      h.addEventListener("click", function(){
+        submitSearch(state.currentApp, h.getAttribute("data-hint"));
+      });
+    });
+  }
+
+  function tickClock(){
+    var el = document.getElementById("clock");
+    if (!el) return;
+    var d = new Date();
+    var hh = ("0" + d.getHours()).slice(-2);
+    var mm = ("0" + d.getMinutes()).slice(-2);
+    el.textContent = hh + ":" + mm;
+  }
+  setInterval(tickClock, 1000 * 15);
+  tickClock();
+
+  resetApps();
+  render();
+})();
+</script>
