@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>크로스 앱 라우터 — 그룹 채널 기준 데모</title>
+<style>
+  :root{
+    --nh:#00A651; --nh-dark:#008C44;
+    --ink:#16181d; --sub:#5f6672; --line:#e5e7eb; --bg:#f4f5f7;
+    --warn:#c2410c; --ok:#047857; --bad:#b91c1c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 80px}
+
+  /* ---------- 상단 ---------- */
+  header.top{background:#fff;border-bottom:1px solid var(--line);padding:18px 0 0}
+  .top .wrap{padding-bottom:0}
+  .brand{font-size:13px;color:var(--sub);letter-spacing:-.2px;margin-bottom:3px}
+  .ttl{font-size:23px;font-weight:800;letter-spacing:-.7px;margin:0 0 4px}
+  .lede{font-size:14.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 16px;max-width:760px}
+  .steps{display:flex;gap:6px;overflow-x:auto}
+  .steps::-webkit-scrollbar{display:none}
+  .step{
+    border:0;background:none;font-family:inherit;cursor:pointer;
+    padding:11px 16px 13px;border-bottom:3px solid transparent;
+    font-size:14.5px;font-weight:700;color:#9aa1ad;letter-spacing:-.3px;white-space:nowrap;
+  }
+  .step .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:#e7e9ee;color:#8b93a1;
+    font-size:11.5px;margin-right:7px;vertical-align:1px;
+  }
+  .step.on{color:var(--ink);border-bottom-color:var(--nh)}
+  .step.on .n{background:var(--nh);color:#fff}
+  .step.done .n{background:#c8ece0;color:var(--nh-dark)}
+
+  /* ---------- 섹션 ---------- */
+  .stage{display:none;padding-top:26px}
+  .stage.on{display:block}
+  .h2{font-size:19px;font-weight:800;letter-spacing:-.6px;margin:0 0 6px}
+  .p{font-size:14.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 18px;max-width:820px}
+  .p b{color:var(--ink)}
+
+  /* ---------- 폰 줄 ---------- */
+  .rail{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 16px;scroll-snap-type:x proximity}
+  .rail::-webkit-scrollbar{height:8px}
+  .rail::-webkit-scrollbar-thumb{background:#d3d7de;border-radius:8px}
+  .phone{
+    flex:0 0 268px;scroll-snap-align:start;
+    background:#fff;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    display:flex;flex-direction:column;box-shadow:0 1px 3px rgba(16,20,30,.05);
+  }
+  .phone.dark{background:#17181b;border-color:#2a2c31}
+  .pname{
+    display:flex;align-items:center;justify-content:space-between;gap:6px;
+    padding:9px 12px;font-size:12.5px;font-weight:800;letter-spacing:-.3px;
+    background:#fafbfc;border-bottom:1px solid var(--line);
+  }
+  .phone.dark .pname{background:#1e2024;border-bottom-color:#2a2c31;color:#e8eaee}
+  .owner{font-size:10.5px;font-weight:600;color:#8b93a1;letter-spacing:-.2px}
+  .screen{padding:10px 12px 14px;flex:1;display:flex;flex-direction:column;min-height:318px}
+  .shead{
+    font-size:13px;font-weight:800;letter-spacing:-.4px;margin-bottom:9px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .shead .x{color:#9aa1ad;font-size:14px}
+  .phone.dark .shead{color:#f2f3f5}
+  .sbox{
+    display:flex;align-items:center;gap:6px;
+    border:1.5px solid var(--nh);border-radius:9px;padding:7px 9px;
+    font-size:12.5px;font-weight:600;letter-spacing:-.3px;margin-bottom:10px;
+  }
+  .phone.dark .sbox{border-color:#12b5ad;color:#f2f3f5}
+  .sbox .mg{margin-left:auto;color:#9aa1ad;font-size:12px}
+  .chips{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap}
+  .chip{
+    font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:999px;
+    background:#eff1f4;color:#4b5361;letter-spacing:-.2px;
+  }
+  .chip.on{background:#16181d;color:#fff}
+  .phone.dark .chip{background:#26282d;color:#b9bec7}
+  .cnt{font-size:11.5px;font-weight:700;letter-spacing:-.3px;margin:2px 0 6px;color:#3d434d}
+  .cnt em{color:var(--nh);font-style:normal}
+  .phone.dark .cnt{color:#c8ccd3}
+  .row{
+    font-size:11.5px;line-height:1.45;letter-spacing:-.3px;color:#3d434d;
+    padding:5px 0;border-bottom:1px dashed #eef0f3;
+  }
+  .phone.dark .row{color:#b9bec7;border-bottom-color:#26282d}
+  .row .g{color:var(--nh)}
+  .phone.dark .row .g{color:#3ecf8e}
+  .zero{
+    text-align:center;padding:18px 0 10px;color:#8b93a1;font-size:12px;line-height:1.6;
+  }
+  .phone.dark .zero{color:#9aa1ad}
+  .zero .em{font-size:26px;display:block;margin-bottom:6px}
+  .sugg{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;margin-top:8px}
+  .sugg span{
+    font-size:10.5px;border:1px solid #3a3d44;border-radius:999px;
+    padding:4px 9px;color:#b9bec7;letter-spacing:-.2px;
+  }
+  .verdict{
+    margin-top:auto;padding-top:10px;font-size:11.5px;font-weight:700;letter-spacing:-.3px;
+    display:flex;align-items:flex-start;gap:6px;line-height:1.45;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;flex:0 0 auto;margin-top:5px}
+  .v-bad .dot{background:var(--bad)} .v-bad{color:var(--bad)}
+  .v-warn .dot{background:var(--warn)} .v-warn{color:var(--warn)}
+  .v-ok .dot{background:var(--ok)} .v-ok{color:var(--ok)}
+
+  /* ---------- 안내 카드 ---------- */
+  .guide{
+    border:1px solid #bfe6d3;background:#f2faf6;border-radius:11px;
+    padding:10px;margin-bottom:9px;
+  }
+  .guide .gt{font-size:11.5px;font-weight:800;letter-spacing:-.35px;line-height:1.4;margin-bottom:7px}
+  .gch{
+    display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #dbeee5;
+    border-radius:8px;padding:7px 8px;margin-bottom:5px;
+  }
+  .gch .nm{font-size:11.5px;font-weight:700;letter-spacing:-.3px}
+  .role{
+    font-size:9.5px;font-weight:800;padding:2px 6px;border-radius:999px;margin-left:auto;flex:0 0 auto;
+  }
+  .role.done{background:#dcf5e8;color:var(--nh-dark)}
+  .role.info{background:#eceef3;color:#5a6480}
+  .gnext{font-size:10.5px;color:#5c6b63;letter-spacing:-.25px;margin-top:6px;line-height:1.45}
+  .noguide{
+    border:1px dashed #cbd2dc;border-radius:11px;background:#fafbfc;
+    padding:11px;margin-bottom:9px;font-size:11px;color:#6b7280;
+    letter-spacing:-.3px;line-height:1.5;
+  }
+  .noguide b{color:#3d434d}
+
+  /* ---------- 해설 ---------- */
+  .note{
+    background:#fff;border:1px solid var(--line);border-left:3px solid var(--nh);
+    border-radius:0 12px 12px 0;padding:16px 18px;margin-top:6px;max-width:860px;
+  }
+  .note h3{font-size:14.5px;font-weight:800;margin:0 0 7px;letter-spacing:-.4px}
+  .note p{font-size:14px;color:#41474f;margin:0 0 8px;letter-spacing:-.3px}
+  .note p:last-child{margin-bottom:0}
+  .note .src{font-size:12px;color:#8b93a1;margin-top:10px;letter-spacing:-.2px}
+
+  /* ---------- 라우터 콘솔 ---------- */
+  .console{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .chead{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:15px 18px;border-bottom:1px solid var(--line);background:#fafbfc;
+  }
+  .chead .ct{font-size:15px;font-weight:800;letter-spacing:-.4px}
+  select{
+    font-family:inherit;font-size:13px;font-weight:700;letter-spacing:-.3px;
+    border:1px solid #d5d9e0;border-radius:8px;padding:7px 10px;background:#fff;color:var(--ink);
+  }
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:760px}
+  th,td{
+    text-align:left;padding:11px 14px;font-size:13px;letter-spacing:-.3px;
+    border-bottom:1px solid #f0f1f4;vertical-align:top;
+  }
+  th{font-size:11.5px;font-weight:700;color:#8b93a1;background:#fcfcfd;letter-spacing:0}
+  tr.new td{background:#f4fbf7}
+  .st{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;white-space:nowrap}
+  .st.appr{background:#dcf5e8;color:var(--nh-dark)}
+  .st.rev{background:#fff0dd;color:var(--warn)}
+  .st.draft{background:#eceef3;color:#5a6480}
+  .cell-ch{font-size:12px;line-height:1.7}
+  .mini{
+    font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:4px;
+  }
+  .mini.done{background:#dcf5e8;color:var(--nh-dark)}
+  .mini.info{background:#eceef3;color:#5a6480}
+
+  /* ---------- 폼 ---------- */
+  .form{padding:18px;border-top:1px solid var(--line);background:#fcfdfe}
+  .form h3{font-size:14.5px;font-weight:800;margin:0 0 3px;letter-spacing:-.4px}
+  .form .fh{font-size:12.5px;color:var(--sub);margin:0 0 16px;letter-spacing:-.3px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:14px}
+  .fld label{display:block;font-size:12px;font-weight:800;color:#4b5361;margin-bottom:6px;letter-spacing:-.3px}
+  .fld label .hint{font-weight:500;color:#9aa1ad;margin-left:5px}
+  .fld input[type=text]{
+    width:100%;font-family:inherit;font-size:13.5px;letter-spacing:-.3px;
+    border:1px solid #d5d9e0;border-radius:8px;padding:9px 11px;outline:none;color:var(--ink);
+  }
+  .fld input[type=text]:focus{border-color:var(--nh)}
+  .tagbox{
+    display:flex;flex-wrap:wrap;gap:6px;border:1px solid #d5d9e0;border-radius:8px;
+    padding:7px;background:#fff;
+  }
+  .tag{
+    display:inline-flex;align-items:center;gap:5px;background:#eef7f2;color:var(--nh-dark);
+    font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;letter-spacing:-.3px;
+  }
+  .tag button{border:0;background:none;color:#8ab6a1;cursor:pointer;font-size:13px;padding:0;line-height:1}
+  .tagbox input{border:0;outline:none;font-family:inherit;font-size:13px;flex:1;min-width:90px;padding:4px}
+  .chrow{
+    display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid #e5e7eb;
+    border-radius:8px;margin-bottom:6px;background:#fff;
+  }
+  .chrow .cn{font-size:13px;font-weight:700;letter-spacing:-.3px;flex:1}
+  .chrow select{font-size:12px;padding:5px 8px}
+  .uses{display:flex;flex-direction:column;gap:7px}
+  .use{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:-.3px;color:#41474f}
+  .use input{width:15px;height:15px;accent-color:var(--nh)}
+  .use.off{color:#a8aeb8}
+  .use .soon{font-size:10.5px;background:#eff1f4;color:#8b93a1;padding:2px 6px;border-radius:5px;font-weight:700}
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:18px;align-items:center}
+  .btn{
+    border:0;border-radius:9px;font-family:inherit;font-size:14px;font-weight:700;
+    padding:11px 18px;cursor:pointer;letter-spacing:-.3px;
+  }
+  .btn.primary{background:var(--nh);color:#fff}
+  .btn.primary:disabled{background:#cfd4db;cursor:default}
+  .btn.ghost{background:#fff;border:1px solid #d5d9e0;color:#41474f}
+  .flash{font-size:13px;font-weight:700;color:var(--nh-dark);letter-spacing:-.3px}
+
+  .navrow{display:flex;gap:9px;margin-top:22px;flex-wrap:wrap}
+
+  .foot{
+    margin-top:34px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12px;color:#9aa1ad;letter-spacing:-.2px;line-height:1.7;max-width:860px;
+  }
+  @media (max-width:640px){
+    .ttl{font-size:20px}
+    .wrap{padding:0 14px 60px}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">NH농협금융지주 · 그룹 채널 기준</div>
+    <h1 class="ttl">크로스 앱 라우터</h1>
+    <p class="lede">
+      각 앱의 검색은 각 앱이 개선합니다. 이 도구는 <b>"어느 업무를 어느 채널이 담당하는가"</b>라는
+      그룹 차원의 기준을 정의하고, 그 기준을 계열 앱들이 가져다 쓰게 합니다.
+    </p>
+    <nav class="steps">
+      <button class="step on" data-s="1"><span class="n">1</span>적용 전 — 지금 무슨 일이 일어나는가</button>
+      <button class="step" data-s="2"><span class="n">2</span>그룹 기준 정의</button>
+      <button class="step" data-s="3"><span class="n">3</span>적용 후 — 기준이 도달한 모습</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ================= 1단계 ================= -->
+  <section class="stage on" id="st1">
+    <h2 class="h2">같은 검색어, 네 개 앱, 네 가지 결과</h2>
+    <p class="p">
+      NH 계열 앱 4개에서 <b>K-패스카드</b>를 검색한 실제 결과입니다.
+      2026-08-18~20에 직접 검색하고 스크린샷으로 기록했습니다.
+    </p>
+    <div class="rail" id="rail1"></div>
+    <div class="note">
+      <h3>이건 검색 성능 문제가 아닙니다</h3>
+      <p>네 개 중 하나만 맞았습니다. 그런데 <b>NH Pay가 맞은 이유는 검색이 좋아서가 아닙니다.</b> 카드가 원래 농협카드 데이터라 그 앱에 들어 있었을 뿐입니다.</p>
+      <p>나머지 세 앱은 각자 다르게 실패했습니다. 하나는 결과가 아예 없고, 하나는 글자만 겹치는 무관한 메뉴를 쏟아내고, 하나는 카드 브랜드 페이지로만 안내합니다. <b>실패 방식이 제각각이라는 건 공통 기준이 없다는 뜻입니다.</b></p>
+      <p>각 앱이 자기 검색을 아무리 잘 고쳐도, <b>"K-패스카드는 NH Pay 담당"이라는 판단은 검색 알고리즘에서 나오지 않습니다.</b> 그건 그룹이 정하는 것입니다.</p>
+      <p class="src">출처: <code>docs/NH앱4개_카드검색_as-is결과.md</code>, <code>raw/스크린샷/</code></p>
+    </div>
+    <div class="navrow">
+      <button class="btn primary" data-go="2">그룹 기준을 정의해보기 →</button>
+    </div>
+  </section>
+
+  <!-- ================= 2단계 ================= -->
+  <section class="stage" id="st2">
+    <h2 class="h2">그룹이 정의하고, 계열사가 채웁니다</h2>
+    <p class="p">
+      각 담당 부서가 자기 업무의 담당 채널을 등록하고, 중앙이 검토·승인합니다.
+      승인된 기준은 <b>하나의 기준으로 모든 접점에 배포</b>됩니다.
+    </p>
+
+    <div class="console">
+      <div class="chead">
+        <span class="ct">채널 담당 기준</span>
+        <select id="tenant">
+          <option>NH농협금융지주</option>
+          <option disabled>다른 그룹사 (예시)</option>
+        </select>
+        <span style="font-size:12px;color:#8b93a1;letter-spacing:-.3px">기준은 그룹 단위로 관리됩니다</span>
+      </div>
+
+      <div class="tblwrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:20%">기능 · 업무</th>
+              <th style="width:24%">사용자 표현</th>
+              <th style="width:26%">담당 채널 · 역할</th>
+              <th style="width:16%">등록 부서</th>
+              <th style="width:14%">상태</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+
+      <div class="form">
+        <h3>새 기준 정의</h3>
+        <p class="fh">카드사업부가 등록하는 항목입니다. 값을 바꾸면 3단계 화면에 그대로 반영됩니다.</p>
+
+        <div class="grid">
+          <div class="fld">
+            <label>기능 · 업무명</label>
+            <input type="text" id="fFunc" value="교통비 환급 카드 신청">
+          </div>
+          <div class="fld">
+            <label>등록 부서</label>
+            <input type="text" id="fDept" value="카드사업부">
+          </div>
+        </div>
+
+        <div class="fld" style="margin-top:14px">
+          <label>사용자 표현 <span class="hint">사용자가 실제로 입력하는 말. 공식·비공식 모두</span></label>
+          <div class="tagbox" id="tagbox">
+            <input type="text" id="tagIn" placeholder="입력 후 Enter">
+          </div>
+        </div>
+
+        <div class="fld" style="margin-top:14px">
+          <label>담당 채널 · 역할 <span class="hint">완료 = 여기서 끝난다 / 경유 = 거쳐 간다 / 안내 = 정보만 준다</span></label>
+          <div id="chList"></div>
+        </div>
+
+        <div class="grid" style="margin-top:14px">
+          <div class="fld">
+            <label>다음 행동 <span class="hint">사용자가 그 채널에서 할 일</span></label>
+            <input type="text" id="fNext" value="카드 목록에서 K-패스카드를 찾아 신청">
+          </div>
+          <div class="fld">
+            <label>이 기준을 쓰는 접점</label>
+            <div class="uses">
+              <label class="use"><input type="checkbox" checked disabled> 통합검색 <span class="soon">이 데모에서 동작</span></label>
+              <label class="use off"><input type="checkbox" disabled> 고객센터 챗봇 <span class="soon">연동 예정</span></label>
+              <label class="use off"><input type="checkbox" disabled> 앱 내 메뉴 안내 <span class="soon">연동 예정</span></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="btn ghost" id="reqBtn">중앙 검토 요청</button>
+          <button class="btn primary" id="apprBtn" disabled>승인하고 배포</button>
+          <span class="flash" id="flash"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:18px">
+      <h3>왜 앱마다 설정하지 않고 중앙에 두는가</h3>
+      <p>담당 채널은 <b>앱의 사정이 아니라 그룹의 사정</b>으로 정해집니다. 콕뱅크는 상호금융, 올원뱅크는 농협은행이 운영하고 감독 체계까지 다릅니다. 어느 앱도 "카드는 NH Pay 담당"이라고 혼자 선언할 수 없습니다.</p>
+      <p>그래서 기준은 한 곳에서 정의하고, 앱들은 <b>가져다 쓰기만</b> 합니다. 한 번의 승인이 네 개 채널에 동시에 도달하는 이유입니다.</p>
+      <p class="src">출처: <code>docs/NH앱4개_카드검색_as-is결과.md</code> 「NH 앱 분리의 조직적 배경」</p>
+    </div>
+
+    <div class="navrow">
+      <button class="btn ghost" data-go="1">← 1단계로</button>
+      <button class="btn primary" id="toStep3" disabled>배포 결과 보기 →</button>
+    </div>
+  </section>
+
+  <!-- ================= 3단계 ================= -->
+  <section class="stage" id="st3">
+    <h2 class="h2">한 번의 승인이 네 채널에 도달합니다</h2>
+    <p class="p">
+      같은 앱, 같은 검색어입니다. 달라진 건 <b>그룹 기준이 존재한다는 것</b> 하나뿐입니다.
+      검색 엔진은 아무것도 바뀌지 않았습니다.
+    </p>
+    <div class="rail" id="rail3"></div>
+    <div class="note">
+      <h3>NH Pay에는 안내가 뜨지 않습니다</h3>
+      <p>기준을 받은 앱이 전부 안내를 띄우는 게 아닙니다. <b>이미 그 앱에서 처리가 끝나는 경우에는 노출하지 않습니다.</b> NH Pay는 담당 채널 본인이라 안내할 대상이 없습니다.</p>
+      <p>같은 기준을 받고도 앱마다 다르게 동작하는 이유는 <b>채널 역할(완료·경유·안내)</b>이 기준 안에 들어 있기 때문입니다. 무분별하게 배너를 뿌리는 기능이 아닙니다.</p>
+      <p class="src">노출 조건 출처: <code>docs/B축_MVP_설계.md</code> — "현재 채널에서 정확한 처리 경로와 다음 행동이 이미 명확하면 중복 안내를 노출하지 않는다"</p>
+    </div>
+    <div class="navrow">
+      <button class="btn ghost" data-go="2">← 2단계로</button>
+      <button class="btn ghost" id="resetBtn">처음부터 다시</button>
+    </div>
+  </section>
+
+  <div class="foot">
+    이 화면은 기획 검증용 <b>목업</b>입니다. 실제 NH농협 서비스가 아니며 NH농협과 무관합니다.
+    1·3단계의 검색 결과는 2026-08-18~20에 실제 앱에서 검색해 기록한 값이고,
+    2단계의 라우터 콘솔은 운영 구조를 보여주기 위한 목업입니다.
+    실제 규칙엔진·앱 연동은 구현되어 있지 않습니다.
+  </div>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+  /* =====================================================
+     실측 as-is 데이터
+     출처: docs/NH앱4개_카드검색_as-is결과.md
+           raw/스크린샷/NH올원뱅크/k패스카드로검색했을시.jpg
+           raw/스크린샷/NH올원뱅크/Screenshot_20260818_131900_NH.jpg
+           raw/스크린샷/NH콕뱅크/케이패스검색결과없음.jpg
+           raw/스크린샷/NH스마트뱅킹/Screenshot_20260820_173247_NH.jpg
+     ===================================================== */
+  var APPS = [
+    {
+      id:"allone", name:"NH올원뱅크", owner:"농협은행", dark:false,
+      head:"통합검색", query:"K-패스카드",
+      chips:["메뉴","상품","FAQ","기타"], chipOn:1,
+      cnt:"상품 <em>4건</em>",
+      rows:[
+        '예/적금 · 사업잘되는NH통장 — <span class="g">신용카드</span>/<span class="g">현금카드</span>/제로페이 가맹점대금…',
+        '예/적금 · Asset글로벌증권통장 — 증권거래와 <span class="g">카드</span>실적에 따라…',
+        '대출 · NH <span class="g">K</span>-외국인<span class="g">신용</span>대출 — 국내 거주 외국인 근로소득자를 위한…',
+        '외환 · NH트래블리 외화예금 — NH트래블리 <span class="g">체크카드</span> 전용 다통화 외화예금'
+      ],
+      verdict:{ cls:"v-warn", txt:"부분 — 메뉴는 'NH농협카드' 브랜드 페이지로만 안내하고, 상품 4건은 통장·대출·외화예금" },
+      guide:true
+    },
+    {
+      id:"kok", name:"NH콕뱅크", owner:"상호금융(지역농협)", dark:true,
+      head:"검색", query:"케이패스",
+      chips:[], chipOn:-1,
+      zero:{
+        msg:"검색 결과가 없어요.<br>추천검색어는 어떠세요?",
+        sugg:["우리아이 콕뱅크 가입","사기예방","증명서 발급","나만의 계좌"]
+      },
+      verdict:{ cls:"v-bad", txt:"실패 — 결과 0건. 추천검색어도 카드와 무관" },
+      guide:true
+    },
+    {
+      id:"smart", name:"NH스마트뱅킹", owner:"농협은행(통합형)", dark:false,
+      head:"검색", query:"K-패스카드",
+      chips:["전체","메뉴","상품","기타"], chipOn:0,
+      cnt:"메뉴 <em>15건</em> · 상품 <em>0건</em>",
+      rows:[
+        '인증/보안 &gt; 보안매체 &gt; 보안<span class="g">카드</span>/OTP 오류 해제',
+        '고객센터 &gt; 사고신고 &gt; 보안<span class="g">카드</span>/OTP 분실신고',
+        '마이페이지 &gt; 나의 <span class="g">카드</span> &gt; <span class="g">카드</span>정보(내 <span class="g">카드</span>)',
+        '고객센터 &gt; 사고신고 &gt; 보안<span class="g">카드</span>/OTP 분실신고 해제'
+      ],
+      verdict:{ cls:"v-bad", txt:"실패 — 보안카드·OTP 등 무관 메뉴만. 카드 상품은 0건" },
+      guide:true
+    },
+    {
+      id:"pay", name:"NH Pay", owner:"농협카드", dark:false,
+      head:"검색", query:"K-패스카드",
+      chips:["전체","카드","혜택"], chipOn:0,
+      cnt:"카드 <em>2건</em>",
+      rows:[
+        '<span class="g">K-패스카드</span> (신용) — 대중교통 이용금액 환급',
+        '<span class="g">K-패스카드</span> (체크) — 대중교통 이용금액 환급'
+      ],
+      verdict:{ cls:"v-ok", txt:"성공 — 정확히 매칭. 카드가 원래 이 앱 데이터이기 때문" },
+      guide:false,
+      noGuideWhy:"이 앱이 담당 채널 본인입니다. 여기서 처리가 끝나므로 안내를 노출하지 않습니다."
+    }
+  ];
+
+  /* =====================================================
+     기준 데이터 (중앙 라우터)
+     ===================================================== */
+  var EXISTING = [
+    { func:"자동이체 해지", terms:["자동이체 해지","자동이체 취소"],
+      ch:[["NH올원뱅크","완료"]], dept:"은행 채널부", st:"승인" },
+    { func:"증명서 발급", terms:["통장사본","거래내역증명"],
+      ch:[["NH스마트뱅킹","완료"]], dept:"은행 채널부", st:"승인" },
+    { func:"조합원 배당 조회", terms:["배당금","출자금 배당"],
+      ch:[["NH콕뱅크","완료"]], dept:"상호금융부", st:"승인" }
+  ];
+
+  var CHANNELS = [
+    { name:"NH Pay",             role:"완료" },
+    { name:"NH농협카드 모바일웹",  role:"완료" },
+    { name:"NH올원뱅크",          role:"안내" },
+    { name:"NH콕뱅크",            role:"안내" },
+    { name:"NH스마트뱅킹",        role:"안내" }
+  ];
+
+  var terms = ["K-패스카드","케이패스","경기패스카드","교통비 환급 카드"];
+  var state = "draft";      // draft → review → approved
+  var applied = null;       // 승인 시점의 기준 스냅샷
+
+  /* =====================================================
+     폰 렌더
+     ===================================================== */
+  function phoneHTML(app, after){
+    var h = "", i;
+    h += '<div class="phone' + (app.dark ? " dark" : "") + '">';
+    h += '<div class="pname"><span>' + esc(app.name) + '</span><span class="owner">' + esc(app.owner) + '</span></div>';
+    h += '<div class="screen">';
+    h += '<div class="shead"><span>' + esc(app.head) + '</span><span class="x">&times;</span></div>';
+    h += '<div class="sbox">' + esc(app.query) + '<span class="mg">&#9906;</span></div>';
+
+    if(app.chips && app.chips.length){
+      h += '<div class="chips">';
+      for(i=0;i<app.chips.length;i++){
+        h += '<span class="chip' + (i===app.chipOn ? " on" : "") + '">' + esc(app.chips[i]) + '</span>';
+      }
+      h += '</div>';
+    }
+
+    // 안내 카드 (3단계, 노출 조건 충족 앱만)
+    if(after){
+      if(app.guide && applied){
+        h += '<div class="guide">';
+        h += '<div class="gt">' + esc(applied.func) + '은(는) 다음 채널에서 처리할 수 있어요</div>';
+        for(i=0;i<applied.ch.length;i++){
+          var c = applied.ch[i];
+          if(c[1] === "안내" && c[0] !== app.name) continue;   // 남의 앱 '안내'는 숨김
+          h += '<div class="gch"><span class="nm">' + esc(c[0]) + '</span>'
+             + '<span class="role ' + (c[1]==="완료" ? "done" : "info") + '">' + esc(c[1]) + '</span></div>';
+        }
+        h += '<div class="gnext">다음 행동 · ' + esc(applied.next) + '</div>';
+        h += '</div>';
+      } else if(!app.guide){
+        h += '<div class="noguide"><b>안내 미노출</b><br>' + esc(app.noGuideWhy) + '</div>';
+      }
+    }
+
+    if(app.zero){
+      h += '<div class="zero"><span class="em">&#128373;</span>' + app.zero.msg + '<div class="sugg">';
+      for(i=0;i<app.zero.sugg.length;i++){ h += '<span>' + esc(app.zero.sugg[i]) + '</span>'; }
+      h += '</div></div>';
+    } else {
+      h += '<div class="cnt">' + app.cnt + '</div>';
+      for(i=0;i<app.rows.length;i++){ h += '<div class="row">' + app.rows[i] + '</div>'; }
+    }
+
+    if(!after){
+      h += '<div class="verdict ' + app.verdict.cls + '"><span class="dot"></span><span>' + esc(app.verdict.txt) + '</span></div>';
+    } else {
+      var ok = app.guide
+        ? { cls:"v-ok", txt:"담당 채널과 다음 행동이 화면에 드러남" }
+        : { cls:"v-ok", txt:"변화 없음 — 원래 여기서 끝나는 업무" };
+      h += '<div class="verdict ' + ok.cls + '"><span class="dot"></span><span>' + esc(ok.txt) + '</span></div>';
+    }
+
+    h += '</div></div>';
+    return h;
+  }
+
+  function renderRail(el, after){
+    var h = "", i;
+    for(i=0;i<APPS.length;i++){ h += phoneHTML(APPS[i], after); }
+    el.innerHTML = h;
+  }
+
+  /* =====================================================
+     콘솔 렌더
+     ===================================================== */
+  function chCells(list){
+    var h = "", i;
+    for(i=0;i<list.length;i++){
+      h += esc(list[i][0])
+         + '<span class="mini ' + (list[i][1]==="완료" ? "done" : "info") + '">' + esc(list[i][1]) + '</span><br>';
+    }
+    return h;
+  }
+
+  function renderTable(){
+    var h = "", i, e, stCls, stTxt;
+    for(i=0;i<EXISTING.length;i++){
+      e = EXISTING[i];
+      h += '<tr><td><b>' + esc(e.func) + '</b></td>'
+         + '<td style="color:#5f6672">' + esc(e.terms.join(", ")) + '</td>'
+         + '<td class="cell-ch">' + chCells(e.ch) + '</td>'
+         + '<td style="color:#5f6672">' + esc(e.dept) + '</td>'
+         + '<td><span class="st appr">승인</span></td></tr>';
+    }
+    stCls = state === "approved" ? "appr" : (state === "review" ? "rev" : "draft");
+    stTxt = state === "approved" ? "승인" : (state === "review" ? "검토 중" : "작성 중");
+    h += '<tr class="new"><td><b>' + esc($("fFunc").value) + '</b></td>'
+       + '<td style="color:#5f6672">' + esc(terms.join(", ")) + '</td>'
+       + '<td class="cell-ch">' + chCells(currentChannels()) + '</td>'
+       + '<td style="color:#5f6672">' + esc($("fDept").value) + '</td>'
+       + '<td><span class="st ' + stCls + '">' + esc(stTxt) + '</span></td></tr>';
+    $("tbody").innerHTML = h;
+  }
+
+  function currentChannels(){
+    var out = [], sels = document.querySelectorAll("#chList select"), i, v;
+    for(i=0;i<sels.length;i++){
+      v = sels[i].value;
+      if(v !== "미사용"){ out.push([CHANNELS[i].name, v]); }
+    }
+    return out;
+  }
+
+  function renderTags(){
+    var box = $("tagbox"), h = "", i;
+    for(i=0;i<terms.length;i++){
+      h += '<span class="tag">' + esc(terms[i]) + '<button data-t="' + i + '" aria-label="삭제">&times;</button></span>';
+    }
+    box.insertAdjacentHTML("afterbegin", "");
+    var old = box.querySelectorAll(".tag");
+    for(i=0;i<old.length;i++){ old[i].remove(); }
+    $("tagIn").insertAdjacentHTML("beforebegin", h);
+    var btns = box.querySelectorAll(".tag button");
+    for(i=0;i<btns.length;i++){
+      btns[i].addEventListener("click", function(){
+        terms.splice(parseInt(this.getAttribute("data-t"),10), 1);
+        renderTags(); renderTable();
+      });
+    }
+  }
+
+  function renderChannels(){
+    var h = "", i, roles = ["완료","경유","안내","미사용"], j;
+    for(i=0;i<CHANNELS.length;i++){
+      h += '<div class="chrow"><span class="cn">' + esc(CHANNELS[i].name) + '</span><select>';
+      for(j=0;j<roles.length;j++){
+        h += '<option' + (roles[j]===CHANNELS[i].role ? " selected" : "") + '>' + roles[j] + '</option>';
+      }
+      h += '</select></div>';
+    }
+    $("chList").innerHTML = h;
+    var sels = document.querySelectorAll("#chList select");
+    for(i=0;i<sels.length;i++){ sels[i].addEventListener("change", renderTable); }
+  }
+
+  /* =====================================================
+     단계 전환
+     ===================================================== */
+  function goto(n){
+    var i, stages = document.querySelectorAll(".stage"), steps = document.querySelectorAll(".step");
+    for(i=0;i<stages.length;i++){ stages[i].classList.remove("on"); }
+    $("st" + n).classList.add("on");
+    for(i=0;i<steps.length;i++){
+      var sn = parseInt(steps[i].getAttribute("data-s"),10);
+      steps[i].classList.toggle("on", sn === n);
+      steps[i].classList.toggle("done", sn < n);
+    }
+    if(n === 3){ renderRail($("rail3"), true); }
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  /* =====================================================
+     이벤트
+     ===================================================== */
+  var steps = document.querySelectorAll(".step"), i;
+  for(i=0;i<steps.length;i++){
+    steps[i].addEventListener("click", function(){
+      var n = parseInt(this.getAttribute("data-s"),10);
+      if(n === 3 && !applied){
+        $("flash").textContent = "먼저 2단계에서 승인해 주세요";
+        goto(2);
+        return;
+      }
+      goto(n);
+    });
+  }
+  var gos = document.querySelectorAll("[data-go]");
+  for(i=0;i<gos.length;i++){
+    gos[i].addEventListener("click", function(){ goto(parseInt(this.getAttribute("data-go"),10)); });
+  }
+
+  $("tagIn").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+      e.preventDefault();
+      var v = this.value.trim();
+      if(v && terms.indexOf(v) === -1){ terms.push(v); this.value = ""; renderTags(); renderTable(); }
+    }
+  });
+  $("fFunc").addEventListener("input", renderTable);
+  $("fDept").addEventListener("input", renderTable);
+
+  $("reqBtn").addEventListener("click", function(){
+    state = "review";
+    $("apprBtn").disabled = false;
+    $("flash").textContent = "중앙 관리자에게 검토 요청됨";
+    renderTable();
+  });
+
+  $("apprBtn").addEventListener("click", function(){
+    state = "approved";
+    applied = {
+      func: $("fFunc").value.trim() || "이 업무",
+      next: $("fNext").value.trim() || "담당 채널에서 신청",
+      ch: currentChannels(),
+      terms: terms.slice()
+    };
+    $("flash").textContent = "승인됨 · 통합검색 접점에 배포되었습니다";
+    $("toStep3").disabled = false;
+    renderTable();
+  });
+
+  $("toStep3").addEventListener("click", function(){ goto(3); });
+
+  $("resetBtn").addEventListener("click", function(){
+    state = "draft"; applied = null;
+    $("apprBtn").disabled = true;
+    $("toStep3").disabled = true;
+    $("flash").textContent = "";
+    terms = ["K-패스카드","케이패스","경기패스카드","교통비 환급 카드"];
+    $("fFunc").value = "교통비 환급 카드 신청";
+    $("fDept").value = "카드사업부";
+    $("fNext").value = "카드 목록에서 K-패스카드를 찾아 신청";
+    renderChannels(); renderTags(); renderTable();
+    goto(1);
+  });
+
+  /* 초기화 */
+  renderRail($("rail1"), false);
+  renderChannels();
+  renderTags();
+  renderTable();
+})();
+</script>
+</body>
+</html>

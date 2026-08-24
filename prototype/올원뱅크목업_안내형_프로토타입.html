@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>담당 채널 안내 사용성 테스트</title>
+<style>
+  :root{
+    --nh-green:#00A651;
+    --nh-green-dark:#008C44;
+    --ink:#1a1a1a;
+    --line:#e4e4e4;
+    --chip:#eef0f7;
+    --aitalk:#2f6bff;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    background:#111;
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif;
+    color:var(--ink);
+    display:flex;justify-content:center;align-items:flex-start;
+    min-height:100vh;
+  }
+  #frame{
+    width:100%;max-width:412px;min-height:100vh;
+    background:#fff;position:relative;display:flex;flex-direction:column;
+    overflow:hidden;
+  }
+
+  /* ---------- 상태바 ---------- */
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:8px 16px 4px;font-size:13px;font-weight:600;color:#111;
+    letter-spacing:-.2px;flex:0 0 auto;
+  }
+  .statusbar .left,.statusbar .right{display:flex;align-items:center;gap:5px}
+  .batt{
+    background:#111;color:#fff;border-radius:8px;
+    font-size:10px;padding:1px 5px;font-weight:700;
+  }
+  .sicon{font-size:11px;color:#111}
+
+  /* ---------- 헤더 ---------- */
+  .apphead{
+    position:relative;height:52px;display:flex;align-items:center;justify-content:center;
+    flex:0 0 auto;
+  }
+  .apphead h1{font-size:19px;font-weight:700;margin:0;letter-spacing:-.4px}
+  .apphead .close{
+    position:absolute;right:14px;top:50%;transform:translateY(-50%);
+    width:30px;height:30px;border:0;background:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .apphead .close::before,.apphead .close::after{
+    content:"";position:absolute;width:23px;height:2px;background:#111;border-radius:2px;
+  }
+  .apphead .close::before{transform:rotate(45deg)}
+  .apphead .close::after{transform:rotate(-45deg)}
+
+  /* ---------- 검색창 ---------- */
+  .searchwrap{padding:6px 16px 0;flex:0 0 auto}
+  .searchbox{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid #d9d9d9;border-radius:12px;
+    height:52px;padding:0 16px;background:#fff;
+  }
+  .searchbox input{
+    flex:1;border:0;outline:none;font-size:18px;font-weight:500;
+    font-family:inherit;color:var(--ink);letter-spacing:-.4px;background:none;
+    min-width:0;
+  }
+  .searchbox input::placeholder{color:#b5b5b5;font-weight:400}
+  .mag{width:24px;height:24px;flex:0 0 auto;cursor:pointer;border:0;background:none;padding:0}
+  .mag svg{display:block}
+
+  /* ---------- 탭 ---------- */
+  .tabs{display:flex;gap:8px;padding:14px 16px 6px;overflow-x:auto;flex:0 0 auto}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{
+    border:0;background:var(--chip);color:#333;
+    font-family:inherit;font-size:15px;font-weight:600;letter-spacing:-.3px;
+    padding:9px 20px;border-radius:999px;white-space:nowrap;cursor:pointer;
+  }
+  .tab.on{background:#111;color:#fff}
+
+  /* ---------- 결과 영역 ---------- */
+  .scroll{flex:1 1 auto;overflow-y:auto;padding:0 16px 90px;-webkit-overflow-scrolling:touch}
+  .seclabel{
+    font-size:16px;font-weight:600;letter-spacing:-.3px;
+    padding:22px 0 10px;border-bottom:1px solid var(--line);
+  }
+  .seclabel b{color:var(--nh-green);font-weight:600}
+  .menurow{
+    padding:15px 0;font-size:16.5px;letter-spacing:-.4px;line-height:1.35;
+    cursor:pointer;
+  }
+  .menurow .leaf{color:var(--nh-green);text-decoration:underline;text-underline-offset:3px}
+  .more{
+    width:100%;height:44px;margin:16px 0 4px;
+    border:1px solid #dcdcdc;border-radius:8px;background:#fff;
+    font-family:inherit;font-size:16px;letter-spacing:-.3px;cursor:pointer;color:#222;
+  }
+  .prodrow{padding:16px 0;cursor:pointer}
+  .prodcat{
+    display:inline-block;background:var(--chip);color:#4b5570;
+    font-size:12.5px;font-weight:600;padding:4px 9px;border-radius:6px;margin-bottom:9px;
+  }
+  .prodtitle{font-size:18px;font-weight:700;letter-spacing:-.5px;margin:0 0 6px}
+  .proddesc{font-size:15px;color:#7a7a7a;line-height:1.45;letter-spacing:-.3px;margin:0}
+  .hl{color:var(--nh-green)}
+  .empty{padding:60px 0;text-align:center;color:#999;font-size:16px;line-height:1.6}
+
+  /* ---------- 안내 카드 (실험군 전용) ---------- */
+  .guide{
+    margin:20px 0 4px;border:1px solid #cdece0;border-radius:14px;
+    background:#f5fbf7;padding:16px 16px 8px;
+  }
+  .guide h2{
+    font-size:16.5px;font-weight:700;margin:0 0 4px;letter-spacing:-.4px;line-height:1.4;
+  }
+  .guide .sub{font-size:13.5px;color:#6b7f74;margin:0 0 12px;letter-spacing:-.3px}
+  .chn{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:12px;margin-bottom:8px;background:#fff;
+    border:1px solid #e3efe8;border-radius:10px;cursor:pointer;text-align:left;
+    width:100%;font-family:inherit;
+  }
+  .chn:active{background:#f0f7f3}
+  .chn .body{flex:1;min-width:0}
+  .chn .nm{font-size:16px;font-weight:700;letter-spacing:-.4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .role{font-size:11.5px;font-weight:700;padding:3px 8px;border-radius:999px;letter-spacing:0}
+  .role.done{background:#e3f5eb;color:var(--nh-green-dark)}
+  .role.info{background:#eef0f7;color:#5a6480}
+  .chn .ds{font-size:14px;color:#6e6e6e;margin-top:5px;line-height:1.45;letter-spacing:-.3px;display:block}
+  .chn .arrow{color:#b9c7bf;font-size:20px;line-height:1.2;flex:0 0 auto}
+
+  /* ---------- AI톡 ---------- */
+  .aitalk{
+    position:absolute;right:14px;bottom:64px;
+    width:56px;height:56px;border-radius:50%;background:var(--aitalk);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:#fff;font-size:11px;font-weight:800;border:0;cursor:default;
+    box-shadow:0 3px 10px rgba(0,0,0,.18);
+  }
+  .aitalk .ch{font-size:20px;line-height:1}
+
+  /* ---------- 하단 시스템 바 ---------- */
+  .sysnav{
+    height:44px;background:#fff;border-top:1px solid #f0f0f0;
+    display:flex;align-items:center;justify-content:space-around;flex:0 0 auto;
+  }
+  .sysnav span{color:#333;font-size:17px}
+
+  /* ---------- 진행 바 (과제용) ---------- */
+  .taskbar{
+    background:#111;color:#fff;padding:9px 14px;font-size:12.5px;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    letter-spacing:-.3px;flex:0 0 auto;
+  }
+  .taskbar .t{font-variant-numeric:tabular-nums;font-weight:700}
+  .taskbar button{
+    border:1px solid #666;background:none;color:#eee;border-radius:6px;
+    font-family:inherit;font-size:11.5px;padding:5px 9px;cursor:pointer;
+  }
+
+  /* ---------- 공통 화면 ---------- */
+  .screen{display:none;flex-direction:column;flex:1 1 auto;min-height:0}
+  .screen.on{display:flex}
+  .pad{padding:24px 22px 40px;overflow-y:auto;flex:1 1 auto}
+  .pad h2{font-size:21px;letter-spacing:-.6px;margin:0 0 14px;line-height:1.35}
+  .pad p{font-size:15.5px;line-height:1.65;color:#333;letter-spacing:-.3px;margin:0 0 14px}
+  .task{
+    background:#f6f7f9;border-left:3px solid var(--nh-green);
+    padding:14px 16px;border-radius:0 10px 10px 0;margin:18px 0;
+    font-size:16px;line-height:1.6;letter-spacing:-.4px;font-weight:600;
+  }
+  .notice{
+    font-size:12.5px;color:#8a8a8a;line-height:1.6;letter-spacing:-.2px;
+    border-top:1px solid var(--line);padding-top:14px;margin-top:22px;
+  }
+  .btn{
+    width:100%;height:52px;border:0;border-radius:12px;
+    background:var(--nh-green);color:#fff;font-family:inherit;
+    font-size:17px;font-weight:700;letter-spacing:-.4px;cursor:pointer;margin-top:8px;
+  }
+  .btn.sub{background:#fff;color:#444;border:1px solid #d5d5d5;font-weight:600}
+  .btn:disabled{background:#d6d6d6;color:#fff;cursor:default}
+  label.q{display:block;font-size:15px;font-weight:700;margin:22px 0 10px;letter-spacing:-.4px}
+  .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{
+    border:1px solid #dcdcdc;border-radius:10px;background:#fff;
+    padding:14px;font-family:inherit;font-size:15.5px;text-align:left;cursor:pointer;
+    letter-spacing:-.3px;line-height:1.4;
+  }
+  .opt.sel{border-color:var(--nh-green);background:#f4fbf7;font-weight:700}
+  textarea{
+    width:100%;min-height:92px;border:1px solid #dcdcdc;border-radius:10px;
+    padding:13px;font-family:inherit;font-size:15.5px;line-height:1.5;
+    resize:vertical;outline:none;letter-spacing:-.3px;
+  }
+  textarea:focus{border-color:var(--nh-green)}
+  .code{
+    background:#f6f7f9;border:1px solid var(--line);border-radius:10px;
+    padding:13px;font-family:ui-monospace,Menlo,Consolas,monospace;
+    font-size:11.5px;line-height:1.5;word-break:break-all;color:#333;
+    max-height:190px;overflow:auto;white-space:pre-wrap;
+  }
+  .mockflag{
+    text-align:center;font-size:11px;color:#b0b0b0;padding:6px 0 0;letter-spacing:-.2px;
+  }
+</style>
+</head>
+<body>
+<div id="frame">
+
+  <!-- ========== 1. 시작 ========== -->
+  <section class="screen on" id="s-intro">
+    <div class="pad">
+      <h2>금융 앱 검색 화면 테스트</h2>
+      <p>지금부터 은행 앱의 검색 화면을 이용해 특정 기능을 어디에서 처리할 수 있는지 찾아보겠습니다.</p>
+      <p><b>여러분을 평가하는 것이 아닙니다.</b> 화면의 안내가 이해되는지 확인하는 테스트입니다. 평소처럼 자유롭게 사용해 주세요. 필요하다고 생각하면 다른 방법을 사용하셔도 됩니다.</p>
+
+      <div class="task">
+        대중교통비 환급 혜택을 받을 수 있는 <b>K-패스카드</b>를 발급받으려 합니다.<br>
+        이 화면을 이용해 <b>어느 채널에서 무엇을 해야 하는지</b> 결정한 뒤 알려주세요.
+      </div>
+
+      <p style="font-size:14.5px;color:#666">검색창에 평소 쓰실 것 같은 말을 자유롭게 입력해 보세요. 결정이 되면 화면 위쪽의 <b>결정했어요</b> 버튼을 누르시면 됩니다. 최대 5분입니다.</p>
+
+      <button class="btn" id="startBtn">시작하기</button>
+
+      <div class="notice">
+        이 화면은 사용성 테스트를 위해 제작한 <b>목업(mockup)</b>입니다. 실제 은행 앱이 아니며 NH농협과 무관합니다.
+        실제 계좌·카드 신청은 이루어지지 않고 개인정보를 수집하지 않습니다. 검색어와 화면 조작 기록만 남습니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== 2. 목업 앱 ========== -->
+  <section class="screen" id="s-app">
+    <div class="taskbar">
+      <span>K-패스카드를 발급받을 곳 찾기</span>
+      <span class="t" id="clock">5:00</span>
+      <button id="decideBtn">결정했어요</button>
+    </div>
+
+    <div class="statusbar">
+      <span class="left"><b>SKT</b> <span id="fakeTime">1:19</span></span>
+      <span class="right"><span class="sicon">&#128263;</span><span class="sicon">&#128246;</span><span class="batt">71</span></span>
+    </div>
+
+    <div class="apphead">
+      <h1>통합검색</h1>
+      <button class="close" id="closeX" aria-label="닫기"></button>
+    </div>
+
+    <div class="searchwrap">
+      <div class="searchbox">
+        <input id="q" type="search" placeholder="검색어를 입력하세요" autocomplete="off" enterkeyhint="search">
+        <button class="mag" id="goBtn" aria-label="검색">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#111" stroke-width="2.1" stroke-linecap="round">
+            <circle cx="10.5" cy="10.5" r="6.7"></circle><line x1="15.6" y1="15.6" x2="21" y2="21"></line>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="tabs" id="tabs" hidden>
+      <button class="tab on" data-tab="menu">메뉴</button>
+      <button class="tab" data-tab="prod">상품</button>
+      <button class="tab" data-tab="faq">FAQ</button>
+      <button class="tab" data-tab="etc">기타</button>
+    </div>
+
+    <div class="scroll" id="results"></div>
+
+    <button class="aitalk" tabindex="-1"><span class="ch">&#128519;</span>AI톡</button>
+
+    <div class="sysnav"><span>&#9776;</span><span>&#9711;</span><span>&#8249;</span></div>
+    <div class="mockflag">목업 · 실제 앱 아님</div>
+  </section>
+
+  <!-- ========== 3. 결정 ========== -->
+  <section class="screen" id="s-decide">
+    <div class="pad">
+      <h2>어디에서 처리하시겠어요?</h2>
+      <p style="font-size:14.5px;color:#666">방금 화면에서 보신 내용을 바탕으로 답해주세요. 정답을 맞히는 것이 목적이 아닙니다.</p>
+
+      <label class="q">1. K-패스카드를 발급받으려면 어디로 가야 한다고 생각하세요?</label>
+      <div class="opts" id="chanOpts">
+        <button class="opt" data-v="NHPAY">NH Pay 앱</button>
+        <button class="opt" data-v="모바일웹">NH농협카드 모바일웹</button>
+        <button class="opt" data-v="올원뱅크">지금 이 앱(올원뱅크) 안에서</button>
+        <button class="opt" data-v="콕뱅크">NH콕뱅크 앱</button>
+        <button class="opt" data-v="스마트뱅킹">NH스마트뱅킹 앱</button>
+        <button class="opt" data-v="영업점">가까운 농협 영업점</button>
+        <button class="opt" data-v="모름">어디인지 모르겠다</button>
+      </div>
+
+      <label class="q">2. 그곳에서 <b>무엇을 하면</b> 발급받을 수 있나요? 짧게 적어주세요.</label>
+      <textarea id="nextAct" placeholder="예: 카드 목록에서 K-패스카드를 찾아 신청한다"></textarea>
+
+      <label class="q">3. 그렇게 판단한 근거는 무엇이었나요?</label>
+      <textarea id="why" placeholder="화면에서 본 것 중 무엇이 그렇게 생각하게 했나요?"></textarea>
+
+      <button class="btn" id="submitBtn" disabled>제출하기</button>
+      <button class="btn sub" id="backBtn">화면으로 돌아가기</button>
+    </div>
+  </section>
+
+  <!-- ========== 4. 종료 ========== -->
+  <section class="screen" id="s-end">
+    <div class="pad">
+      <h2 id="endTitle">참여해 주셔서 감사합니다</h2>
+      <p id="endMsg">아래 기록을 복사해서 보내주시면 됩니다.</p>
+      <div class="code" id="logOut"></div>
+      <button class="btn" id="copyBtn">기록 복사하기</button>
+      <div class="notice">
+        이 화면은 사용성 테스트용 목업이며 실제 은행 앱이 아닙니다. 개인정보는 수집하지 않았습니다.
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* =========================================================
+     검색 결과 데이터 — raw/스크린샷/NH올원뱅크 실측 재현
+     출처: Screenshot_20260818_131721 (경기패스카드)
+           Screenshot_20260818_131852 (카드 발급)
+           Screenshot_20260818_131900 (카드 신청)
+           k패스카드로검색했을시.jpg (상품 탭)
+     ========================================================= */
+
+  var MENU_CARD8 = {
+    count: 8,
+    rows: [
+      ["NH금융그룹 > ", "NH농협카드"],
+      ["금융편의 > ", "학생증체크카드"],
+      ["내 자산 > 라이프 > ", "건강카드뉴스"],
+      ["내 자산 > 소비관리 > ", "카드혜택비교"],
+      ["내 자산 > 소비관리 > ", "카드리포트"]
+    ]
+  };
+
+  var MENU_SINCHEONG39 = {
+    count: 39,
+    rows: [
+      ["공과금/채권 > 납부하기 > ", "법원등기신청 수수료"],
+      ["퇴직연금 > 연금계좌관리 > ", "연금신청 조회/취소"],
+      ["퇴직연금 > 연금계좌관리 > ", "해지신청"],
+      ["퇴직연금 > 연금계좌관리 > ", "해지신청 조회/취소"],
+      ["퇴직연금 > 연금계좌관리 > ", "연금신청"]
+    ]
+  };
+
+  var PROD_KPASS4 = {
+    count: 4,
+    rows: [
+      { cat:"예/적금", title:"사업잘되는NH통장",
+        desc:'<span class="hl">신용카드</span>/<span class="hl">현금카드</span>/제로페이 가맹점대금 입금시 이 통장을 통한 거래에 한해 우대혜택을 드리는 비대…' },
+      { cat:"예/적금", title:"Asset글로벌증권통장",
+        desc:'증권거래와 <span class="hl">카드</span>실적에 따라 금융혜택을 제공하고 국내주식거래 및 해외주식 적립식 투자가 가능한…' },
+      { cat:"대출", title:'NH <span class="hl">K</span>-외국인<span class="hl">신용</span>대출',
+        desc:'국내 거주 외국인 근로소득자를 위한 <span class="hl">신용</span>대출' },
+      { cat:"외환", title:"NH트래블리 외화예금",
+        desc:'해외여행 특화 상품인 NH트래블리 <span class="hl">체크카드</span> 전용 다통화 외화예금' }
+    ]
+  };
+
+  var PROD_CARD3 = {
+    count: 3,
+    rows: [
+      { cat:"예/적금", title:"사업잘되는NH통장",
+        desc:'<span class="hl">신용카드</span>/<span class="hl">현금카드</span>/제로페이 가맹점대금 입금시 이 통장을 통한 거래에 한해 우대혜택을 드리는 비대…' },
+      { cat:"예/적금", title:"Asset글로벌증권통장",
+        desc:'증권거래와 <span class="hl">카드</span>실적에 따라 금융혜택을 제공하고 국내주식거래 및 해외주식 적립식 투자가 가능한…' },
+      { cat:"외환", title:"NH트래블리 외화예금",
+        desc:'해외여행 특화 상품인 NH트래블리 <span class="hl">체크카드</span> 전용 다통화 외화예금' }
+    ]
+  };
+
+  var TABLE = [
+    { keys:["카드신청","신청카드","카드신청하기"], menu:MENU_SINCHEONG39, prod:PROD_CARD3, guide:true },
+    { keys:["카드발급","발급카드","카드만들기"], menu:MENU_CARD8, prod:PROD_CARD3, guide:true },
+    { keys:["경기패스카드","경기패스","더경기패스"], menu:MENU_CARD8, prod:PROD_KPASS4, guide:true },
+    { keys:["k패스카드","케이패스카드","k패스","케이패스","kpass","kpasscard",
+            "k패스카드발급","k패스카드신청","교통카드","대중교통카드","교통비환급카드"],
+      menu:MENU_CARD8, prod:PROD_KPASS4, guide:true },
+    { keys:["카드"], menu:MENU_CARD8, prod:PROD_CARD3, guide:true }
+  ];
+
+  function norm(s){
+    return (s||"").toLowerCase().replace(/[\s\-_.·]/g,"");
+  }
+
+  function lookup(raw){
+    var n = norm(raw), i, j;
+    if(!n) return null;
+    for(i=0;i<TABLE.length;i++){
+      for(j=0;j<TABLE[i].keys.length;j++){
+        if(n === TABLE[i].keys[j]) return TABLE[i];
+      }
+    }
+    for(i=0;i<TABLE.length;i++){
+      for(j=0;j<TABLE[i].keys.length;j++){
+        if(n.indexOf(TABLE[i].keys[j]) > -1 || TABLE[i].keys[j].indexOf(n) > -1) return TABLE[i];
+      }
+    }
+    return null;
+  }
+
+  /* =========================================================
+     안내 카드 — docs/B축_MVP_설계.md 사용자 화면 예시
+     ========================================================= */
+  var GUIDE = {
+    title: "K-패스카드는 다음 채널에서 처리할 수 있어요",
+    sub: "이 앱 검색 결과만으로는 담당 채널이 드러나지 않아 안내를 표시했습니다.",
+    channels: [
+      { v:"NHPAY", nm:"NH Pay", role:"완료", cls:"done", ds:"카드 상품을 확인하고 신청까지 마칠 수 있어요." },
+      { v:"모바일웹", nm:"NH농협카드 모바일웹", role:"완료", cls:"done", ds:"앱 설치 없이 상품을 확인하고 신청할 수 있어요." },
+      { v:"올원뱅크", nm:"올원뱅크(현재 앱)", role:"안내", cls:"info", ds:"담당 채널 정보만 확인할 수 있고, 이 앱에서는 신청이 끝나지 않아요." }
+    ]
+  };
+
+  /* =========================================================
+     상태 / 로그
+     ========================================================= */
+  var LIMIT_MS = 5*60*1000;
+
+  var params = new URLSearchParams(location.search);
+  var g = (params.get("g")||"").toLowerCase();
+  if(g !== "a" && g !== "b"){ g = Math.random() < 0.5 ? "a" : "b"; }
+  var SHOW_GUIDE = (g === "b");
+
+  var log = {
+    group: g,
+    groupLabel: SHOW_GUIDE ? "실험군(안내 있음)" : "대조군(안내 없음)",
+    participant: params.get("p") || "",
+    startedAt: null,
+    endedAt: null,
+    elapsedSec: null,
+    queries: [],
+    reformulations: 0,
+    clicks: [],
+    guideShown: false,
+    guideShownAtSec: null,
+    guideChannelClicks: [],
+    leftScreen: [],
+    outcome: null,
+    channel: null,
+    nextAction: "",
+    why: "",
+    ua: navigator.userAgent
+  };
+
+  var t0 = 0, timer = null, ended = false;
+  var curTab = "menu", curEntry = null, searched = false, selChan = null;
+
+  function $(id){ return document.getElementById(id); }
+  function sec(){ return t0 ? Math.round((Date.now()-t0)/1000) : 0; }
+  function show(id){
+    var list = document.querySelectorAll(".screen"), i;
+    for(i=0;i<list.length;i++){ list[i].classList.remove("on"); }
+    $(id).classList.add("on");
+  }
+  function esc(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  /* =========================================================
+     렌더
+     ========================================================= */
+  function render(){
+    var box = $("results"), html = "", i, a, b, m, p, r;
+    box.innerHTML = "";
+
+    if(!searched){
+      box.innerHTML = '<div class="empty">찾으시는 메뉴나 상품을<br>검색해 보세요.</div>';
+      $("tabs").hidden = true;
+      return;
+    }
+    $("tabs").hidden = false;
+
+    if(SHOW_GUIDE && curEntry && curEntry.guide){
+      if(!log.guideShown){
+        log.guideShown = true;
+        log.guideShownAtSec = sec();
+      }
+      html += '<div class="guide"><h2>' + esc(GUIDE.title) + '</h2>';
+      html += '<p class="sub">' + esc(GUIDE.sub) + '</p>';
+      for(i=0;i<GUIDE.channels.length;i++){
+        var c = GUIDE.channels[i];
+        html += '<button class="chn" data-chn="' + esc(c.v) + '">'
+              +   '<span class="body">'
+              +     '<span class="nm">' + esc(c.nm) + ' <span class="role ' + c.cls + '">' + esc(c.role) + '</span></span>'
+              +     '<span class="ds">' + esc(c.ds) + '</span>'
+              +   '</span><span class="arrow">&#8250;</span>'
+              + '</button>';
+      }
+      html += '</div>';
+    }
+
+    if(!curEntry){
+      html += '<div class="empty">검색 결과가 없습니다.<br><span style="font-size:14px">다른 검색어로 찾아보세요.</span></div>';
+      box.innerHTML = html;
+      bind(box);
+      return;
+    }
+
+    if(curTab === "menu"){
+      m = curEntry.menu;
+      html += '<div class="seclabel">메뉴 <b>' + m.count + '건</b></div>';
+      for(a=0;a<m.rows.length;a++){
+        html += '<div class="menurow" data-click="메뉴: ' + esc(m.rows[a][1]) + '">'
+              + esc(m.rows[a][0])
+              + '<span class="leaf">' + esc(m.rows[a][1]) + '</span></div>';
+      }
+      html += '<button class="more" data-click="더보기(메뉴)">더보기</button>';
+    } else if(curTab === "prod"){
+      p = curEntry.prod;
+      html += '<div class="seclabel">상품 <b>' + p.count + '건</b></div>';
+      for(b=0;b<p.rows.length;b++){
+        r = p.rows[b];
+        html += '<div class="prodrow" data-click="상품: ' + esc(r.title.replace(/<[^>]+>/g,"")) + '">'
+              + '<span class="prodcat">' + esc(r.cat) + '</span>'
+              + '<div class="prodtitle">' + r.title + '</div>'
+              + '<p class="proddesc">' + r.desc + '</p></div>';
+      }
+    } else if(curTab === "faq"){
+      html += '<div class="seclabel">FAQ <b>0건</b></div><div class="empty">검색 결과가 없습니다.</div>';
+    } else {
+      html += '<div class="seclabel">기타 <b>0건</b></div><div class="empty">검색 결과가 없습니다.</div>';
+    }
+
+    box.innerHTML = html;
+    bind(box);
+  }
+
+  function bind(box){
+    var rows = box.querySelectorAll("[data-click]"), chs = box.querySelectorAll("[data-chn]"), i, j;
+    for(i=0;i<rows.length;i++){
+      rows[i].addEventListener("click", function(){
+        log.clicks.push({ at: sec(), item: this.getAttribute("data-click") });
+      });
+    }
+    for(j=0;j<chs.length;j++){
+      chs[j].addEventListener("click", function(){
+        var v = this.getAttribute("data-chn");
+        log.guideChannelClicks.push({ at: sec(), channel: v });
+        preselect(v);
+        show("s-decide");
+      });
+    }
+  }
+
+  /* =========================================================
+     검색
+     ========================================================= */
+  function doSearch(){
+    var raw = $("q").value.trim(), tabs, i;
+    if(!raw) return;
+    if(log.queries.length > 0){ log.reformulations++; }
+    curEntry = lookup(raw);
+    searched = true;
+    curTab = "menu";
+    tabs = document.querySelectorAll(".tab");
+    for(i=0;i<tabs.length;i++){
+      tabs[i].classList.toggle("on", tabs[i].getAttribute("data-tab") === "menu");
+    }
+    log.queries.push({
+      at: sec(),
+      q: raw,
+      hit: !!curEntry,
+      menuCount: curEntry ? curEntry.menu.count : 0,
+      prodCount: curEntry ? curEntry.prod.count : 0
+    });
+    render();
+    $("results").scrollTop = 0;
+    if(document.activeElement && document.activeElement.blur){ document.activeElement.blur(); }
+  }
+
+  /* =========================================================
+     결정 / 종료
+     ========================================================= */
+  function preselect(v){
+    var opts = document.querySelectorAll("#chanOpts .opt"), i, on;
+    for(i=0;i<opts.length;i++){
+      on = opts[i].getAttribute("data-v") === v;
+      opts[i].classList.toggle("sel", on);
+      if(on){ selChan = v; }
+    }
+    checkSubmit();
+  }
+
+  function checkSubmit(){
+    $("submitBtn").disabled = !(selChan && $("nextAct").value.trim().length > 0);
+  }
+
+  function finish(outcome){
+    if(ended) return;
+    ended = true;
+    if(timer){ clearInterval(timer); }
+    log.outcome = outcome;
+    log.endedAt = new Date().toISOString();
+    log.elapsedSec = sec();
+    log.channel = selChan;
+    log.nextAction = $("nextAct").value.trim();
+    log.why = $("why").value.trim();
+
+    if(outcome === "시간초과"){
+      $("endTitle").textContent = "5분이 지났습니다";
+      $("endMsg").textContent = "여기까지 진행한 기록을 복사해서 보내주시면 됩니다.";
+    } else if(outcome === "포기"){
+      $("endTitle").textContent = "중단하셨습니다";
+      $("endMsg").textContent = "괜찮습니다. 아래 기록을 복사해서 보내주시면 됩니다.";
+    }
+    $("logOut").textContent = JSON.stringify(log, null, 1);
+    show("s-end");
+  }
+
+  function tick(){
+    var left = LIMIT_MS - (Date.now() - t0), s;
+    if(left <= 0){
+      $("clock").textContent = "0:00";
+      finish("시간초과");
+      return;
+    }
+    s = Math.floor(left/1000);
+    $("clock").textContent = Math.floor(s/60) + ":" + ("0" + (s%60)).slice(-2);
+  }
+
+  /* =========================================================
+     이벤트
+     ========================================================= */
+  $("startBtn").addEventListener("click", function(){
+    var d = new Date();
+    t0 = Date.now();
+    log.startedAt = new Date().toISOString();
+    $("fakeTime").textContent = (d.getHours() % 12 || 12) + ":" + ("0" + d.getMinutes()).slice(-2);
+    show("s-app");
+    render();
+    timer = setInterval(tick, 250);
+    tick();
+    setTimeout(function(){ $("q").focus(); }, 120);
+  });
+
+  $("goBtn").addEventListener("click", doSearch);
+  $("q").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); doSearch(); }
+  });
+
+  var tabBtns = document.querySelectorAll(".tab"), tb;
+  for(tb=0;tb<tabBtns.length;tb++){
+    tabBtns[tb].addEventListener("click", function(){
+      var k;
+      for(k=0;k<tabBtns.length;k++){ tabBtns[k].classList.remove("on"); }
+      this.classList.add("on");
+      curTab = this.getAttribute("data-tab");
+      log.clicks.push({ at: sec(), item: "탭: " + this.textContent });
+      render();
+    });
+  }
+
+  $("closeX").addEventListener("click", function(){
+    log.clicks.push({ at: sec(), item: "검색 화면 닫기(X)" });
+  });
+
+  $("decideBtn").addEventListener("click", function(){ show("s-decide"); });
+  $("backBtn").addEventListener("click", function(){ show("s-app"); });
+
+  var opts = document.querySelectorAll("#chanOpts .opt"), o;
+  for(o=0;o<opts.length;o++){
+    opts[o].addEventListener("click", function(){
+      var k;
+      for(k=0;k<opts.length;k++){ opts[k].classList.remove("sel"); }
+      this.classList.add("sel");
+      selChan = this.getAttribute("data-v");
+      checkSubmit();
+    });
+  }
+  $("nextAct").addEventListener("input", checkSubmit);
+  $("submitBtn").addEventListener("click", function(){ finish("결정 완료"); });
+
+  $("copyBtn").addEventListener("click", function(){
+    var txt = $("logOut").textContent;
+    function done(){ $("copyBtn").textContent = "복사됐습니다"; }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = txt;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); done(); }
+      catch(e){ $("copyBtn").textContent = "직접 선택해서 복사해 주세요"; }
+      document.body.removeChild(ta);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(done, fallback);
+    } else {
+      fallback();
+    }
+  });
+
+  document.addEventListener("visibilitychange", function(){
+    if(document.hidden && t0 && !ended){
+      log.leftScreen.push({ at: sec(), note: "화면을 벗어남(외부 검색 가능성)" });
+    }
+  });
+
+  var db = $("decideBtn"), holdT = null;
+  db.addEventListener("pointerdown", function(){
+    holdT = setTimeout(function(){
+      if(confirm("찾기를 중단하시겠어요?")){ finish("포기"); }
+    }, 1200);
+  });
+  ["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+    db.addEventListener(ev, function(){ if(holdT){ clearTimeout(holdT); } });
+  });
+})();
+</script>
+</body>
+</html>
