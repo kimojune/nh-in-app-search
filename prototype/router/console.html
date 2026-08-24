@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>크로스 앱 라우터 · 관리 콘솔</title>
+<style>
+  :root{
+    --nh:#00A651; --nh-dark:#008C44;
+    --ink:#16181d; --sub:#5f6672; --line:#e5e7eb; --bg:#f4f5f7;
+    --warn:#c2410c; --ok:#047857; --bad:#b91c1c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px 70px}
+  header.top{background:#fff;border-bottom:1px solid var(--line);padding:16px 0}
+  .brand{font-size:12.5px;color:var(--sub);letter-spacing:-.2px}
+  .row1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:2px}
+  h1{font-size:21px;font-weight:800;letter-spacing:-.6px;margin:0}
+  .badge{font-size:11.5px;font-weight:800;background:#eef1f5;color:#5a6480;padding:3px 9px;border-radius:999px}
+  .lede{font-size:13.5px;color:var(--sub);letter-spacing:-.3px;margin:6px 0 0;max-width:820px}
+  .openapp{
+    margin-left:auto;font-size:13px;font-weight:700;color:var(--nh-dark);text-decoration:none;
+    border:1px solid #bfe6d3;background:#f2faf6;padding:8px 13px;border-radius:9px;white-space:nowrap;
+  }
+
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;margin-top:20px;overflow:hidden}
+  .chead{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+    padding:14px 18px;border-bottom:1px solid var(--line);background:#fafbfc;
+  }
+  .ct{font-size:15px;font-weight:800;letter-spacing:-.4px}
+  .cnote{font-size:12.5px;color:var(--sub);letter-spacing:-.3px}
+  select,input[type=text],textarea{
+    font-family:inherit;font-size:13px;letter-spacing:-.3px;color:var(--ink);
+    border:1px solid #d5d9e0;border-radius:8px;padding:8px 10px;background:#fff;outline:none;
+  }
+  input[type=text]:focus,select:focus,textarea:focus{border-color:var(--nh)}
+  textarea{width:100%;font-family:ui-monospace,Consolas,monospace;font-size:12px;line-height:1.6;resize:vertical}
+
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;min-width:880px}
+  th,td{
+    text-align:left;padding:10px 13px;font-size:12.5px;letter-spacing:-.3px;
+    border-bottom:1px solid #f0f1f4;vertical-align:top;
+  }
+  th{font-size:11px;font-weight:700;color:#8b93a1;background:#fcfcfd;letter-spacing:0}
+  tr.pending td{background:#fbfdfc}
+  .st{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .st.approved{background:#dcf5e8;color:var(--nh-dark)}
+  .st.review{background:#fff0dd;color:var(--warn)}
+  .st.draft{background:#eceef3;color:#5a6480}
+  .mini{font-size:9.5px;font-weight:800;padding:1px 5px;border-radius:4px;margin-left:4px}
+  .mini.done{background:#dcf5e8;color:var(--nh-dark)}
+  .mini.via{background:#fff0dd;color:var(--warn)}
+  .mini.info{background:#eceef3;color:#5a6480}
+  .supp{font-size:10.5px;color:#8b93a1;margin-top:3px}
+
+  .tabs{display:flex;gap:6px;padding:0 18px;border-bottom:1px solid var(--line);background:#fafbfc}
+  .tab{
+    border:0;background:none;font-family:inherit;cursor:pointer;padding:11px 14px 13px;
+    border-bottom:3px solid transparent;font-size:13.5px;font-weight:700;color:#9aa1ad;letter-spacing:-.3px;
+  }
+  .tab.on{color:var(--ink);border-bottom-color:var(--nh)}
+  .pane{display:none;padding:18px}
+  .pane.on{display:block}
+
+  .drop{border:2px dashed #cfd6de;border-radius:12px;background:#fcfdfe;padding:18px;text-align:center}
+  .drop.over{border-color:var(--nh);background:#f2faf6}
+  .drop p{margin:0 0 10px;font-size:13px;color:var(--sub);letter-spacing:-.3px}
+  .srcnote{
+    background:#f7f9fb;border-left:3px solid #c9d2dc;border-radius:0 8px 8px 0;
+    padding:11px 14px;margin-bottom:14px;font-size:12.5px;color:#4b5361;letter-spacing:-.3px;line-height:1.6;
+  }
+  .srcnote b{color:var(--ink)}
+
+  .maprow{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0 6px}
+  .mapf{flex:1;min-width:170px}
+  .mapf label{display:block;font-size:11.5px;font-weight:800;color:#4b5361;margin-bottom:5px}
+  .mapf label .req{color:var(--bad);margin-left:3px}
+  .mapf label .hint{font-weight:500;color:#9aa1ad;margin-left:5px}
+  .mapf select{width:100%}
+  .termbox{
+    display:flex;flex-wrap:wrap;gap:6px;border:1px solid #d5d9e0;border-radius:8px;
+    padding:8px;background:#fff;
+  }
+  .termbox label{
+    display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    color:#41474f;background:#f4f6f8;border-radius:7px;padding:5px 10px;cursor:pointer;margin:0;
+  }
+  .termbox label.on{background:#eef7f2;color:var(--nh-dark)}
+  .termbox input{width:14px;height:14px;accent-color:var(--nh)}
+  .fillrow{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin:12px 0 4px}
+  .fillrow .mapf{min-width:200px}
+  .needfill{
+    background:#fff8f1;border:1px solid #f2d7bf;border-radius:10px;padding:12px 14px;margin:14px 0;
+    font-size:12.5px;color:#7c4a1e;letter-spacing:-.3px;line-height:1.6;
+  }
+  .needfill b{color:#5c3512}
+  .manualwarn{
+    background:#fff4f4;border:1px solid #f0cccc;border-radius:10px;padding:12px 14px;margin:14px 0;
+    font-size:12.5px;color:#8a2d2d;letter-spacing:-.3px;line-height:1.6;display:none;
+  }
+  .manualwarn.on{display:block}
+
+  td.auto{color:#3d434d}
+  td.manual{background:#fffaf4}
+  td.manual input,td.manual select{width:100%;font-size:12px;padding:5px 7px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11.5px;color:#8b93a1;padding:10px 13px 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid #e0e4ea}
+  .sw.a{background:#fff} .sw.m{background:#fffaf4;border-color:#f2d7bf}
+
+  .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px;align-items:center}
+  .btn{
+    border:0;border-radius:9px;font-family:inherit;font-size:13.5px;font-weight:700;
+    padding:10px 16px;cursor:pointer;letter-spacing:-.3px;
+  }
+  .btn.primary{background:var(--nh);color:#fff}
+  .btn.primary:disabled{background:#cfd4db;cursor:default}
+  .btn.ghost{background:#fff;border:1px solid #d5d9e0;color:#41474f}
+  .btn.sm{font-size:11.5px;padding:5px 10px;border-radius:7px}
+  .flash{font-size:12.5px;font-weight:700;color:var(--nh-dark);letter-spacing:-.3px}
+  .flash.bad{color:var(--bad)}
+
+  .pubbar{
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding:14px 18px;background:#f7fbf9;border-top:1px solid #e2efe8;
+  }
+  .kv{font-size:12.5px;color:var(--sub)}
+  .kv b{color:var(--ink);font-variant-numeric:tabular-nums}
+  pre.snap{
+    margin:0;padding:14px 18px;background:#0f1115;color:#c8ccd3;
+    font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.55;
+    max-height:280px;overflow:auto;white-space:pre;
+  }
+  .foot{
+    margin-top:28px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:12px;color:#9aa1ad;line-height:1.7;max-width:840px;
+  }
+  .tagbox{display:flex;flex-wrap:wrap;gap:6px;border:1px solid #d5d9e0;border-radius:8px;padding:7px;background:#fff}
+  .tag{
+    display:inline-flex;align-items:center;gap:5px;background:#eef7f2;color:var(--nh-dark);
+    font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;
+  }
+  .tag button{border:0;background:none;color:#8ab6a1;cursor:pointer;font-size:13px;padding:0;line-height:1}
+  .tagbox input{border:0;outline:none;font-family:inherit;font-size:13px;flex:1;min-width:100px;padding:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+  .fld label{display:block;font-size:12px;font-weight:800;color:#4b5361;margin-bottom:6px}
+  .fld label .hint{font-weight:500;color:#9aa1ad;margin-left:5px}
+  .fld input[type=text]{width:100%}
+  .chrow{
+    display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid #e5e7eb;
+    border-radius:8px;margin-bottom:6px;background:#fff;
+  }
+  .chrow .cn{font-size:13px;font-weight:700;flex:1}
+  .uses{display:flex;flex-direction:column;gap:7px}
+  .use{display:flex;align-items:center;gap:8px;font-size:13px;letter-spacing:-.3px;color:#41474f}
+  .use input{width:15px;height:15px;accent-color:var(--nh)}
+  .use.off{color:#a8aeb8}
+  .use .tagon{font-size:10.5px;background:#dcf5e8;color:var(--nh-dark);padding:2px 7px;border-radius:5px;font-weight:800}
+  .use .tagsoon{font-size:10.5px;background:#eff1f4;color:#8b93a1;padding:2px 7px;border-radius:5px;font-weight:800}
+  .covsum{
+    display:flex;gap:20px;flex-wrap:wrap;background:#f7fbf9;border:1px solid #e2efe8;
+    border-radius:10px;padding:13px 16px;margin:14px 0 4px;font-size:12.5px;color:var(--sub);
+  }
+  .covsum div{display:flex;flex-direction:column;gap:1px}
+  .covsum b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:16px;font-weight:800}
+  .covsum b.big{color:var(--nh-dark)}
+  .cov{font-size:10.5px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+  .cov.miss{background:#fff0dd;color:var(--warn)}
+  .cov.ok{background:#dcf5e8;color:var(--nh-dark)}
+  .cov.pend{background:#eef1f5;color:#5a6480}
+  td.act select{width:100%;font-size:12px;padding:5px 7px;margin-bottom:5px}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand">NH농협금융지주 · 그룹 채널 기준</div>
+    <div class="row1">
+      <h1>크로스 앱 라우터 · 관리 콘솔</h1>
+      <span class="badge" id="verBadge">미발행</span>
+      <a class="openapp" href="./bank-app.html" target="_blank">계열사 앱 열기 ↗</a>
+    </div>
+    <p class="lede">
+      각 앱의 검색은 각 앱이 개선합니다. 이 콘솔은 <b>어느 업무를 어느 채널이 담당하는가</b>만 정의하고,
+      승인된 기준을 스냅샷으로 발행합니다. 계열사는 <b>이미 가진 데이터를 내보내 올리고</b>, 앱은 그 스냅샷을 받아 조회만 합니다.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- 기준 목록 -->
+  <section class="card">
+    <div class="chead">
+      <span class="ct">채널 담당 기준</span>
+      <select id="tenant">
+        <option value="nh-financial">NH농협금융지주</option>
+        <option disabled>다른 그룹사 (임시)</option>
+      </select>
+      <span class="cnote">계열사 담당자가 등록하고 중앙이 승인합니다. 승인된 것만 발행됩니다.</span>
+      <span style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn ghost sm" id="reqAllBtn">일괄 검토 요청</button>
+        <button class="btn ghost sm" id="apprAllBtn">일괄 승인</button>
+      </span>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:17%">기능 · 업무</th>
+            <th style="width:21%">사용자 표현</th>
+            <th style="width:24%">담당 채널 · 역할</th>
+            <th style="width:13%">등록 부서</th>
+            <th style="width:11%">출처</th>
+            <th style="width:8%">상태</th>
+            <th style="width:6%"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+
+    <div class="pubbar">
+      <button class="btn primary" id="pubBtn">승인된 기준 발행</button>
+      <span class="kv">발행 버전 <b id="kvVer">—</b></span>
+      <span class="kv">기능 <b id="kvFn">0</b>건</span>
+      <span class="kv">표현 키 <b id="kvKeys">0</b>개</span>
+      <span class="kv">스냅샷 <b id="kvSize">0</b> B</span>
+      <span class="flash" id="pubFlash"></span>
+    </div>
+  </section>
+
+  <!-- 등록 -->
+  <section class="card">
+    <div class="chead">
+      <span class="ct">기준 등록</span>
+      <span class="cnote">계열사 담당자가 수행합니다</span>
+    </div>
+
+    <div class="tabs">
+      <button class="tab on" data-p="up">데이터 올리기</button>
+      <button class="tab" data-p="log">로그로 후보 찾기</button>
+      <button class="tab" data-p="manual">한 건 직접 입력</button>
+    </div>
+
+    <!-- 업로드 -->
+    <div class="pane on" id="pane-up">
+      <div class="srcnote">
+        계열사는 <b>이미 가진 상품·업무 데이터를 그대로 내보내 올립니다.</b>
+        계열사마다 시스템이 달라 <b>구분자·컬럼명·별칭 표기가 제각각</b>인데, 콘솔이 그 차이를 흡수합니다.
+        회사 데이터에 없는 값은 <b>채널 역할</b>과 <b>다음 행동</b> 두 가지뿐입니다.
+      </div>
+
+      <div class="drop" id="drop">
+        <p>CSV·TSV 파일을 끌어다 놓거나 내용을 붙여넣으세요</p>
+        <div class="actions" style="justify-content:center;margin-top:0">
+          <input type="file" id="file" accept=".csv,.tsv,.txt" style="display:none">
+          <button class="btn ghost" id="pickBtn">파일 선택</button>
+          <select id="sampleSel" style="min-width:280px">
+            <option value="">계열사 샘플 불러오기…</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <select id="delimSel">
+          <option value="auto">구분자 자동 감지</option>
+          <option value="comma">쉼표 ,</option>
+          <option value="tab">탭</option>
+          <option value="pipe">파이프 |</option>
+          <option value="semi">세미콜론 ;</option>
+        </select>
+        <button class="btn primary" id="parseBtn">분석</button>
+        <span class="flash" id="parseFlash"></span>
+      </div>
+
+      <textarea id="csv" rows="6" style="margin-top:4px" placeholder="머리글 한 줄과 데이터 한 줄 이상"></textarea>
+
+      <div id="mapArea" style="display:none">
+        <div class="manualwarn" id="manualWarn">
+          <b>컬럼을 자동으로 알아보지 못했습니다.</b> 머리글이 영문 약어라 이름으로 추정할 수 없습니다.
+          아래에서 어떤 컬럼이 무엇인지 직접 지정해 주세요. 한 번 지정하면 같은 양식은 다음부터 그대로 씁니다.
+        </div>
+
+        <div class="maprow">
+          <div class="mapf"><label>기능 · 업무명 <span class="req">*</span></label><select id="mFunc"></select></div>
+          <div class="mapf"><label>담당 채널 <span class="req">*</span></label><select id="mChannel"></select></div>
+          <div class="mapf"><label>등록 부서</label><select id="mDept"></select></div>
+        </div>
+
+        <div class="mapf" style="margin-top:4px">
+          <label>사용자 표현으로 쓸 컬럼 <span class="req">*</span><span class="hint">여러 개 고를 수 있습니다. 쉼표·세미콜론·파이프로 나뉘어 있으면 자동으로 분리합니다</span></label>
+          <div class="termbox" id="termBox"></div>
+        </div>
+
+        <div class="needfill">
+          <b>회사 데이터에 없어서 담당자가 채워야 하는 값</b> — 아래에서 기본값을 정하고, 행별로 고칠 수 있습니다.
+        </div>
+
+        <div class="fillrow">
+          <div class="mapf">
+            <label>담당 채널의 역할 기본값</label>
+            <select id="dRole"><option>완료</option><option>경유</option><option>안내</option></select>
+          </div>
+          <div class="mapf" style="flex:2">
+            <label>다음 행동 기본값 <span class="hint">비우면 행별로 직접 채워야 합니다</span></label>
+            <input type="text" id="dNext" value="담당 채널에서 해당 업무를 검색해 진행">
+          </div>
+          <div class="mapf" style="flex:0 0 auto">
+            <button class="btn ghost" id="applyDefBtn">기본값 채우기</button>
+          </div>
+        </div>
+
+        <div class="mapf" style="margin-top:16px">
+          <label>이 기준을 쓰는 접점 <span class="hint">승인·발행되면 아래 접점이 같은 기준을 가져다 씁니다</span></label>
+          <div class="uses">
+            <label class="use"><input type="checkbox" checked disabled> 통합검색 <span class="tagon">동작</span></label>
+            <label class="use off"><input type="checkbox" disabled> 고객센터 챗봇 <span class="tagsoon">(임시) 연동 예정</span></label>
+            <label class="use off"><input type="checkbox" disabled> 앱 내 메뉴 안내 <span class="tagsoon">(임시) 연동 예정</span></label>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i class="sw a"></i> 올린 데이터에서 자동</span>
+          <span><i class="sw m"></i> 담당자가 채우는 칸</span>
+        </div>
+
+        <div class="tblwrap" style="margin-top:6px">
+          <table id="preview"><thead></thead><tbody></tbody></table>
+        </div>
+
+        <div class="actions">
+          <button class="btn primary" id="addBtn">등록 요청</button>
+          <span class="flash" id="addFlash"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 로그로 후보 찾기 -->
+    <div class="pane" id="pane-log">
+      <div class="srcnote">
+        여기까지는 계열사가 <b>데이터를 밀어 넣는</b> 방식이었습니다. 반대 방향도 됩니다 —
+        각 앱의 <b>검색 결과 0건 로그</b>를 올리면 라우터가 <b>어떤 표현을 등록해야 하는지 스스로 찾아냅니다.</b>
+        담당자가 무엇을 빠뜨렸는지 기억해낼 필요가 없습니다.
+      </div>
+
+      <div class="drop" id="logDrop">
+        <p>앱에서 내보낸 0건 쿼리 로그를 올리거나 붙여넣으세요</p>
+        <div class="actions" style="justify-content:center;margin-top:0">
+          <input type="file" id="logFile" accept=".csv,.tsv,.txt" style="display:none">
+          <button class="btn ghost" id="logPickBtn">파일 선택</button>
+          <button class="btn ghost" id="logSampleBtn">샘플 로그 불러오기</button>
+        </div>
+      </div>
+
+      <textarea id="logCsv" rows="5" style="margin-top:12px" placeholder="집계일,앱,검색어,검색수,결과수"></textarea>
+
+      <div class="actions">
+        <button class="btn primary" id="logParseBtn">후보 찾기</button>
+        <span class="flash" id="logFlash"></span>
+      </div>
+
+      <div id="logResult" style="display:none">
+        <div class="maprow">
+          <div class="mapf"><label>검색어 컬럼 <span class="req">*</span></label><select id="lQuery"></select></div>
+          <div class="mapf"><label>앱</label><select id="lApp"></select></div>
+          <div class="mapf"><label>검색 횟수</label><select id="lCount"></select></div>
+        </div>
+
+        <div class="covsum" id="covSum"></div>
+
+        <div class="tblwrap" style="margin-top:6px">
+          <table id="cand"><thead></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 직접 입력 -->
+    <div class="pane" id="pane-manual">
+      <div class="grid">
+        <div class="fld"><label>기능 · 업무명</label><input type="text" id="fFunc" value="교통비 환급 카드 신청"></div>
+        <div class="fld"><label>등록 부서</label><input type="text" id="fDept" value="카드사업부"></div>
+      </div>
+      <div class="fld" style="margin-top:14px">
+        <label>사용자 표현 <span class="hint">Enter로 추가</span></label>
+        <div class="tagbox" id="tagbox"><input type="text" id="tagIn" placeholder="입력 후 Enter"></div>
+      </div>
+      <div class="fld" style="margin-top:14px">
+        <label>담당 채널 · 역할</label>
+        <div id="chList"></div>
+      </div>
+      <div class="fld" style="margin-top:14px">
+        <label>다음 행동</label><input type="text" id="fNext" value="카드 목록에서 K-패스카드를 찾아 신청">
+      </div>
+      <div class="actions">
+        <button class="btn primary" id="addManualBtn">등록 요청</button>
+        <span class="flash" id="manualFlash"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 발행 산출물 -->
+  <section class="card">
+    <div class="chead">
+      <span class="ct">발행 산출물</span>
+      <span class="cnote">앱이 실제로 내려받는 파일 — routing-index.json</span>
+      <button class="btn ghost sm" id="resetBtn" style="margin-left:auto">전체 초기화</button>
+    </div>
+    <pre class="snap" id="snapView">아직 발행하지 않았습니다.</pre>
+  </section>
+
+  <div class="foot">
+    이 콘솔은 기획 검증용 <b>목업</b>입니다. 실제 NH농협 서비스가 아니며 NH농협과 무관합니다.
+    실제 서비스에서는 파일 업로드 자리에 계열사 시스템과의 배치 연동 또는 API가 오고,
+    발행 산출물은 오브젝트 스토리지와 CDN을 통해 배포됩니다 — <code>README.md</code> 참고.
+    드롭다운의 샘플은 <code>samples/</code> 폴더 파일과 같은 내용의 사본입니다.
+  </div>
+</main>
+
+<script src="./routing-client.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var CHANNEL_KEY = "routing:published";
+  var CONSOLE_KEY = "routing:console";
+
+  /* 검색 접점이 있는 앱 */
+  var APPS = [
+    { id:"allone", name:"NH올원뱅크" },
+    { id:"kok",    name:"NH콕뱅크" },
+    { id:"smart",  name:"NH스마트뱅킹" },
+    { id:"nhpay",  name:"NH Pay" }
+  ];
+
+  /* 담당 채널로 등록 가능한 접점.
+     alias는 계열사가 파일에 적어 보내는 축약·변형 표기다. */
+  var CHANNELS = [
+    { id:"nhpay",   name:"NH Pay",             alias:["nhpay","nh페이","농협페이","nh카드앱"] },
+    { id:"cardweb", name:"NH농협카드 모바일웹", alias:["농협카드모바일웹","카드모바일웹","카드웹","농협카드웹"] },
+    { id:"allone",  name:"NH올원뱅크",          alias:["올원뱅크","올원","allone"] },
+    { id:"kok",     name:"NH콕뱅크",            alias:["콕뱅크","kok"] },
+    { id:"smart",   name:"NH스마트뱅킹",        alias:["스마트뱅킹","smb","nhsmart"] }
+  ];
+
+  /* samples/ 폴더 파일과 같은 내용의 사본.
+     고칠 때는 두 곳을 함께 고친다. */
+  var SAMPLES = [
+    { label:"카드사업부 · 상품 마스터 (쉼표, 별칭 한 컬럼)",
+      text: [
+        "상품코드,상품명,별칭,담당앱,담당부서,업무구분",
+        'CARD-2041,K-패스카드,"K-패스,케이패스,경기패스카드,교통비 환급 카드",NH Pay,카드사업부,교통비 환급 카드 신청',
+        'CARD-1102,올바른FLEX카드,"올바른플렉스,플렉스카드",NH Pay,카드사업부,신용카드 신청',
+        'CARD-1188,올바른이음카드,"이음카드,올바른이음",NH Pay,카드사업부,신용카드 신청',
+        'CARD-3310,학생증체크카드,"학생증카드,학생 체크카드",NH올원뱅크,카드사업부,체크카드 발급'
+      ].join("\n") },
+
+    { label:"은행 채널부 · 메뉴 트리 (쉼표, 별칭 컬럼 없음)",
+      text: [
+        "MENU_ID,메뉴 경로,메뉴명,서비스 채널,운영 조직",
+        "ALL-0421,이체 > 이체관리,자동이체 해지,NH올원뱅크,은행 채널부",
+        "ALL-0733,내 자산 > 소비관리,카드혜택비교,NH올원뱅크,은행 채널부",
+        "ALL-0735,내 자산 > 소비관리,카드리포트,NH올원뱅크,은행 채널부",
+        "ALL-0912,인증/보안 > 보안매체,보안카드 재발급,NH올원뱅크,은행 채널부"
+      ].join("\n") },
+
+    { label:"상호금융부 · 업무 목록 (파이프 구분, 축약 표기)",
+      text: [
+        "업무ID|업무명|고객 표현|처리 앱|주관부서",
+        "MG-1180|조합원 배당 조회|배당금;출자금 배당;배당 조회|콕뱅크|상호금융부",
+        "MG-1205|출자금 납입|출자금;출자 납입|콕뱅크|상호금융부",
+        "MG-1310|지역농협 계좌 개설|계좌 개설;통장 만들기;농협 계좌|콕뱅크|상호금융부",
+        "MG-1422|농·축협 통장 재발급|통장 재발급;통장 분실|콕뱅크|상호금융부"
+      ].join("\n") },
+
+    { label:"디지털전략부 · 통합 채널 (탭 구분, 영문 컬럼 — 수동 매핑)",
+      text: [
+        "svc_cd\tsvc_nm\tkwd_1\tkwd_2\tch_nm\torg_nm",
+        "SMB-0304\t증명서 발급\t통장사본\t거래내역증명\tNH스마트뱅킹\t디지털전략부",
+        "SMB-0411\t계좌 통합 조회\t전 계좌 조회\t오픈뱅킹 조회\tNH스마트뱅킹\t디지털전략부",
+        "SMB-0522\t보안매체 재발급\tOTP 재발급\t보안카드 발급\tNH스마트뱅킹\t디지털전략부",
+        "SMB-0630\t예금 만기 조회\t만기일 조회\t예금 만기\tNH스마트뱅킹\t디지털전략부"
+      ].join("\n") }
+  ];
+
+  var SEED = [
+    { id:"f-101", func:"자동이체 해지", terms:["자동이체 해지","자동이체 취소"],
+      channels:[{id:"allone",name:"NH올원뱅크",role:"완료"}],
+      next:"이체관리에서 등록된 자동이체를 선택해 해지",
+      dept:"은행 채널부", source:"배치 연동", suppressIn:["allone"], state:"approved" },
+    { id:"f-103", func:"조합원 배당 조회", terms:["배당금","출자금 배당"],
+      channels:[{id:"kok",name:"NH콕뱅크",role:"완료"}],
+      next:"조합원 메뉴에서 배당 내역 조회",
+      dept:"상호금융부", source:"배치 연동", suppressIn:["kok"], state:"approved" }
+  ];
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  var normalize = window.RoutingClient.normalize;
+
+  /* ---------------- 상태 ---------------- */
+  var st = load();
+  var parsed = null;
+  var draftRows = [];
+  var termCols = [];
+
+  function load(){
+    try{
+      var raw = localStorage.getItem(CONSOLE_KEY);
+      if(raw){
+        var o = JSON.parse(raw);
+        if(o && o.rules) return o;
+      }
+    }catch(e){}
+    return { version:0, seq:1, rules: JSON.parse(JSON.stringify(SEED)) };
+  }
+  function save(){ localStorage.setItem(CONSOLE_KEY, JSON.stringify(st)); }
+
+  /* ---------------- 구분자 ---------------- */
+  var DELIM_MAP = { comma:",", tab:"\t", pipe:"|", semi:";" };
+
+  function detectDelim(text){
+    var first = String(text).split(/\r?\n/)[0] || "";
+    var cands = [
+      { d:"\t", n: first.split("\t").length - 1 },
+      { d:"|",  n: first.split("|").length - 1 },
+      { d:";",  n: first.split(";").length - 1 },
+      { d:",",  n: first.split(",").length - 1 }
+    ];
+    cands.sort(function(a,b){ return b.n - a.n; });
+    return cands[0].n > 0 ? cands[0].d : ",";
+  }
+
+  function delimLabel(d){
+    if(d === "\t") return "탭";
+    if(d === "|")  return "파이프";
+    if(d === ";")  return "세미콜론";
+    return "쉼표";
+  }
+
+  /* ---------------- 파싱 ---------------- */
+  function parseCSV(text, delim){
+    var rows = [], row = [], cur = "", q = false, i, c;
+    delim = delim || ",";
+    text = String(text).replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    for(i=0;i<text.length;i++){
+      c = text[i];
+      if(q){
+        if(c === '"'){
+          if(text[i+1] === '"'){ cur += '"'; i++; }
+          else q = false;
+        } else cur += c;
+      } else {
+        if(c === '"') q = true;
+        else if(c === delim){ row.push(cur.trim()); cur = ""; }
+        else if(c === "\n"){ row.push(cur.trim()); rows.push(row); row = []; cur = ""; }
+        else cur += c;
+      }
+    }
+    if(cur.length || row.length){ row.push(cur.trim()); rows.push(row); }
+    return rows.filter(function(r){ return r.some(function(v){ return v !== ""; }); });
+  }
+
+  /* 셀 안의 표현 분리. parseCSV가 따옴표를 이미 벗겨냈으므로
+     필드 구분자와 무관하게 쉼표·세미콜론·파이프로 나눈다. */
+  function splitTerms(v){
+    return String(v == null ? "" : v)
+      .split(/[,;|]/)
+      .map(function(x){ return x.trim(); })
+      .filter(function(x){ return x.length > 0; });
+  }
+
+  /* 컬럼 이름으로 매핑을 추천한다.
+     더 구체적인 단어가 먼저 이기도록 단어를 바깥 루프에 둔다.
+     한국어 이름 체계만 안다 — 영문 약어 머리글은 수동 지정이 필요하다. */
+  function guess(headers, words){
+    var i, j, h;
+    for(j=0;j<words.length;j++){
+      for(i=0;i<headers.length;i++){
+        h = headers[i].replace(/\s/g,"");
+        if(h.indexOf(words[j]) > -1) return i;
+      }
+    }
+    return -1;
+  }
+
+  function guessAll(headers, words){
+    var out = [], i, j, h;
+    for(i=0;i<headers.length;i++){
+      h = headers[i].replace(/\s/g,"");
+      for(j=0;j<words.length;j++){
+        if(h.indexOf(words[j]) > -1){ out.push(i); break; }
+      }
+    }
+    return out;
+  }
+
+  var W_FUNC    = ["업무구분","업무명","업무","기능","카테고리","메뉴명","서비스명","구분"];
+  var W_TERMS   = ["별칭","동의어","검색","표현","키워드","메뉴명","상품명","서비스명","명칭"];
+  var W_CHANNEL = ["담당앱","처리앱","서비스채널","제공채널","채널","앱"];
+  var W_DEPT    = ["담당부서","운영조직","주관부서","부서","조직"];
+
+  function fillSelect(sel, headers, chosen, allowNone){
+    var h = "", i;
+    if(allowNone || chosen < 0) h += '<option value="-1">— 선택하세요 —</option>';
+    for(i=0;i<headers.length;i++){
+      h += '<option value="' + i + '"' + (i === chosen ? " selected" : "") + '>' + esc(headers[i]) + '</option>';
+    }
+    sel.innerHTML = h;
+  }
+
+  function renderTermBox(headers){
+    var h = "", i;
+    for(i=0;i<headers.length;i++){
+      var on = termCols.indexOf(i) !== -1;
+      h += '<label class="' + (on ? "on" : "") + '"><input type="checkbox" data-t="' + i + '"'
+         + (on ? " checked" : "") + '> ' + esc(headers[i]) + '</label>';
+    }
+    $("termBox").innerHTML = h;
+    var boxes = $("termBox").querySelectorAll("input");
+    for(i=0;i<boxes.length;i++){
+      boxes[i].addEventListener("change", function(){
+        var idx = parseInt(this.getAttribute("data-t"), 10), at = termCols.indexOf(idx);
+        if(this.checked && at === -1) termCols.push(idx);
+        if(!this.checked && at !== -1) termCols.splice(at, 1);
+        this.parentNode.classList.toggle("on", this.checked);
+        rebuildDraft();
+      });
+    }
+  }
+
+  function analyze(){
+    var sel = $("delimSel").value;
+    var delim = (sel === "auto") ? detectDelim($("csv").value) : DELIM_MAP[sel];
+    var rows = parseCSV($("csv").value, delim);
+
+    if(rows.length < 2){
+      $("parseFlash").className = "flash bad";
+      $("parseFlash").textContent = "머리글 한 줄과 데이터가 최소 한 줄 필요합니다";
+      return;
+    }
+    parsed = { headers: rows[0], rows: rows.slice(1), delim: delim };
+
+    var gFunc = guess(parsed.headers, W_FUNC);
+    var gCh   = guess(parsed.headers, W_CHANNEL);
+    var gDept = guess(parsed.headers, W_DEPT);
+    termCols  = guessAll(parsed.headers, W_TERMS);
+
+    fillSelect($("mFunc"),    parsed.headers, gFunc, false);
+    fillSelect($("mChannel"), parsed.headers, gCh,   false);
+    fillSelect($("mDept"),    parsed.headers, gDept, true);
+    renderTermBox(parsed.headers);
+
+    var manual = (gFunc < 0 || gCh < 0 || termCols.length === 0);
+    $("manualWarn").classList.toggle("on", manual);
+
+    $("parseFlash").className = "flash";
+    $("parseFlash").textContent = parsed.rows.length + "행 · 컬럼 " + parsed.headers.length
+      + "개 · 구분자 " + delimLabel(delim)
+      + (manual ? " · 자동 인식 실패" : " · 자동 인식됨");
+    $("mapArea").style.display = "";
+    rebuildDraft();
+  }
+
+  function colVal(row, sel){
+    var i = parseInt(sel.value, 10);
+    if(isNaN(i) || i < 0) return "";
+    return row[i] || "";
+  }
+
+  function channelByName(name){
+    var n = String(name).replace(/[\s\-_.·]/g,"").toLowerCase(), i, j, c, cn;
+    if(!n) return null;
+    for(i=0;i<CHANNELS.length;i++){
+      c = CHANNELS[i];
+      cn = c.name.replace(/[\s\-_.·]/g,"").toLowerCase();
+      if(cn === n) return c;
+      for(j=0;j<c.alias.length;j++){ if(c.alias[j] === n) return c; }
+    }
+    for(i=0;i<CHANNELS.length;i++){
+      c = CHANNELS[i];
+      cn = c.name.replace(/[\s\-_.·]/g,"").toLowerCase();
+      if(n.indexOf(cn) > -1 || cn.indexOf(n) > -1) return c;
+      for(j=0;j<c.alias.length;j++){
+        if(n.indexOf(c.alias[j]) > -1 || c.alias[j].indexOf(n) > -1) return c;
+      }
+    }
+    return null;
+  }
+
+  function rebuildDraft(){
+    if(!parsed) return;
+    draftRows = parsed.rows.map(function(r){
+      var terms = [], k;
+      for(k=0;k<termCols.length;k++){
+        splitTerms(r[termCols[k]]).forEach(function(x){
+          if(terms.indexOf(x) === -1) terms.push(x);
+        });
+      }
+      var chName = colVal(r, $("mChannel"));
+      var ch = channelByName(chName);
+      return {
+        func: colVal(r, $("mFunc")),
+        terms: terms,
+        chName: chName,
+        chId: ch ? ch.id : null,
+        role: $("dRole").value,
+        next: "",
+        dept: colVal(r, $("mDept")) || "미지정"
+      };
+    });
+    renderPreview();
+  }
+
+  function renderPreview(){
+    var roles = ["완료","경유","안내"], h = "", i, j, d;
+    h = '<tr><th style="width:17%">기능 · 업무</th><th style="width:26%">사용자 표현</th>'
+      + '<th style="width:16%">담당 채널</th><th style="width:11%">역할</th>'
+      + '<th style="width:22%">다음 행동</th><th style="width:8%">부서</th></tr>';
+    $("preview").querySelector("thead").innerHTML = h;
+
+    h = "";
+    for(i=0;i<draftRows.length;i++){
+      d = draftRows[i];
+      h += '<tr>'
+        + '<td class="auto">' + (d.func ? esc(d.func) : '<span style="color:#b91c1c">미지정</span>') + '</td>'
+        + '<td class="auto" style="color:#5f6672">'
+        +   (d.terms.length ? esc(d.terms.join(", ")) : '<span style="color:#b91c1c">미지정</span>') + '</td>'
+        + '<td class="auto">' + esc(d.chName)
+        +   (d.chName && !d.chId ? ' <span style="color:#b91c1c;font-size:11px">인식 실패</span>' : '')
+        +   (!d.chName ? '<span style="color:#b91c1c">미지정</span>' : '') + '</td>'
+        + '<td class="manual"><select data-r="' + i + '" data-f="role">';
+      for(j=0;j<roles.length;j++){
+        h += '<option' + (roles[j] === d.role ? " selected" : "") + '>' + roles[j] + '</option>';
+      }
+      h += '</select></td>'
+        + '<td class="manual"><input type="text" data-r="' + i + '" data-f="next" value="' + esc(d.next) + '" placeholder="예: 카드 목록에서 찾아 신청"></td>'
+        + '<td class="auto" style="color:#5f6672">' + esc(d.dept) + '</td>'
+        + '</tr>';
+    }
+    $("preview").querySelector("tbody").innerHTML = h;
+
+    var inputs = $("preview").querySelectorAll("[data-r]");
+    for(i=0;i<inputs.length;i++){
+      inputs[i].addEventListener("input", onCell);
+      inputs[i].addEventListener("change", onCell);
+    }
+  }
+
+  function onCell(){
+    var r = parseInt(this.getAttribute("data-r"), 10);
+    draftRows[r][this.getAttribute("data-f")] = this.value;
+  }
+
+  /* ---------------- 목록 ---------------- */
+  function roleCls(r){ return r === "완료" ? "done" : (r === "경유" ? "via" : "info"); }
+  function appName(id){
+    for(var i=0;i<APPS.length;i++){ if(APPS[i].id === id) return APPS[i].name; }
+    return id;
+  }
+
+  function chCell(list, suppressIn){
+    var h = "", i;
+    for(i=0;i<list.length;i++){
+      h += esc(list[i].name) + '<span class="mini ' + roleCls(list[i].role) + '">' + esc(list[i].role) + '</span><br>';
+    }
+    if(suppressIn && suppressIn.length){
+      h += '<div class="supp">미노출: ' + esc(suppressIn.map(appName).join(", ")) + '</div>';
+    }
+    return h;
+  }
+
+  function stateLabel(s){ return s === "approved" ? "승인" : (s === "review" ? "검토 중" : "등록"); }
+
+  function renderTable(){
+    var h = "", i, r;
+    for(i=0;i<st.rules.length;i++){
+      r = st.rules[i];
+      h += '<tr' + (r.state !== "approved" ? ' class="pending"' : '') + '>'
+        + '<td><b>' + esc(r.func) + '</b></td>'
+        + '<td style="color:#5f6672">' + esc(r.terms.join(", ")) + '</td>'
+        + '<td>' + chCell(r.channels, r.suppressIn) + '</td>'
+        + '<td style="color:#5f6672">' + esc(r.dept) + '</td>'
+        + '<td style="color:#8b93a1;font-size:11.5px">' + esc(r.source || "직접 입력") + '</td>'
+        + '<td><span class="st ' + r.state + '">' + stateLabel(r.state) + '</span></td>'
+        + '<td>' + rowAction(r) + '</td>'
+        + '</tr>';
+    }
+    $("tbody").innerHTML = h;
+
+    var bs = $("tbody").querySelectorAll("[data-id]");
+    for(i=0;i<bs.length;i++){
+      bs[i].addEventListener("click", function(){
+        var id = this.getAttribute("data-id"), act = this.getAttribute("data-act"), j;
+        for(j=0;j<st.rules.length;j++){
+          if(st.rules[j].id === id){
+            st.rules[j].state = (act === "req") ? "review" : "approved";
+          }
+        }
+        save(); renderTable();
+      });
+    }
+  }
+
+  function rowAction(r){
+    if(r.state === "draft")  return '<button class="btn ghost sm" data-id="' + r.id + '" data-act="req">검토 요청</button>';
+    if(r.state === "review") return '<button class="btn ghost sm" data-id="' + r.id + '" data-act="appr">승인</button>';
+    return '';
+  }
+
+  function calcSuppress(channels){
+    var out = [], i;
+    for(i=0;i<channels.length;i++){
+      var isApp = APPS.some(function(a){ return a.id === channels[i].id; });
+      if(isApp && channels[i].role === "완료") out.push(channels[i].id);
+    }
+    return out;
+  }
+
+  function addRows(rows, source){
+    var added = 0, skipped = 0, i, d;
+    for(i=0;i<rows.length;i++){
+      d = rows[i];
+      if(!d.func || !d.terms.length || !d.chId || !String(d.next).trim()){ skipped++; continue; }
+      var ch = CHANNELS.filter(function(c){ return c.id === d.chId; })[0];
+      var channels = [{ id:ch.id, name:ch.name, role:d.role }];
+      st.rules.push({
+        id: "f-" + String(200 + st.seq++),
+        func: d.func,
+        terms: d.terms.slice(),
+        channels: channels,
+        next: String(d.next).trim(),
+        dept: d.dept,
+        source: source,
+        suppressIn: calcSuppress(channels),
+        state: "draft"
+      });
+      added++;
+    }
+    save(); renderTable();
+    return { added: added, skipped: skipped };
+  }
+
+  /* ---------------- 발행 ---------------- */
+  function hash(s){
+    var h = 5381, i;
+    for(i=0;i<s.length;i++){ h = ((h << 5) + h + s.charCodeAt(i)) | 0; }
+    return (h >>> 0).toString(16).slice(0,6);
+  }
+
+  function publish(){
+    var approved = st.rules.filter(function(r){ return r.state === "approved"; });
+    var index = {}, functions = {}, i, j, r;
+    for(i=0;i<approved.length;i++){
+      r = approved[i];
+      functions[r.id] = {
+        name: r.func, next: r.next, suppressIn: r.suppressIn.slice(),
+        channels: r.channels.map(function(c){ return { id:c.id, name:c.name, role:c.role }; })
+      };
+      for(j=0;j<r.terms.length;j++){ index[normalize(r.terms[j])] = r.id; }
+    }
+    var snap = {
+      version: st.version + 1,
+      publishedAt: new Date().toISOString(),
+      tenant: $("tenant").value,
+      etag: "",
+      index: index,
+      functions: functions
+    };
+    snap.etag = "v" + snap.version + "-" + hash(JSON.stringify(index) + JSON.stringify(functions));
+    st.version = snap.version;
+    localStorage.setItem(CHANNEL_KEY, JSON.stringify(snap));
+    save();
+    showSnapshot(snap);
+    $("pubFlash").textContent = "v" + snap.version + " 발행됨 · 계열사 앱에서 동기화하면 반영됩니다";
+  }
+
+  function showSnapshot(snap){
+    var txt = JSON.stringify(snap, null, 2);
+    $("snapView").textContent = txt;
+    $("kvVer").textContent = "v" + snap.version;
+    $("kvFn").textContent = Object.keys(snap.functions).length;
+    $("kvKeys").textContent = Object.keys(snap.index).length;
+    $("kvSize").textContent = new TextEncoder().encode(txt).length.toLocaleString();
+    $("verBadge").textContent = "발행 v" + snap.version;
+  }
+
+  /* ---------------- 직접 입력 탭 ---------------- */
+  var mTerms = ["K-패스카드","케이패스","경기패스카드","교통비 환급 카드"];
+  var mChannels = CHANNELS.map(function(c){
+    return { id:c.id, name:c.name, role: (c.id === "nhpay" || c.id === "cardweb") ? "완료" : (c.id === "allone" ? "안내" : "미사용") };
+  });
+
+  function renderTags(){
+    var box = $("tagbox"), i, olds = box.querySelectorAll(".tag");
+    for(i=0;i<olds.length;i++){ olds[i].remove(); }
+    var h = "";
+    for(i=0;i<mTerms.length;i++){
+      h += '<span class="tag">' + esc(mTerms[i]) + '<button data-t="' + i + '">&times;</button></span>';
+    }
+    $("tagIn").insertAdjacentHTML("beforebegin", h);
+    var btns = box.querySelectorAll(".tag button");
+    for(i=0;i<btns.length;i++){
+      btns[i].addEventListener("click", function(){
+        mTerms.splice(parseInt(this.getAttribute("data-t"),10), 1);
+        renderTags();
+      });
+    }
+  }
+
+  function renderManualChannels(){
+    var h = "", i, j, roles = ["완료","경유","안내","미사용"];
+    for(i=0;i<mChannels.length;i++){
+      h += '<div class="chrow"><span class="cn">' + esc(mChannels[i].name) + '</span><select data-c="' + i + '">';
+      for(j=0;j<roles.length;j++){
+        h += '<option' + (roles[j] === mChannels[i].role ? " selected" : "") + '>' + roles[j] + '</option>';
+      }
+      h += '</select></div>';
+    }
+    $("chList").innerHTML = h;
+    var sels = $("chList").querySelectorAll("select");
+    for(i=0;i<sels.length;i++){
+      sels[i].addEventListener("change", function(){
+        mChannels[parseInt(this.getAttribute("data-c"),10)].role = this.value;
+      });
+    }
+  }
+
+  /* ---------------- 이벤트 ---------------- */
+  var tabs = document.querySelectorAll(".tab");
+  for(var t=0;t<tabs.length;t++){
+    tabs[t].addEventListener("click", function(){
+      var k;
+      for(k=0;k<tabs.length;k++){ tabs[k].classList.remove("on"); }
+      this.classList.add("on");
+      var p = this.getAttribute("data-p");
+      $("pane-up").classList.toggle("on", p === "up");
+      $("pane-log").classList.toggle("on", p === "log");
+      $("pane-manual").classList.toggle("on", p === "manual");
+    });
+  }
+
+  (function initSamples(){
+    var h = '<option value="">계열사 샘플 불러오기…</option>', i;
+    for(i=0;i<SAMPLES.length;i++){
+      h += '<option value="' + i + '">' + esc(SAMPLES[i].label) + '</option>';
+    }
+    $("sampleSel").innerHTML = h;
+  })();
+
+  $("sampleSel").addEventListener("change", function(){
+    if(this.value === "") return;
+    $("csv").value = SAMPLES[parseInt(this.value, 10)].text;
+    $("delimSel").value = "auto";
+    analyze();
+  });
+
+  $("pickBtn").addEventListener("click", function(){ $("file").click(); });
+  $("file").addEventListener("change", function(){
+    var f = this.files[0];
+    if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){ $("csv").value = rd.result; $("delimSel").value = "auto"; analyze(); };
+    rd.readAsText(f, "utf-8");
+  });
+
+  var drop = $("drop");
+  ["dragenter","dragover"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+  });
+  drop.addEventListener("drop", function(e){
+    var f = e.dataTransfer.files[0];
+    if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){ $("csv").value = rd.result; $("delimSel").value = "auto"; analyze(); };
+    rd.readAsText(f, "utf-8");
+  });
+
+  $("parseBtn").addEventListener("click", analyze);
+  $("delimSel").addEventListener("change", function(){ if(parsed) analyze(); });
+  ["mFunc","mChannel","mDept"].forEach(function(id){
+    $(id).addEventListener("change", rebuildDraft);
+  });
+  $("applyDefBtn").addEventListener("click", function(){
+    var i;
+    for(i=0;i<draftRows.length;i++){
+      draftRows[i].role = $("dRole").value;
+      if($("dNext").value.trim()) draftRows[i].next = $("dNext").value.trim();
+    }
+    renderPreview();
+  });
+
+  $("addBtn").addEventListener("click", function(){
+    var r = addRows(draftRows, "파일 업로드");
+    $("addFlash").className = "flash" + (r.added ? "" : " bad");
+    $("addFlash").textContent = r.added + "건 등록됨"
+      + (r.skipped ? " · " + r.skipped + "건 건너뜀 (다음 행동이 비었거나 컬럼 지정이 덜 됨)" : "");
+  });
+
+  $("addManualBtn").addEventListener("click", function(){
+    var used = mChannels.filter(function(c){ return c.role !== "미사용"; });
+    if(!used.length || !mTerms.length || !$("fNext").value.trim()){
+      $("manualFlash").className = "flash bad";
+      $("manualFlash").textContent = "표현·담당 채널·다음 행동이 모두 필요합니다";
+      return;
+    }
+    st.rules.push({
+      id: "f-" + String(200 + st.seq++),
+      func: $("fFunc").value.trim() || "이름 없는 업무",
+      terms: mTerms.slice(),
+      channels: used.map(function(c){ return { id:c.id, name:c.name, role:c.role }; }),
+      next: $("fNext").value.trim(),
+      dept: $("fDept").value.trim() || "미지정",
+      source: "직접 입력",
+      suppressIn: calcSuppress(used),
+      state: "draft"
+    });
+    save(); renderTable();
+    $("manualFlash").className = "flash";
+    $("manualFlash").textContent = "1건 등록됨";
+  });
+
+  $("tagIn").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+      e.preventDefault();
+      var v = this.value.trim();
+      if(v && mTerms.indexOf(v) === -1){ mTerms.push(v); this.value = ""; renderTags(); }
+    }
+  });
+
+  $("reqAllBtn").addEventListener("click", function(){
+    var n = 0, i;
+    for(i=0;i<st.rules.length;i++){ if(st.rules[i].state === "draft"){ st.rules[i].state = "review"; n++; } }
+    save(); renderTable();
+    $("pubFlash").textContent = n + "건 검토 요청됨";
+  });
+  $("apprAllBtn").addEventListener("click", function(){
+    var n = 0, i;
+    for(i=0;i<st.rules.length;i++){ if(st.rules[i].state === "review"){ st.rules[i].state = "approved"; n++; } }
+    save(); renderTable();
+    $("pubFlash").textContent = n + "건 승인됨 — 이제 발행할 수 있습니다";
+  });
+
+  $("pubBtn").addEventListener("click", publish);
+
+  $("resetBtn").addEventListener("click", function(){
+    if(!confirm("콘솔 데이터와 발행된 스냅샷을 모두 지웁니다. 계속할까요?")) return;
+    localStorage.removeItem(CONSOLE_KEY);
+    localStorage.removeItem(CHANNEL_KEY);
+    localStorage.removeItem(window.RoutingClient.KEYS.SNAPSHOT);
+    localStorage.removeItem(window.RoutingClient.KEYS.ETAG);
+    localStorage.removeItem(window.RoutingClient.KEYS.SYNCED);
+    location.reload();
+  });
+
+  /* =========================================================
+     로그로 후보 찾기
+     0건 쿼리에서 "등록해야 할 표현"을 역으로 뽑는다.
+     계열사가 밀어 넣는 방향(업로드)의 반대 방향이다.
+     ========================================================= */
+
+  var SAMPLE_LOG = [
+    "집계일,앱,검색어,검색수,결과수",
+    "2026-08-17,NH올원뱅크,케이패스카드,412,0",
+    "2026-08-17,NH올원뱅크,경기패스,288,0",
+    "2026-08-17,NH콕뱅크,k패스,196,0",
+    "2026-08-17,NH스마트뱅킹,교통카드 신청,151,0",
+    "2026-08-17,NH올원뱅크,올바른이음,143,0",
+    "2026-08-17,NH콕뱅크,출자금 배당금,97,0",
+    "2026-08-17,NH스마트뱅킹,통장사본 발급,88,0",
+    "2026-08-17,NH올원뱅크,자동이체 끊기,64,0"
+  ].join("\n");
+
+  var W_QUERY = ["검색어","질의","쿼리","키워드"];
+  var W_APP   = ["앱","채널"];
+  var W_COUNT = ["검색수","검색횟수","횟수","건수","조회수"];
+
+  var logParsed = null;
+  var cands = [];
+
+  /* 등록된 모든 표현 → 규칙 */
+  function termIndex(){
+    var m = {}, i, j, r;
+    for(i=0;i<st.rules.length;i++){
+      r = st.rules[i];
+      for(j=0;j<r.terms.length;j++){ m[normalize(r.terms[j])] = r; }
+    }
+    return m;
+  }
+
+  /* 아주 단순한 유사도. 데모용이며 검색 엔진 수준의 매칭이 아니다. */
+  function sim(a, b){
+    if(!a || !b) return 0;
+    if(a === b) return 1;
+    if(a.indexOf(b) > -1 || b.indexOf(a) > -1) return 0.8;
+    /* 앞부분이 같으면 같은 업무일 가능성이 높다 — "자동이체 끊기" 대 "자동이체 해지" */
+    var p = 0;
+    while(p < a.length && p < b.length && a[p] === b[p]) p++;
+    var prefix = p / Math.max(a.length, b.length);
+    var seen = {}, total = 0, common = 0, i, k;
+    for(i=0;i<a.length;i++){ if(!seen[a[i]]){ seen[a[i]] = 1; total++; } }
+    for(k in seen){ if(b.indexOf(k) > -1) common++; }
+    var chars = total ? (common / total) * 0.6 : 0;
+    return Math.max(prefix * 0.9, chars);
+  }
+
+  function bestRule(q){
+    var key = normalize(q), best = null, bestS = 0, i, j, s;
+    for(i=0;i<st.rules.length;i++){
+      for(j=0;j<st.rules[i].terms.length;j++){
+        s = sim(key, normalize(st.rules[i].terms[j]));
+        if(s > bestS){ bestS = s; best = st.rules[i]; }
+      }
+    }
+    return (best && bestS >= 0.5) ? { rule: best, score: bestS } : null;
+  }
+
+  function analyzeLog(){
+    var delim = detectDelim($("logCsv").value);
+    var rows = parseCSV($("logCsv").value, delim);
+    if(rows.length < 2){
+      $("logFlash").className = "flash bad";
+      $("logFlash").textContent = "머리글 한 줄과 데이터가 최소 한 줄 필요합니다";
+      return;
+    }
+    logParsed = { headers: rows[0], rows: rows.slice(1) };
+
+    fillSelect($("lQuery"), logParsed.headers, guess(logParsed.headers, W_QUERY), false);
+    fillSelect($("lApp"),   logParsed.headers, guess(logParsed.headers, W_APP),   true);
+    fillSelect($("lCount"), logParsed.headers, guess(logParsed.headers, W_COUNT), true);
+
+    $("logFlash").className = "flash";
+    $("logFlash").textContent = logParsed.rows.length + "개 쿼리 분석";
+    $("logResult").style.display = "";
+    buildCands();
+  }
+
+  function buildCands(){
+    if(!logParsed) return;
+    var iQ = parseInt($("lQuery").value, 10);
+    var iA = parseInt($("lApp").value, 10);
+    var iC = parseInt($("lCount").value, 10);
+    var idx = termIndex();
+
+    cands = logParsed.rows.map(function(r){
+      var q = (iQ >= 0 ? r[iQ] : "") || "";
+      var hit = idx[normalize(q)] || null;
+      var sug = hit ? null : bestRule(q);
+      return {
+        q: q,
+        app: iA >= 0 ? (r[iA] || "") : "",
+        count: iC >= 0 ? (parseInt(r[iC], 10) || 0) : 0,
+        rule: hit,
+        sug: sug,
+        target: hit ? null : (sug ? sug.rule.id : "")
+      };
+    }).filter(function(c){ return c.q; });
+
+    cands.sort(function(a, b){ return b.count - a.count; });
+    renderCands();
+  }
+
+  function renderCands(){
+    var total = 0, miss = 0, missCount = 0, i, j, c;
+    for(i=0;i<cands.length;i++){
+      total += cands[i].count;
+      if(!cands[i].rule){ miss++; missCount += cands[i].count; }
+    }
+    var pct = total ? Math.round(missCount / total * 100) : 0;
+
+    $("covSum").innerHTML =
+        '<div><span>0건 쿼리</span><b>' + cands.length + '건</b></div>'
+      + '<div><span>총 검색</span><b>' + total.toLocaleString() + '회</b></div>'
+      + '<div><span>미등록 표현</span><b class="big">' + miss + '건</b></div>'
+      + '<div><span>미등록이 차지하는 검색 비중</span><b class="big">' + pct + '%</b></div>'
+      + '<div><span style="max-width:250px;line-height:1.5">이 ' + miss
+      + '건만 등록하면 0건 검색의 ' + pct + '%가 담당 채널 안내를 받습니다</span></div>';
+
+    var h = '<tr><th style="width:20%">검색어</th><th style="width:14%">앱</th>'
+          + '<th style="width:10%">검색수</th><th style="width:22%">상태</th>'
+          + '<th style="width:34%">조치</th></tr>';
+    $("cand").querySelector("thead").innerHTML = h;
+
+    h = "";
+    for(i=0;i<cands.length;i++){
+      c = cands[i];
+      h += '<tr><td><b>' + esc(c.q) + '</b></td>'
+        +  '<td style="color:#5f6672">' + esc(c.app) + '</td>'
+        +  '<td style="font-variant-numeric:tabular-nums">' + c.count.toLocaleString() + '</td>';
+
+      if(c.rule){
+        var pend = c.rule.state !== "approved";
+        h += '<td><span class="cov ' + (pend ? "pend" : "ok") + '">'
+          +  (pend ? "등록됨 · 미승인" : "이미 등록됨") + '</span>'
+          +  '<div style="color:#8b93a1;font-size:11px;margin-top:3px">' + esc(c.rule.func) + '</div></td>'
+          +  '<td style="color:#8b93a1;font-size:11.5px;line-height:1.5">'
+          +  (pend ? "승인하고 발행하면 해결됩니다."
+                  : "기준에는 있는데 0건이 나왔습니다. 이 앱이 아직 스냅샷을 받지 않았을 수 있습니다.")
+          +  '</td>';
+      } else {
+        h += '<td><span class="cov miss">미등록</span>'
+          +  (c.sug ? '<div style="color:#8b93a1;font-size:11px;margin-top:3px">추천 · '
+                      + esc(c.sug.rule.func) + '</div>' : '')
+          +  '</td><td class="act"><select data-i="' + i + '">'
+          +  '<option value="">— 붙일 기능 선택 —</option>';
+        for(j=0;j<st.rules.length;j++){
+          h += '<option value="' + st.rules[j].id + '"'
+            +  (st.rules[j].id === c.target ? " selected" : "") + '>'
+            +  esc(st.rules[j].func) + '</option>';
+        }
+        h += '</select><button class="btn ghost sm" data-add="' + i + '">표현 추가</button></td>';
+      }
+      h += '</tr>';
+    }
+    $("cand").querySelector("tbody").innerHTML = h;
+
+    var sels = $("cand").querySelectorAll("select[data-i]");
+    for(i=0;i<sels.length;i++){
+      sels[i].addEventListener("change", function(){
+        cands[parseInt(this.getAttribute("data-i"), 10)].target = this.value;
+      });
+    }
+    var btns = $("cand").querySelectorAll("[data-add]");
+    for(i=0;i<btns.length;i++){
+      btns[i].addEventListener("click", function(){
+        addTermFromLog(parseInt(this.getAttribute("data-add"), 10));
+      });
+    }
+  }
+
+  function addTermFromLog(i){
+    var c = cands[i], j, r = null;
+    if(!c || !c.target){
+      $("logFlash").className = "flash bad";
+      $("logFlash").textContent = "붙일 기능을 먼저 고르세요";
+      return;
+    }
+    for(j=0;j<st.rules.length;j++){ if(st.rules[j].id === c.target) r = st.rules[j]; }
+    if(!r) return;
+
+    if(r.terms.indexOf(c.q) === -1) r.terms.push(c.q);
+    /* 승인된 기준을 고쳤으면 다시 승인을 받아야 한다 */
+    var reapprove = (r.state === "approved");
+    if(reapprove) r.state = "review";
+
+    save();
+    renderTable();
+    buildCands();
+    $("logFlash").className = "flash";
+    $("logFlash").textContent = '"' + c.q + '" 를 ' + r.func + '에 추가함'
+      + (reapprove ? " · 재승인 필요" : "");
+  }
+
+  $("logSampleBtn").addEventListener("click", function(){
+    $("logCsv").value = SAMPLE_LOG;
+    analyzeLog();
+  });
+  $("logPickBtn").addEventListener("click", function(){ $("logFile").click(); });
+  $("logFile").addEventListener("change", function(){
+    var f = this.files[0];
+    if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){ $("logCsv").value = rd.result; analyzeLog(); };
+    rd.readAsText(f, "utf-8");
+  });
+  var logDrop = $("logDrop");
+  ["dragenter","dragover"].forEach(function(ev){
+    logDrop.addEventListener(ev, function(e){ e.preventDefault(); logDrop.classList.add("over"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    logDrop.addEventListener(ev, function(e){ e.preventDefault(); logDrop.classList.remove("over"); });
+  });
+  logDrop.addEventListener("drop", function(e){
+    var f = e.dataTransfer.files[0];
+    if(!f) return;
+    var rd = new FileReader();
+    rd.onload = function(){ $("logCsv").value = rd.result; analyzeLog(); };
+    rd.readAsText(f, "utf-8");
+  });
+  $("logParseBtn").addEventListener("click", analyzeLog);
+  ["lQuery","lApp","lCount"].forEach(function(id){
+    $(id).addEventListener("change", buildCands);
+  });
+
+  /* 테스트에서 쓰는 내부 함수 */
+  window.__router = {
+    parseCSV: parseCSV, detectDelim: detectDelim, splitTerms: splitTerms,
+    guess: guess, guessAll: guessAll, channelByName: channelByName,
+    W_FUNC: W_FUNC, W_TERMS: W_TERMS, W_CHANNEL: W_CHANNEL, W_DEPT: W_DEPT,
+    SAMPLES: SAMPLES, SAMPLE_LOG: SAMPLE_LOG,
+    sim: sim, bestRule: bestRule, termIndex: termIndex,
+    W_QUERY: W_QUERY, W_APP: W_APP, W_COUNT: W_COUNT,
+    rules: function(){ return st.rules; }
+  };
+
+  /* ---------------- 초기화 ---------------- */
+  renderTable();
+  renderTags();
+  renderManualChannels();
+  try{
+    var raw = localStorage.getItem(CHANNEL_KEY);
+    if(raw) showSnapshot(JSON.parse(raw));
+  }catch(e){}
+})();
+</script>
+</body>
+</html>
