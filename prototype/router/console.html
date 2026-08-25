@@ -231,6 +231,7 @@
 
     <div class="pubbar">
       <button class="btn primary" id="pubBtn">승인된 기준 발행</button>
+      <span class="kv" id="kvPend">승인 대기 <b>0</b>건</span>
       <span class="kv">발행 버전 <b id="kvVer">—</b></span>
       <span class="kv">기능 <b id="kvFn">0</b>건</span>
       <span class="kv">표현 키 <b id="kvKeys">0</b>개</span>
@@ -418,6 +419,36 @@
     <pre class="snap" id="snapView">아직 발행하지 않았습니다.</pre>
   </section>
 
+  <!-- 발행 이력 -->
+  <section class="card">
+    <div class="chead">
+      <span class="ct">발행 이력</span>
+      <span class="cnote">잘못 나간 발행을 이전 내용으로 되돌립니다 — 최근 10건까지 보관</span>
+      <button class="btn ghost sm" id="histClearBtn" style="margin-left:auto">이력 비우기</button>
+    </div>
+    <div class="tblwrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:9%">버전</th>
+            <th style="width:22%">발행 시각</th>
+            <th style="width:10%">기능</th>
+            <th style="width:12%">표현 키</th>
+            <th style="width:12%">크기</th>
+            <th style="width:20%">etag</th>
+            <th style="width:15%"></th>
+          </tr>
+        </thead>
+        <tbody id="histBody"></tbody>
+      </table>
+    </div>
+    <div class="cnote" style="padding:10px 14px">
+      되돌리기는 <b>발행 결과만</b> 되돌립니다. 위 등록 목록의 승인 상태는 그대로 남습니다 —
+      실제 서비스에서도 배포를 되돌리는 것과 원본 데이터를 되돌리는 것은 별개입니다.
+      되돌리면 그 내용이 <b>새 버전으로 다시 나갑니다</b>. 버전 번호는 되감기지 않습니다.
+    </div>
+  </section>
+
   <div class="foot">
     이 콘솔은 기획 검증용 <b>목업</b>입니다. 실제 NH농협 서비스가 아니며 NH농협과 무관합니다.
     실제 서비스에서는 파일 업로드 자리에 계열사 시스템과의 배치 연동 또는 API가 오고,
@@ -504,7 +535,13 @@
   ];
 
   var $ = function(id){ return document.getElementById(id); };
-  function esc(s){ return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  /* & < > 뿐 아니라 따옴표까지 바꾼다.
+     따옴표를 두면 value="..." 같은 속성 안에서 값이 속성을 빠져나갈 수 있다. */
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
   var normalize = window.RoutingClient.normalize;
 
   /* ---------------- 상태 ---------------- */
@@ -796,6 +833,7 @@
         + '</tr>';
     }
     $("tbody").innerHTML = h;
+    renderPending();
 
     var bs = $("tbody").querySelectorAll("[data-id]");
     for(i=0;i<bs.length;i++){
@@ -857,9 +895,64 @@
     return (h >>> 0).toString(16).slice(0,6);
   }
 
+  /* 승인 대기 건수를 발행 바에 계속 보여준다 — 발행 직전에 눈에 들어오게 한다 */
+  function renderPending(){
+    var pend = st.rules.filter(function(r){ return r.state !== "approved"; }).length;
+    $("kvPend").innerHTML = "승인 대기 <b" + (pend ? " style=\"color:var(--bad)\"" : "") + ">" + pend + "</b>건";
+  }
+
+  /* 이번 발행에서 빠지는 기준을 찾는다.
+     승인된 기준을 고치면 상태가 검토 중으로 돌아가므로, 재승인 없이 발행하면
+     지금까지 되던 안내가 계열사 앱에서 조용히 사라진다. 그걸 미리 알린다. */
+  function droppedFromLast(approved){
+    var raw = localStorage.getItem(CHANNEL_KEY), out = [], prev, keep = {}, k;
+    if(!raw) return out;
+    try { prev = JSON.parse(raw); } catch(e){ return out; }
+    for(k=0;k<approved.length;k++){ keep[approved[k].id] = 1; }
+    var ids = Object.keys(prev.functions || {});
+    for(k=0;k<ids.length;k++){
+      if(!keep[ids[k]]) out.push(prev.functions[ids[k]].name);
+    }
+    return out;
+  }
+
+  function lastPublished(){
+    var raw = localStorage.getItem(CHANNEL_KEY);
+    if(!raw) return null;
+    try { return JSON.parse(raw); } catch(e){ return null; }
+  }
+
+  /* 발행할 때 etag 에 넣어둔 내용 해시를 꺼낸다. 형식은 v{버전}-{해시}다.
+     옛 형식이거나 읽을 수 없으면 내용에서 다시 계산한다. */
+  function lastBodyHash(snap){
+    var e = String((snap && snap.etag) || ""), at = e.indexOf("-");
+    if(at !== -1) return e.slice(at + 1);
+    return hash(JSON.stringify((snap && snap.index) || {}) + JSON.stringify((snap && snap.functions) || {}));
+  }
+
   function publish(){
     var approved = st.rules.filter(function(r){ return r.state === "approved"; });
     var index = {}, functions = {}, i, j, r;
+
+    /* 관문 1 — 승인된 것이 하나도 없으면 발행하지 않는다.
+       빈 기준을 내보내면 앱은 200 OK를 받고 성공한 것처럼 보이지만 아무 안내도 뜨지 않는다. */
+    if(!approved.length){
+      $("pubFlash").className = "flash bad";
+      $("pubFlash").textContent = "승인 0건 — 발행하지 않았습니다. 먼저 검토 요청 → 승인을 하세요";
+      alert(["승인된 기준이 0건입니다.", "", "지금 발행하면 빈 기준이 나가서, 계열사 앱은 동기화에 성공하고도 아무 안내를 띄우지 못합니다.", "", "[일괄 검토 요청] → [일괄 승인]을 먼저 누르세요."].join(String.fromCharCode(10)));
+      renderPending();
+      return;
+    }
+
+    /* 관문 2 — 지금까지 발행돼 있던 기준이 이번에 빠지면 먼저 알린다. */
+    var dropped = droppedFromLast(approved);
+    if(dropped.length){
+      if(!confirm(["이번 발행에서 아래 기준이 빠집니다.", "계열사 앱에서 지금까지 되던 안내가 사라집니다.", "", "· " + dropped.join(String.fromCharCode(10) + "· "), "", "승인 상태를 확인하지 않고 계속할까요?"].join(String.fromCharCode(10)))){
+        $("pubFlash").className = "flash bad";
+        $("pubFlash").textContent = "발행을 멈췄습니다 — 빠지는 기준 " + dropped.length + "건을 승인하세요";
+        return;
+      }
+    }
     for(i=0;i<approved.length;i++){
       r = approved[i];
       functions[r.id] = {
@@ -868,6 +961,18 @@
       };
       for(j=0;j<r.terms.length;j++){ index[normalize(r.terms[j])] = r.id; }
     }
+    /* 관문 3 — 내용이 지난 발행과 같으면 발행하지 않는다.
+       버전과 etag가 올라가면 앱은 똑같은 내용을 200으로 다시 내려받는다.
+       바뀐 게 없을 때 304로 끝나는 것이 이 구조의 전제이므로, 내용 해시로 판별한다. */
+    var body = hash(JSON.stringify(index) + JSON.stringify(functions));
+    var last = lastPublished();
+    if(last && lastBodyHash(last) === body){
+      $("pubFlash").className = "flash bad";
+      $("pubFlash").textContent = "바뀐 내용이 없어 발행하지 않았습니다 — v" + last.version + " 그대로입니다";
+      renderPending();
+      return;
+    }
+
     var snap = {
       version: st.version + 1,
       publishedAt: new Date().toISOString(),
@@ -876,12 +981,24 @@
       index: index,
       functions: functions
     };
-    snap.etag = "v" + snap.version + "-" + hash(JSON.stringify(index) + JSON.stringify(functions));
+    snap.etag = "v" + snap.version + "-" + body;
+
+    var stillPending = st.rules.length - approved.length;
+    emit(snap, "v" + snap.version + " 발행됨 · 계열사 앱에서 동기화하면 반영됩니다"
+      + (stillPending ? " (승인 대기 " + stillPending + "건은 포함되지 않았습니다)" : ""));
+  }
+
+  /* 스냅샷을 실제로 내보내는 한 곳. 발행과 되돌리기가 모두 여기를 지난다. */
+  function emit(snap, note){
     st.version = snap.version;
     localStorage.setItem(CHANNEL_KEY, JSON.stringify(snap));
+    pushHistory(snap);
     save();
     showSnapshot(snap);
-    $("pubFlash").textContent = "v" + snap.version + " 발행됨 · 계열사 앱에서 동기화하면 반영됩니다";
+    renderHistory();
+    renderPending();
+    $("pubFlash").className = "flash";
+    $("pubFlash").textContent = note;
   }
 
   function showSnapshot(snap){
@@ -892,6 +1009,125 @@
     $("kvKeys").textContent = Object.keys(snap.index).length;
     $("kvSize").textContent = new TextEncoder().encode(txt).length.toLocaleString();
     $("verBadge").textContent = "발행 v" + snap.version;
+  }
+
+  /* ---------------- 발행 이력 ----------------
+     잘못 나간 발행을 이전 내용으로 되돌린다.
+     브라우저 저장소를 쓰므로 무한히 쌓지 않고 최근 것만 남긴다. */
+  var HISTORY_KEY = "routing:history";
+  var HISTORY_MAX = 10;
+
+  function loadHistory(){
+    var raw = localStorage.getItem(HISTORY_KEY);
+    if(!raw) return [];
+    try {
+      var h = JSON.parse(raw);
+      return Object.prototype.toString.call(h) === "[object Array]" ? h : [];
+    } catch(e){ return []; }
+  }
+
+  /* 최신이 앞이다. 같은 버전이 이미 있으면 덮어쓰지 않고 그대로 둔다. */
+  function pushHistory(snap){
+    var h = loadHistory(), i;
+    for(i=0;i<h.length;i++){ if(h[i].version === snap.version) return; }
+    h.unshift(snap);
+    if(h.length > HISTORY_MAX) h = h.slice(0, HISTORY_MAX);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(h));
+  }
+
+  /* 이력만 비운다. 지금 배포돼 있는 버전 한 줄은 남긴다 —
+     목록은 비었는데 앱에는 뭔가 나가 있는 상태가 더 헷갈리기 때문이다.
+     현재 배포본과 등록 목록은 건드리지 않으므로 되돌릴 대상만 사라진다. */
+  function clearHistory(current){
+    if(current) localStorage.setItem(HISTORY_KEY, JSON.stringify([current]));
+    else localStorage.removeItem(HISTORY_KEY);
+    return loadHistory();
+  }
+
+  function snapSize(snap){ return new TextEncoder().encode(JSON.stringify(snap, null, 2)).length; }
+
+  function whenText(iso){
+    var d = new Date(iso);
+    if(isNaN(d.getTime())) return "—";
+    function p(n){ return (n < 10 ? "0" : "") + n; }
+    return d.getFullYear() + "-" + p(d.getMonth()+1) + "-" + p(d.getDate())
+      + " " + p(d.getHours()) + ":" + p(d.getMinutes()) + ":" + p(d.getSeconds());
+  }
+
+  function renderHistory(){
+    var h = loadHistory(), cur = lastPublished(), curVer = cur ? cur.version : null;
+    var out = "", i, s;
+    if(!h.length){
+      $("histBody").innerHTML = '<tr><td colspan="7" style="color:#9aa1ad">아직 발행 이력이 없습니다.</td></tr>';
+      return;
+    }
+    for(i=0;i<h.length;i++){
+      s = h[i];
+      var isCur = (s.version === curVer);
+      out += '<tr' + (isCur ? '' : ' class="pending"') + '>'
+        + '<td><b>v' + s.version + '</b>' + (isCur ? ' <span class="st approved">현재</span>' : '') + '</td>'
+        + '<td style="color:#5f6672">' + esc(whenText(s.publishedAt)) + '</td>'
+        + '<td>' + Object.keys(s.functions || {}).length + '건</td>'
+        + '<td>' + Object.keys(s.index || {}).length + '개</td>'
+        + '<td style="color:#5f6672">' + snapSize(s).toLocaleString() + ' B</td>'
+        + '<td style="color:#8b93a1;font-size:11.5px">' + esc(s.etag || "—") + '</td>'
+        + '<td>' + (isCur ? '' : '<button class="btn ghost sm" data-ver="' + s.version + '">이 내용으로 되돌리기</button>') + '</td>'
+        + '</tr>';
+    }
+    $("histBody").innerHTML = out;
+
+    var bs = $("histBody").querySelectorAll("[data-ver]");
+    for(i=0;i<bs.length;i++){
+      bs[i].addEventListener("click", function(){
+        rollback(parseInt(this.getAttribute("data-ver"), 10));
+      });
+    }
+  }
+
+  /* 되돌리기는 버전을 되감지 않는다. 그 내용을 새 버전으로 다시 내보낸다.
+     실제 배포도 이렇게 한다 — 과거 번호를 재사용하면 무엇이 나가 있는지 알 수 없게 된다. */
+  function rollback(version){
+    var h = loadHistory(), target = null, i;
+    for(i=0;i<h.length;i++){ if(h[i].version === version) target = h[i]; }
+    if(!target){
+      $("pubFlash").className = "flash bad";
+      $("pubFlash").textContent = "v" + version + " 을 이력에서 찾지 못했습니다";
+      return;
+    }
+
+    var cur = lastPublished();
+    var body = hash(JSON.stringify(target.index || {}) + JSON.stringify(target.functions || {}));
+    if(cur && lastBodyHash(cur) === body){
+      $("pubFlash").className = "flash bad";
+      $("pubFlash").textContent = "지금 나가 있는 내용과 같아 되돌리지 않았습니다";
+      return;
+    }
+
+    var lost = [], keep = Object.keys(target.functions || {}), k, curFns = (cur && cur.functions) || {};
+    var keepMap = {};
+    for(k=0;k<keep.length;k++){ keepMap[keep[k]] = 1; }
+    var curIds = Object.keys(curFns);
+    for(k=0;k<curIds.length;k++){ if(!keepMap[curIds[k]]) lost.push(curFns[curIds[k]].name); }
+
+    var msg = ["v" + version + " 의 내용으로 되돌립니다.", ""];
+    if(lost.length){
+      msg.push("지금 나가 있는 기준 중 아래가 빠집니다.");
+      msg.push("· " + lost.join(String.fromCharCode(10) + "· "));
+      msg.push("");
+    }
+    msg.push("되돌린 내용은 새 버전 v" + (st.version + 1) + " 로 다시 나갑니다. 계속할까요?");
+    if(!confirm(msg.join(String.fromCharCode(10)))) return;
+
+    var snap = {
+      version: st.version + 1,
+      publishedAt: new Date().toISOString(),
+      tenant: target.tenant,
+      etag: "",
+      index: target.index,
+      functions: target.functions
+    };
+    snap.etag = "v" + snap.version + "-" + body;
+    emit(snap, "v" + version + " 의 내용을 v" + snap.version + " 으로 되돌렸습니다 · 앱에서 동기화하면 반영됩니다");
   }
 
   /* ---------------- 직접 입력 탭 ---------------- */
@@ -1055,10 +1291,30 @@
 
   $("pubBtn").addEventListener("click", publish);
 
+  $("histClearBtn").addEventListener("click", function(){
+    var cur = lastPublished(), h = loadHistory();
+    var removable = h.filter(function(s){ return !cur || s.version !== cur.version; }).length;
+    if(!removable){
+      $("pubFlash").className = "flash";
+      $("pubFlash").textContent = "비울 이력이 없습니다";
+      return;
+    }
+    var msg = ["되돌릴 수 있는 이전 발행 " + removable + "건을 지웁니다.", ""];
+    if(cur) msg.push("지금 배포된 v" + cur.version + " 한 줄은 남습니다.");
+    msg.push("등록 목록과 앱에 나가 있는 내용은 그대로입니다.", "", "계속할까요?");
+    if(!confirm(msg.join(String.fromCharCode(10)))) return;
+
+    clearHistory(cur);
+    renderHistory();
+    $("pubFlash").className = "flash";
+    $("pubFlash").textContent = "이전 발행 " + removable + "건을 지웠습니다 — 그만큼 되돌릴 수 없게 됩니다";
+  });
+
   $("resetBtn").addEventListener("click", function(){
-    if(!confirm("콘솔 데이터와 발행된 스냅샷을 모두 지웁니다. 계속할까요?")) return;
+    if(!confirm("콘솔 데이터와 발행된 스냅샷, 발행 이력을 모두 지웁니다. 계속할까요?")) return;
     localStorage.removeItem(CONSOLE_KEY);
     localStorage.removeItem(CHANNEL_KEY);
+    localStorage.removeItem(HISTORY_KEY);
     localStorage.removeItem(window.RoutingClient.KEYS.SNAPSHOT);
     localStorage.removeItem(window.RoutingClient.KEYS.ETAG);
     localStorage.removeItem(window.RoutingClient.KEYS.SYNCED);
@@ -1313,6 +1569,7 @@
     var raw = localStorage.getItem(CHANNEL_KEY);
     if(raw) showSnapshot(JSON.parse(raw));
   }catch(e){}
+  renderHistory();
 })();
 </script>
 </body>
