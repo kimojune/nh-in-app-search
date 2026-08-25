@@ -30,7 +30,7 @@
 | 항목 | 담당 |
 |---|---|
 | 사용성 테스트용 프로토타입 구현 | 이 세션(Claude Code 로컬) → Claude Artifact로 배포 |
-| ThinkCode 제출용 "동작하는 결과물" 구현 | 사용자가 ThinkCode에서 직접, `docs/ThinkCode_시작프롬프트.md`를 시작점으로 사용 |
+| ThinkCode 제출용 "동작하는 결과물" 구현 | 사용자가 ThinkCode에서 직접, `_done/docs/ThinkCode_시작프롬프트.md`를 시작점으로 사용 |
 | `submit_session` 호출(실제 제출) | 이 세션에서 하지 않음 — 사용자가 ThinkCode 쪽 작업이 끝난 뒤 그쪽에서 처리 |
 | `pull_files`/`push_files` | 이 세션에서 사용하지 않음(사용자 지시) |
 
