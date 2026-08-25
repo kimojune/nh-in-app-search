@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); } a:hover { color: oklch(38% 0.09 160); }
+    .slide{
+      width:1280px; height:720px; background:var(--bg); color:var(--ink);
+      font-family:var(--font-body); position:relative; overflow:hidden;
+      display:flex; flex-direction:column; padding:88px 96px;
+    }
+    .kicker{ font-size:14px; letter-spacing:0.14em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+    .title{ font-family:var(--font-display); font-size:56px; line-height:1.2; font-weight:600; margin:20px 0 0; color:var(--ink); }
+    .subtitle{ font-size:20px; color:var(--ink-muted); margin-top:20px; max-width:760px; line-height:1.6; }
+    .meta-row{ display:flex; gap:28px; margin-top:36px; font-size:15px; color:var(--ink-muted); }
+    .meta-item{ display:flex; align-items:center; gap:8px; }
+    .dot{ width:6px; height:6px; border-radius:50%; background:var(--accent); }
+    .divider{ height:1px; background:var(--line); margin:44px 0 32px; }
+    .agenda{ display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:14px 40px; }
+    .agenda-item{ display:flex; align-items:baseline; gap:14px; }
+    .agenda-num{ font-family:var(--font-display); font-size:22px; color:var(--accent); font-weight:600; width:34px; }
+    .agenda-label{ font-size:17px; color:var(--ink); }
+    .agenda-time{ font-size:13px; color:var(--ink-muted); margin-left:auto; }
+    .footer{ position:absolute; left:96px; right:96px; bottom:44px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="kicker">Portfolio · PO·기획 트랙 A</div>
+  <div class="title">채널 안내 기능</div>
+  <div class="subtitle">기업의 서비스를 안내하는 기능</div>
+
+  <div class="meta-row">
+    <div class="meta-item"><span class="dot"></span>발표 2026-08-26 · 5분</div>
+    <div class="meta-item"><span class="dot"></span>제출 2026-08-27 · ThinkCode</div>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="agenda">
+    <div class="agenda-item"><span class="agenda-num">01</span><span class="agenda-label">결론 먼저</span><span class="agenda-time">25초</span></div>
+    <div class="agenda-item"><span class="agenda-num">02</span><span class="agenda-label">가설과 반증</span><span class="agenda-time">50초</span></div>
+    <div class="agenda-item"><span class="agenda-num">03</span><span class="agenda-label">그래도 남는 것</span><span class="agenda-time">50초</span></div>
+    <div class="agenda-item"><span class="agenda-num">04</span><span class="agenda-label">왜 통합이 아닌가</span><span class="agenda-time">35초</span></div>
+    <div class="agenda-item"><span class="agenda-num">05</span><span class="agenda-label">최소 안내로 좁혔다 + 구조</span><span class="agenda-time">50초</span></div>
+    <div class="agenda-item"><span class="agenda-num">06</span><span class="agenda-label">지표 구조</span><span class="agenda-time">[직접 작성]</span></div>
+    <div class="agenda-item"><span class="agenda-num">07</span><span class="agenda-label">시연</span><span class="agenda-time">50초</span></div>
+    <div class="agenda-item"><span class="agenda-num">08</span><span class="agenda-label">못 한 것과 다음</span><span class="agenda-time">40초</span></div>
+  </div>
+
+  <div class="footer">
+    <span>NH인앱검색 · 채널 안내 기능</span>
+    <span>0 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

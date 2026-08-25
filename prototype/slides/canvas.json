@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1280, "h": 720, "title": "표지" },
+    { "file": "Conclusion.dc.html", "x": 1360, "y": 0, "w": 1280, "h": 720, "title": "01 결론 먼저" },
+    { "file": "Hypothesis.dc.html", "x": 2720, "y": 0, "w": 1280, "h": 720, "title": "02 가설과 반증" },
+    { "file": "Remaining.dc.html", "x": 4080, "y": 0, "w": 1280, "h": 720, "title": "03 그래도 남는 것" },
+    { "file": "WhyNotIntegration.dc.html", "x": 5440, "y": 0, "w": 1280, "h": 720, "title": "04 왜 통합이 아닌가" },
+    { "file": "Solution.dc.html", "x": 6800, "y": 0, "w": 1280, "h": 720, "title": "05 최소 안내로 좁혔다 + 구조" },
+    { "file": "Metrics.dc.html", "x": 8160, "y": 0, "w": 1280, "h": 720, "title": "06 지표 구조" },
+    { "file": "Demo.dc.html", "x": 9520, "y": 0, "w": 1280, "h": 720, "title": "07 시연" },
+    { "file": "NextSteps.dc.html", "x": 10880, "y": 0, "w": 1280, "h": 720, "title": "08 못 한 것과 다음" }
+  ],
+  "launch": { "view": "canvas" }
+}

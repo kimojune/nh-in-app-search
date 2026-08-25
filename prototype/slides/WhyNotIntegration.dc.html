@@ -1,0 +1,79 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); } a:hover { color: oklch(38% 0.09 160); }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:64px 96px; }
+    .head{ display:flex; align-items:baseline; gap:16px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .kicker{ font-size:14px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-muted); }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+    .premise{ font-size:19px; color:var(--ink); margin:18px 0 28px; }
+    .cols{ display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:24px; }
+    .col{ background:var(--panel); border:1px solid var(--line); padding:26px 22px; display:flex; flex-direction:column; gap:12px; min-height:200px; }
+    .col-label{ font-size:14px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.04em; }
+    .col-body{ font-size:16.5px; line-height:1.6; color:var(--ink); }
+    .sum-row{ margin-top:26px; font-size:18px; font-weight:600; }
+    .arrow-box{ margin-top:16px; background:var(--accent-soft); padding:18px 22px; font-size:17px; line-height:1.5; }
+    .footer{ position:absolute; left:96px; right:96px; bottom:32px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:14px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">04</span>
+    <span class="kicker">왜 통합이 아닌가</span>
+    <span class="time">35초</span>
+  </div>
+
+  <div class="premise">NH도 슈퍼앱 통합을 추진하고 있다 <span style="color:var(--ink-muted); font-size:15px;">(언론 보도로 확인)</span> — 그런데 완전 통합에는 세 가지가 걸린다</div>
+
+  <div class="cols">
+    <div class="col">
+      <div class="col-label">운영 주체</div>
+      <div class="col-body">콕뱅크(상호금융)와 올원뱅크(농협은행)는 감독 체계가 다른 별도 법인</div>
+    </div>
+    <div class="col">
+      <div class="col-label">기술</div>
+      <div class="col-body">과거에 앱을 쪼갠 이유 자체가 "하나에 다 담으면 느려진다"였다</div>
+    </div>
+    <div class="col">
+      <div class="col-label">사용성</div>
+      <div class="col-body">기능이 과밀해지면 오히려 찾기 어려워진다</div>
+    </div>
+  </div>
+
+  <div class="sum-row">합쳐도 다 못 합친다 — 은행 · 상호금융 · 카드 · 보험 · 증권</div>
+  <div class="arrow-box">→ 통합을 기다리는 대신, 지금 구조 위에 얹는다</div>
+
+  <div class="footer">
+    <span>근거: NH앱4개_카드검색_as-is결과.md 「NH 앱 분리의 조직적 배경」</span>
+    <span>4 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

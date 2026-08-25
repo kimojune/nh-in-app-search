@@ -1,0 +1,93 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    a { color: var(--accent); } a:hover { color: oklch(38% 0.09 160); }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:64px 96px; }
+    .head{ display:flex; align-items:baseline; gap:16px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .kicker{ font-size:14px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-muted); }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+    .stat{ font-family:var(--font-display); font-size:38px; font-weight:600; margin:16px 0 30px; }
+    .stat .n{ color:var(--accent); }
+    .body-row{ display:flex; gap:36px; flex:1; min-height:0; }
+    .left{ flex:1.1; display:flex; flex-direction:column; gap:12px; min-width:0; }
+    .row-label{ font-size:15px; color:var(--ink-muted); margin-bottom:4px; }
+    .list-line{ font-size:17px; line-height:1.6; display:flex; gap:12px; }
+    .list-line .tag{ font-size:12px; font-weight:700; letter-spacing:0.04em; color:var(--ink-muted); min-width:44px; }
+    .arrow-box{ margin-top:14px; background:var(--accent-soft); padding:18px 22px; font-size:17px; line-height:1.5; }
+    .caution{ margin-top:16px; background:var(--warn-soft); border-left:0; padding:14px 18px; font-size:13.5px; color:oklch(38% 0.1 55); line-height:1.6; }
+    .caution .lbl{ font-weight:700; display:block; margin-bottom:4px; color:var(--warn); }
+    .right{ flex:1; display:flex; flex-direction:column; min-width:0; }
+    .img-placeholder{ flex:1; border:1.5px dashed var(--line); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; color:var(--ink-muted); text-align:center; padding:24px; }
+    .img-placeholder svg{ width:40px; height:40px; opacity:0.5; }
+    .img-placeholder .cap{ font-size:14px; line-height:1.5; max-width:260px; }
+    .footer{ position:absolute; left:96px; right:96px; bottom:32px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:14px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">03</span>
+    <span class="kicker">그래도 남는 것</span>
+    <span class="time">50초</span>
+  </div>
+
+  <div class="stat">못 찾으면 <span class="n">60%</span>가 포털로 간다</div>
+
+  <div class="body-row">
+    <div class="left">
+      <div class="row-label">포털에 나가면 만나는 화면</div>
+      <div class="list-line"><span class="tag">1위</span><span>모두의카드 (정부 정책 채널)</span></div>
+      <div class="list-line"><span class="tag">광고</span><span>신용카드 관련광고 7건 · 1위 KB국민 K-패스카드</span></div>
+      <div class="list-line"><span class="tag"></span><span>NH농협카드는 카드사 필터 7건 중 일곱 번째(맨 끝)</span></div>
+
+      <div class="arrow-box">→ 회사는 이 지점부터 고객이 무엇을 보고 고르는지에 관여하지 못한다</div>
+
+      <div class="caution">
+        <span class="lbl">조심할 것</span>
+        `40%`(처음부터 포털)와 `60%`(실패하면 포털)는 다른 문항 — 섞지 않는다.
+        "경쟁사에 뺏긴다"고 말하지 않는다 — 그걸 보여줄 표본이 없다. "통제하지 못한다"까지만.
+      </div>
+    </div>
+    <div class="right">
+      <div class="img-placeholder">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-5 3 3 4-5 4 5"/></svg>
+        <div class="cap">화면 자리 — 2026-08-25 네이버 실측 캡처<br>raw/스크린샷/…_NAVER.jpg</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>근거: decision-log/포털대체와_공식판별_확정.md</span>
+    <span>3 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
