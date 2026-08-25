@@ -1,0 +1,111 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
+    .head{ display:flex; align-items:baseline; gap:14px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
+    .kicker{ font-size:15px; font-weight:700; color:var(--ink); }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .lead{ margin:18px 0 16px; font-size:18px; line-height:1.5; }
+    .lead b{ font-weight:700; }
+
+    .apps{ display:flex; flex-direction:column; gap:7px; }
+    .a{ display:flex; align-items:center; gap:14px; background:var(--panel); border:1px solid var(--line); padding:11px 16px; }
+    .a .nm{ flex:0 0 128px; font-size:15px; font-weight:700; }
+    .a .res{ flex:1; font-size:14px; color:var(--ink-muted); line-height:1.4; }
+    .a .dx{ flex:0 0 168px; font-size:12.5px; font-weight:800; text-align:right; letter-spacing:0.02em; }
+    .a.f .dx{ color:var(--warn); }
+    .a.o{ border-color:var(--accent); background:var(--accent-soft); }
+    .a.o .dx{ color:var(--accent); }
+
+    .verdict{ margin-top:16px; display:flex; gap:20px; align-items:stretch; }
+    .v1{ flex:1.15; background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:16px 18px; font-size:15px; line-height:1.6; }
+    .v1 b{ font-weight:800; }
+    .v2{ flex:1; background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent); padding:16px 18px; font-size:14px; line-height:1.55; }
+    .v2 .lbl{ display:block; font-size:12px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-muted); margin-bottom:7px; }
+    .v2 b{ font-weight:700; }
+    .sep{ background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:8px 11px; font-size:12.5px; line-height:1.45; margin-top:9px; }
+    .sep b{ font-weight:800; }
+    .split{ display:flex; gap:8px; align-items:stretch; font-size:11.5px; color:var(--ink-muted); margin-top:8px; }
+    .split .side{ flex:1; background:var(--bg); border:1px solid var(--line); padding:6px 9px; line-height:1.4; }
+    .note{ font-size:12px; color:var(--ink-muted); line-height:1.45; margin-top:8px; }
+    .note b{ color:var(--ink); font-weight:700; }
+
+    .close{ margin-top:16px; background:var(--accent-soft); padding:15px 20px; font-size:17px; font-weight:700; line-height:1.5; }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">04</span>
+    <span class="stage">문제 구조화</span>
+    <span class="kicker">진짜 문제는 무엇인가</span>
+    <span class="time">40초</span>
+  </div>
+
+  <div class="lead">배운 언어로 네 개 앱을 다시 읽으니 <b>실패가 저마다 다른 종류였다.</b> 같은 검색어인데 실패하는 이유가 앱마다 달랐다.</div>
+
+  <div class="apps">
+    <div class="a f"><span class="nm">NH콕뱅크</span><span class="res">결과 0건 · 엉뚱한 추천검색어</span><span class="dx">검색 대상에 없음</span></div>
+    <div class="a f"><span class="nm">NH올원뱅크</span><span class="res">39건 — 법원등기 · 퇴직연금</span><span class="dx">관련도 실패</span></div>
+    <div class="a f"><span class="nm">NH스마트뱅킹</span><span class="res">보안카드 · OTP 메뉴만 · 상품 0건</span><span class="dx">관련도 실패</span></div>
+    <div class="a o"><span class="nm">NH Pay</span><span class="res">K-패스카드(신용/체크) 정확히 매칭</span><span class="dx">성공 — 그런데</span></div>
+  </div>
+
+  <div class="verdict">
+    <div class="v1">
+      NH Pay가 맞은 건 <b>검색이 뛰어나서가 아니다.</b> 카드가 원래 그 앱 데이터라 우연히 들어 있었을 뿐이다.<br><br>
+      즉 <b>데이터가 우연히 있는 곳만 맞는다.</b>
+    </div>
+    <div class="v2">
+      <span class="lbl">합치면 되지 않나</span>
+      <b>농협중앙회와 NH농협금융지주는 별도 법인</b>이다. 중앙회가 지분 <b>100%</b>를 갖고도 법인은 분리돼 있다.
+      <div class="sep">2012년 <b>신경분리</b> — 금융은 지주로 가고 <b>상호금융만 중앙회에 남았다</b></div>
+      <div class="split">
+        <span class="side">농협중앙회<br>상호금융 · 콕뱅크</span>
+        <span class="side">NH농협금융지주 · 농협은행<br>올원뱅크 · 스마트뱅킹 · NH Pay</span>
+      </div>
+      <div class="note">은행 앱은 7개를 3개로 줄였다. 그런데 카드는 <b>같은 은행 안에서도 사업부문이 달라</b> NH Pay가 따로 있다.</div>
+    </div>
+  </div>
+
+  <div class="close">검색 성능 문제가 아니다 — <b>“담당이 어디인가”를 아무도 알려주지 않는 문제</b>다</div>
+
+  <div class="footer">
+    <span>근거: NH앱4개_카드검색_as-is결과.md 「NH 앱 분리의 조직적 배경」 · NH농협금융지주 공식 사이트 · 한경매거진&북(2024)</span>
+    <span>4 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

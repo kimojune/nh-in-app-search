@@ -44,35 +44,36 @@
     .kpi-box .t{ font-size:19px; line-height:1.55; font-weight:600; color:var(--ink); }
     .aux-list{ display:flex; flex-direction:column; gap:8px; background:var(--panel); border:1px solid var(--line); padding:18px 20px; flex:1; }
     .aux-list .i{ font-size:14.5px; color:var(--ink); line-height:1.5; }
-    .guard-box{ background:var(--panel); border:1px solid var(--line); padding:20px; flex:1; display:flex; flex-direction:column; gap:10px; }
-    .guard-box .t{ font-size:15.5px; font-weight:600; }
-    .guard-box .v{ font-family:var(--font-display); font-size:26px; font-weight:600; color:var(--accent); }
-    .guard-box .d{ font-size:13px; color:var(--ink-muted); line-height:1.5; }
+    .guard-box{ background:var(--panel); border:1px solid var(--line); padding:16px 18px; display:flex; flex-direction:column; gap:6px; }
+    .guard-stack{ display:flex; flex-direction:column; gap:10px; flex:1; }
+    .guard-box.fresh{ border-color:var(--accent); background:var(--accent-soft); }
+    .guard-box .t{ font-size:14px; font-weight:600; line-height:1.4; }
+    .guard-box .v{ font-family:var(--font-display); font-size:21px; font-weight:600; color:var(--accent); }
+    .guard-box .d{ font-size:12px; color:var(--ink-muted); line-height:1.45; }
     .foot-note{ margin-top:20px; font-size:13.5px; color:var(--ink-muted); line-height:1.6; }
     .footer{ position:absolute; left:96px; right:96px; bottom:32px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:14px; }
   </style>
 </helmet>
 <div class="slide">
   <div class="head">
-    <span class="num">06</span>
+    <span class="num">05</span>
     <span class="kicker">지표 구조</span>
-    <span class="time">[초 배정 — 직접 작성]</span>
+    <span class="time">40초</span>
   </div>
 
-  <div class="banner"><b>안내의 효과 자체는 아직 측정되지 않았다.</b> 아래는 무엇을 어떻게 재기로 했는지의 구조이며, 지금까지 나온 숫자(문제 크기·도입 비용)와는 다른 층이다.</div>
+  <div class="banner"><b>안내의 효과 자체는 아직 측정되지 않았다.</b> 아래는 무엇을 어떻게 재기로 했는지의 구조다. <b>주 KPI는 담당 채널 식별까지</b>다 — 그 앱 안에서 벌어지는 일은 우리가 통제하지 못하므로 가드레일로 뒀다.</div>
 
   <div class="body-row">
     <div class="col kpi">
       <div class="col-label">1차 KPI <span class="status pending">검증 예정</span></div>
       <div class="kpi-box">
-        <div class="t">외부 재검색이나 진행자 도움 없이 올바른 담당 채널과 다음 행동을 결정한 참가자 비율</div>
+        <div class="t">외부 재검색이나 진행자 도움 없이 <b>올바른 담당 채널을 선택한</b> 참가자 비율</div>
       </div>
     </div>
     <div class="col aux">
       <div class="col-label">보조 지표 <span class="status pending">검증 예정</span></div>
       <div class="aux-list">
         <div class="i">올바른 채널 선택률</div>
-        <div class="i">올바른 다음 행동 설명률</div>
         <div class="i">결정까지 걸린 시간</div>
         <div class="i">검색어 재입력 횟수</div>
         <div class="i">외부 검색·도움 요청 비율</div>
@@ -80,20 +81,32 @@
       </div>
     </div>
     <div class="col guard">
-      <div class="col-label">가드레일 <span class="status have">Before 값 있음</span></div>
-      <div class="guard-box">
-        <div class="t">잘못된 채널을 확신하는 비율</div>
-        <div class="v">15명 중 7명</div>
-        <div class="d">앱을 먼저 여는 15명 중 7명이 담당 앱이 아닌 것을 고르고도 확신도 4~5를 줬다 (인식설문 25건, 자기보고·5지선다 한계 있음)</div>
+      <div class="col-label">가드레일 <span class="status have">관찰값 있음</span></div>
+      <div class="guard-stack">
+        <div class="guard-box">
+          <div class="t">잘못된 채널을 확신하는 비율</div>
+          <div class="v">15명 중 7명</div>
+          <div class="d">담당 앱이 아닌 것을 고르고도 확신도 4~5 (인식설문 25건, 자기보고 한계)</div>
+        </div>
+        <div class="guard-box fresh">
+          <div class="t">복수 완료 채널로 결정을 보류한 비율</div>
+          <div class="v">2명 중 2명</div>
+          <div class="d">둘 다 NHPAY를 눌렀다가 화면으로 돌아가 모바일웹을 다시 확인했다. 한 명은 그 왕복에 52초</div>
+        </div>
+        <div class="guard-box">
+          <div class="t">다음 행동을 설명하지 못한 비율</div>
+          <div class="v" style="font-size:15px;color:var(--ink-muted)">검증 예정</div>
+          <div class="d">담당 채널에 도착한 뒤 무엇을 할지 모르면 안내가 절반만 닿은 것이다. 채점 규칙을 정한 뒤 잰다</div>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="foot-note">방법상 한계 — 통제된 과제에서 보기를 주고 재면 회상이 재인으로 바뀌어 실제보다 높게 나올 수 있다. 배포 후에는 「안내 노출 후 재검색률」을 주지표로 별도로 잰다.</div>
+  <div class="foot-note">방법상 한계 — 통제된 과제에서 보기를 주고 재면 회상이 재인으로 바뀌어 실제보다 높게 나온다. 배포 후에는 「안내 노출 후 재검색률」을 주지표로 별도로 잰다.</div>
 
   <div class="footer">
     <span>근거: B축_MVP_설계.md 「검증 기준」</span>
-    <span>6 / 8</span>
+    <span>5 / 7</span>
   </div>
 </div>
 </x-dc>

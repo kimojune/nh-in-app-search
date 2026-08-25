@@ -29,6 +29,13 @@
     .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
     .kicker{ font-size:14px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-muted); }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+    .rebut{ background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:13px 16px; margin:16px 0 14px; font-size:15px; line-height:1.55; }
+    .rebut .lbl{ display:block; font-size:12.5px; color:var(--ink-muted); margin-bottom:4px; letter-spacing:0.04em; }
+    .rebut b{ font-weight:700; }
+    .den{ font-size:16px; color:var(--ink-muted); font-weight:400; }
+    .hq{ margin-top:12px; background:var(--accent-soft); padding:13px 16px; font-size:14px; line-height:1.55; }
+    .hq .lbl{ display:block; font-size:12px; letter-spacing:0.05em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:5px; }
+    .hq b{ font-weight:700; }
     .stat{ font-family:var(--font-display); font-size:38px; font-weight:600; margin:16px 0 30px; }
     .stat .n{ color:var(--accent); }
     .body-row{ display:flex; gap:36px; flex:1; min-height:0; }
@@ -49,11 +56,16 @@
 <div class="slide">
   <div class="head">
     <span class="num">03</span>
-    <span class="kicker">그래도 남는 것</span>
-    <span class="time">50초</span>
+    <span class="kicker">사용자 우회 행동</span>
+    <span class="time">45초</span>
   </div>
 
-  <div class="stat">못 찾으면 <span class="n">60%</span>가 포털로 간다</div>
+  <div class="rebut">
+    <span class="lbl">그런데 — 첫 가설이 흔들린 지점</span>
+    실제로 시켜보니 포털이 <b>70초</b> 만에 신청 직전 화면까지 데려갔다. “그럼 만들 필요 없는 것 아닌가”에서 한 번 멈췄다.
+  </div>
+
+  <div class="stat">못 찾으면 <span class="n">60%</span>가 포털로 간다 <span class="den">(25명 중 15명)</span></div>
 
   <div class="body-row">
     <div class="left">
@@ -63,6 +75,12 @@
       <div class="list-line"><span class="tag"></span><span>NH농협카드는 카드사 필터 7건 중 일곱 번째(맨 끝)</span></div>
 
       <div class="arrow-box">→ 회사는 이 지점부터 고객이 무엇을 보고 고르는지에 관여하지 못한다</div>
+
+    <div class="hq">
+      <span class="lbl">그 손해를 누가 느끼나</span>
+      은행은 은행 실적만, 상호금융은 조합 실적만 본다. <b>포털로 나가는 손해를 그룹 전체로 내부화해 느끼는 주체는 중앙회뿐이다.</b>
+      계열사를 지도·검사하는 조직이 이미 있어서, 매핑 승인은 새 조직을 만드는 게 아니라 <b>있는 조직 위에 얹는 일</b>이다.
+    </div>
 
       <div class="caution">
         <span class="lbl">조심할 것</span>
@@ -80,7 +98,7 @@
 
   <div class="footer">
     <span>근거: decision-log/포털대체와_공식판별_확정.md</span>
-    <span>3 / 8</span>
+    <span>3 / 7</span>
   </div>
 </div>
 </x-dc>

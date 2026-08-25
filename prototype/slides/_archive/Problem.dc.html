@@ -1,0 +1,123 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:56px 96px; }
+    .head{ display:flex; align-items:baseline; gap:16px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .kicker{ font-size:14px; letter-spacing:0.12em; text-transform:uppercase; color:var(--ink-muted); }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .hypo{ margin:18px 0 16px; font-size:21px; line-height:1.45; }
+    .hypo .lbl{ font-size:14px; color:var(--warn); font-weight:700; display:block; margin-bottom:6px; letter-spacing:0.02em; }
+    .hypo b{ font-weight:700; }
+
+    .body-row{ display:flex; gap:26px; flex:1; min-height:0; }
+    .left{ flex:1.02; display:flex; flex-direction:column; gap:10px; min-width:0; }
+    .right{ flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+    .row-label{ font-size:12.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-muted); }
+
+    .ev{ display:flex; align-items:baseline; gap:10px; font-size:15px; line-height:1.5; }
+    .ev .v{ font-family:var(--font-display); font-size:23px; font-weight:600; color:var(--accent); min-width:64px; text-align:right; }
+    .ev .t{ flex:1; }
+
+    .shot{ margin-top:4px; flex:1; min-height:0; border:1px dashed var(--line); background:var(--panel); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:var(--ink-muted); padding:14px; }
+    .shot svg{ width:30px; height:30px; opacity:0.55; }
+    .shot .cap{ font-size:12.5px; text-align:center; line-height:1.5; }
+
+    .cause{ background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--accent); padding:16px 18px; display:flex; flex-direction:column; gap:9px; }
+    .cause .t{ font-size:15.5px; line-height:1.5; }
+    .cause .t b{ font-weight:700; }
+    .cause .split{ display:flex; gap:10px; align-items:center; font-size:13.5px; color:var(--ink-muted); padding-top:2px; }
+    .cause .split .side{ background:var(--bg); border:1px solid var(--line); padding:5px 10px; line-height:1.35; }
+    .cause .split .vs{ font-size:12px; color:var(--ink-muted); }
+
+    .tried{ background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:13px 16px; font-size:14px; line-height:1.55; }
+    .tried b{ font-weight:700; }
+
+    .sum{ background:var(--accent-soft); padding:12px 16px; font-size:15px; font-weight:600; }
+
+    .arrow-box{ margin-top:14px; font-size:18px; font-weight:700; color:var(--accent); }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:28px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">02</span>
+    <span class="kicker">문제 장면과 원인</span>
+    <span class="time">55초</span>
+  </div>
+
+  <div class="hypo">
+    <span class="lbl">시작 — NH에서 K-패스카드를 발급받으려다 앱 네 개를 헤맸다</span>
+    <b>그래서 세운 가설 — 사용자는 이름은 아는 상품을 어느 앱에서 처리하는지 알지 못한다</b>
+  </div>
+
+  <div class="body-row">
+    <div class="left">
+      <div class="row-label">실제로 그랬다</div>
+      <div class="ev"><span class="v">1명</span><span class="t">앱을 먼저 여는 <b>15명 중</b> 담당 앱(NH Pay)을 고른 사람</span></div>
+      <div class="ev"><span class="v">7명</span><span class="t">같은 15명 중 담당 앱이 아닌 것을 고르고 <b>확신도 4~5</b></span></div>
+      <div class="ev"><span class="v">39건</span><span class="t">올원뱅크 "카드신청" 검색 결과 — <b>전부 퇴직연금</b></span></div>
+
+      <div class="shot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1.5"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-5 3 3 4-5 4 5"/></svg>
+        <div class="cap">화면 자리 — 4개 앱 as-is 검색 결과 캡처<br>(같은 검색어인데 앱마다 다르다)</div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div class="row-label">왜 이렇게 됐나 — 법인이 다르다</div>
+
+      <div class="cause">
+        <div class="t"><b>농협중앙회</b>와 <b>농협금융지주</b>는 별도 법인이다. 중앙회가 금융지주를 <b>소유하지만 법인은 분리돼 있다.</b></div>
+        <div class="split">
+          <span class="side">상호금융<br>콕뱅크</span>
+          <span class="vs">◀ 다른 법인 계열 ▶</span>
+          <span class="side">중앙금융<br>올원뱅크 · 스마트뱅킹 · NH Pay</span>
+        </div>
+      </div>
+
+      <div class="tried"><b>합치려는 시도는 이미 했다.</b> 은행 계열 앱 7개를 3개로 통합했지만 스마트뱅킹이 별도로 남았고, 앱 과밀·사용성 문제로 완전 통합에는 이르지 못했다.</div>
+
+      <div class="sum">합쳐도 다 못 합친다 — 은행 · 상호금융 · 카드 · 보험 · 증권</div>
+    </div>
+  </div>
+
+  <div class="arrow-box">→ 통합을 기다리는 대신, 지금 구조 위에 얹는다</div>
+
+  <div class="footer">
+    <span>근거: 인식설문 25건 · NH앱4개_카드검색_as-is결과.md 「NH 앱 분리의 조직적 배경」</span>
+    <span>2 / 7</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

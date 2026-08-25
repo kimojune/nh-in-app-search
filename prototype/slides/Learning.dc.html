@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
+    .head{ display:flex; align-items:baseline; gap:14px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
+    .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .lead{ margin:20px 0 20px; font-size:19px; line-height:1.5; }
+    .lead .q{ color:var(--warn); font-weight:700; }
+    .lead b{ font-weight:700; }
+
+    .concepts{ display:flex; gap:20px; flex:1; min-height:0; }
+    .c{ flex:1; background:var(--panel); border:1px solid var(--line); padding:20px 20px; display:flex; flex-direction:column; gap:12px; min-width:0; }
+    .c .k{ font-size:19px; font-weight:700; line-height:1.3; }
+    .c .k .en{ display:block; font-size:12.5px; color:var(--ink-muted); font-weight:500; margin-top:3px; letter-spacing:0.02em; }
+    .c .def{ font-size:14px; color:var(--ink-muted); line-height:1.55; }
+    .c .case{ margin-top:auto; font-size:14.5px; line-height:1.6; padding:12px 14px; background:var(--bg); border-left:3px solid var(--line); }
+    .c .case b{ font-weight:700; }
+    .c .case .tagx{ display:block; font-size:11px; font-weight:800; color:var(--warn); letter-spacing:0.04em; margin-bottom:5px; }
+    .c.hit{ border-color:var(--accent); }
+    .c.hit .case{ border-left-color:var(--accent); background:var(--accent-soft); }
+
+    .close{ margin-top:20px; background:var(--accent-soft); padding:15px 20px; font-size:17px; font-weight:700; line-height:1.5; }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">02</span>
+    <span class="stage">도메인 리서치</span>
+    <span class="kicker">검색은 어떻게 작동하나</span>
+    <span class="time">40초</span>
+  </div>
+
+  <div class="lead">
+    <span class="q">"검색이 불편하다"</span>는 말로는 아무것도 못 고친다.
+    <b>검색이 어떤 구조로 작동하는지 먼저 배우고, 그 언어로 NH 사례를 다시 읽었다.</b>
+  </div>
+
+  <div class="concepts">
+    <div class="c">
+      <div class="k">검색 대상<span class="en">Search Scope</span></div>
+      <div class="def">그 검색창이 어떤 종류의 정보를 찾을 수 있게 구성돼 있는가</div>
+      <div class="case">앱 안에 기능이 <b>있는 것</b>과 검색 대상에 <b>들어 있는 것</b>은 다르다. 메뉴로는 갈 수 있어도 검색으로는 안 나올 수 있다.</div>
+    </div>
+
+    <div class="c hit">
+      <div class="k">검색어 매칭<span class="en">Query Matching</span></div>
+      <div class="def">사용자가 쓴 표현과 등록된 데이터를 어떤 기준으로 잇는가</div>
+      <div class="case">
+        <span class="tagx">NH 사례</span>
+        비공식명 <b>경기패스카드</b>를 공식명 <b>K-패스카드</b>로 바꿔 검색해도 같은 앱은 <b>같은 결과</b>였다 → <b>표기 문제가 아니다</b>
+      </div>
+    </div>
+
+    <div class="c hit">
+      <div class="k">검색 관련도<span class="en">Search Relevance</span></div>
+      <div class="def">결과가 나왔는가가 아니라, 나온 결과가 찾던 것과 맞는가</div>
+      <div class="case">
+        <span class="tagx">NH 사례</span>
+        올원뱅크 <b>"카드신청"</b> → <b>39건</b>이 나왔는데 법원등기·퇴직연금뿐. <b>결과가 있는 것과 맞는 것은 다르다.</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="close">표기를 고쳐도, 결과를 늘려도 해결되지 않는다 — 애초에 <b>그 앱이 담당이 아니었다</b></div>
+
+  <div class="footer">
+    <span>근거: docs/인앱검색_도메인학습기록.md 「체화가 확인된 내용 1~3」</span>
+    <span>2 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

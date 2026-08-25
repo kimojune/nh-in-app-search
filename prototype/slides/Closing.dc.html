@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:56px 96px; }
+    .head{ display:flex; align-items:baseline; gap:14px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
+    .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .h1{ margin:24px 0 26px; font-size:29px; font-weight:700; line-height:1.4; }
+    .h1 b{ font-weight:700; color:var(--accent); }
+
+    .cols{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; flex:1; min-height:0; }
+    .col{ background:var(--panel); border:1px solid var(--line); padding:20px 18px; display:flex; flex-direction:column; gap:9px; }
+    .col.good{ border-top:3px solid var(--accent); }
+    .col.bad{ border-top:3px solid var(--warn); }
+    .col.next{ border-top:3px solid var(--ink-muted); }
+    .col-label{ font-size:14.5px; font-weight:700; }
+    .col.good .col-label{ color:var(--accent); }
+    .col.bad .col-label{ color:var(--warn); }
+    .line{ font-size:14px; line-height:1.55; }
+    .line b{ font-weight:700; }
+
+    .cond{ margin-top:18px; background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:14px 18px; font-size:14.5px; line-height:1.6; }
+    .cond b{ font-weight:700; }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:28px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">08</span>
+    <span class="stage">마무리</span>
+    <span class="kicker">결론 · 한계 · 다음</span>
+    <span class="time">20초</span>
+  </div>
+
+  <div class="h1">조직은 나뉘어 있지만, <b>사용자에게 NH는 하나다</b></div>
+
+  <div class="cols">
+    <div class="col good">
+      <div class="col-label">결론</div>
+      <div class="line">실패의 정체는 검색 성능이 아니라 <b>담당 채널을 아무도 알려주지 않는 것</b>이었다</div>
+      <div class="line"><b>NH도 이미 앱끼리 잇고 있다</b> — 콕뱅크는 크롬으로 NH Pay 웹을 연다. 도착지가 전체 목록일 뿐이다</div>
+      <div class="line">기준이 바뀌어도 <b>앱 배포 없이 네 앱에 동시에 반영된다</b> — 시연으로 확인했다</div>
+    </div>
+
+    <div class="col bad">
+      <div class="col-label">한계</div>
+      <div class="line"><b>안내가 실제로 사용자를 돕는지</b> 확인하지 못했다 — <b>조건을 맞추면 Before가 훼손된다</b></div>
+      <div class="line"><b>주 KPI에 두 관점이 섞여 있다</b> — 외부 검색 성공은 회사엔 실패지만 사용자에겐 성공이다. 가르려면 <b>기업 내부 데이터</b>가 필요하다</div>
+      <div class="line"><b>K-패스카드 한 사례다</b> — 저빈도 금융 기능 전체로 넓힐 수 없다</div>
+      <div class="line">같은 기능을 <b>여러 채널이 함께 취급할 때 우선순위를 정하지 못했다</b></div>
+      <div class="line"><b>명부 서명 검증이 없다</b> — 변조되면 그대로 피싱 화면이 된다</div>
+    </div>
+
+    <div class="col next">
+      <div class="col-label">다음</div>
+      <div class="line"><b>안내 노출 후 재검색률</b>로 잰다 — 실사용 로그에서 비교군을 추린다</div>
+      <div class="line"><b>0건 로그에서 다음 대상 기능을 고른다</b> — 같은 방식으로 넓혀지는지 본다</div>
+      <div class="line">여러 채널이 취급할 때의 <b>노출 순서 규칙</b>을 먼저 합의한다</div>
+      <div class="line"><b>딥링크·화면 컴포넌트는 얹을 수 있게 열어뒀다</b> — 이번엔 최소한만 만들었다</div>
+    </div>
+  </div>
+
+  <div class="cond"><b>이 문제가 성립하는 조건</b> — 법인이 하나인 회사에서는 덜할 수 있다. 다만 <b>같은 법인 안에서도 사업부가 나뉘면 생긴다</b> — 농협은행 안의 NH Pay가 그 예다. 유사한 구조의 다른 기업에서도 같은 문제가 나타나는지는 확인하지 못했다.</div>
+
+  <div class="footer">
+    <span>근거: B축_MVP_설계.md 「운영 단계 지표」 · prototype/router/README.md 「고지와 한계」</span>
+    <span>8 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

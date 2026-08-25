@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
+    .head{ display:flex; align-items:baseline; gap:14px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
+    .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .lead{ margin:16px 0 18px; font-size:18px; line-height:1.5; }
+    .lead b{ font-weight:700; }
+
+    .body-row{ display:flex; gap:24px; flex:1; min-height:0; }
+    .c{ flex:1; background:var(--panel); border:1px solid var(--line); padding:16px 18px; display:flex; flex-direction:column; gap:9px; min-width:0; }
+    .c .k{ font-size:17px; font-weight:700; }
+    .c .k .en{ font-size:12px; color:var(--ink-muted); font-weight:500; margin-left:8px; }
+    .c .def{ font-size:13.5px; color:var(--ink-muted); line-height:1.5; }
+
+    .neq{ background:var(--bg); border:1px solid var(--line); padding:12px 14px; font-size:15px; line-height:1.6; font-weight:600; }
+    .neq .x{ color:var(--warn); font-weight:800; margin:0 6px; }
+
+    .case{ font-size:14px; line-height:1.55; padding-left:13px; border-left:2px solid var(--accent); }
+    .case b{ font-weight:700; }
+    .case .tagx{ font-size:11px; font-weight:800; color:var(--warn); letter-spacing:0.03em; display:block; margin-bottom:3px; }
+    .moved{ display:flex; flex-direction:column; gap:7px; margin-top:2px; }
+    .mv{ display:flex; gap:10px; align-items:flex-start; font-size:13.5px; line-height:1.5; }
+    .mv .ar{ flex:0 0 14px; color:var(--accent); font-weight:800; }
+    .mv .b{ flex:1; }
+    .mv .b b{ font-weight:700; }
+    .mv.last .b{ color:var(--warn); }
+    .mv.last .ar{ color:var(--warn); }
+    .endpt{ background:var(--accent-soft); padding:7px 11px; font-size:13.5px; font-weight:700; line-height:1.45; }
+    .endpt .old{ color:var(--ink-muted); font-weight:500; text-decoration:line-through; }
+
+    .zrr{ display:flex; flex-direction:column; gap:6px; }
+    .z{ display:flex; gap:10px; align-items:baseline; font-size:13.5px; line-height:1.45; }
+    .z .app{ flex:0 0 92px; font-weight:700; }
+    .z .r{ flex:1; color:var(--ink-muted); }
+    .z .v{ flex:0 0 62px; text-align:right; font-family:var(--font-display); font-size:16px; font-weight:600; }
+    .z.bad .v{ color:var(--warn); }
+    .z.ok .v{ color:var(--accent); }
+
+    .law{ background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:11px 14px; font-size:13.5px; line-height:1.55; }
+    .law b{ font-weight:700; }
+
+    .close{ margin-top:16px; background:var(--accent-soft); padding:13px 18px; font-size:15.5px; font-weight:600; line-height:1.5; }
+    .close b{ font-weight:800; }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">03</span>
+    <span class="stage">도메인 리서치</span>
+    <span class="kicker">그래서 무엇을 재는가</span>
+    <span class="time">35초</span>
+  </div>
+
+  <div class="lead">문제에 이름을 붙였으면 <b>무엇을 세야 하는지</b>가 따라온다. 그런데 흔히 쓰는 지표가 이 실패를 놓친다.</div>
+
+  <div class="body-row">
+    <div class="c">
+      <div class="k">과업 성공<span class="en">Task Success</span></div>
+      <div class="def">사용자가 원래 하려던 일을 끝냈는가. 종료점은 관찰이 아니라 <b>PM이 정한다</b></div>
+
+      <div class="neq">클릭<span class="x">≠</span>과업 성공</div>
+
+      <div class="case">
+        <span class="tagx">NH 사례</span>
+        콕뱅크에서 "카드 신청"을 누르면 크롬이 열리고 NHPAY 웹으로 간다. 도착지가 <b>전체 카드 79건 목록</b>이라 거기서 다시 찾아야 한다.
+      </div>
+
+      <div class="moved">
+        <div class="mv"><span class="ar">→</span><span class="b">그래서 <b>종료점을 옮겼다</b></span></div>
+        <div class="endpt"><span class="old">신청 완료</span> &nbsp;→&nbsp; 담당 채널을 확정했는가</div>
+        <div class="mv last"><span class="ar">→</span><span class="b">옮기고 나서도 <b>클릭은 성공이 아니었다.</b> 안내 카드에서 눌렀다가 돌아와 <b>다른 채널을 고른 참가자가 있었다.</b></span></div>
+      </div>
+    </div>
+
+    <div class="c">
+      <div class="k">검색 지표<span class="en">Zero Results Rate</span></div>
+      <div class="def">결과 0건 비율. 가장 널리 쓰이지만 <b>0건만 센다</b></div>
+
+      <div class="zrr">
+        <div class="z bad"><span class="app">콕뱅크</span><span class="r">결과 0건</span><span class="v">50%</span></div>
+        <div class="z bad"><span class="app">스마트뱅킹</span><span class="r">확인한 3건 전부 실패</span><span class="v">0%</span></div>
+        <div class="z bad"><span class="app">올원뱅크</span><span class="r">39건 전부 무관</span><span class="v">0%</span></div>
+        <div class="z ok"><span class="app">NH Pay</span><span class="r">정확히 매칭</span><span class="v">0%</span></div>
+      </div>
+
+      <div class="law"><b>지표만 보면 실패한 앱이 성공한 앱과 똑같아 보인다.</b> 이 지표만 관리하면 결과를 아무거나 채우는 쪽으로 움직인다 — 굿하트의 법칙.</div>
+    </div>
+  </div>
+
+  <div class="close">결국 재야 하는 건 <b>"담당 채널을 스스로 찾아냈는가"</b> — 검색 지표에는 그런 칸이 없다</div>
+
+  <div class="footer">
+    <span>근거: docs/인앱검색_도메인학습기록.md 「체화가 확인된 내용 4~5」</span>
+    <span>3 / 8</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

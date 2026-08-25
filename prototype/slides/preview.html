@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>슬라이드 미리보기 — 현재 파일 그대로</title>
+<style>
+  :root{ --ink:#16181d; --sub:#5f6672; --line:#e5e7eb; --bg:#eef0f3; --accent:#00794d; }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  }
+  header{
+    background:#fff; border-bottom:1px solid var(--line); padding:16px 24px;
+    position:sticky; top:0; z-index:10;
+    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  }
+  h1{font-size:17px; font-weight:800; margin:0; letter-spacing:-.5px}
+  .note{font-size:12.5px; color:var(--sub); letter-spacing:-.3px}
+  .ctrl{margin-left:auto; display:flex; gap:8px; align-items:center; font-size:13px}
+  .ctrl button{
+    border:1px solid #d5d9e0; background:#fff; border-radius:8px; padding:7px 12px;
+    font-family:inherit; font-size:13px; font-weight:700; cursor:pointer; color:#41474f;
+  }
+  .ctrl button.on{border-color:var(--accent); background:#eefaf4; color:var(--accent)}
+
+  .grid{padding:22px; display:grid; gap:22px; grid-template-columns:repeat(auto-fill, minmax(660px,1fr))}
+  .grid.one{grid-template-columns:1fr}
+
+  .card{background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden}
+  .cap{
+    display:flex; align-items:center; gap:10px; padding:10px 14px;
+    border-bottom:1px solid var(--line); background:#fafbfc;
+  }
+  .n{font-size:12px; font-weight:800; color:var(--accent); font-variant-numeric:tabular-nums}
+  .t{font-size:13.5px; font-weight:700; letter-spacing:-.3px}
+  .f{font-size:11.5px; color:#9aa1ad; margin-left:auto; font-family:ui-monospace,Consolas,monospace}
+  .tag{font-size:10.5px; font-weight:800; padding:2px 7px; border-radius:999px; background:#eefaf4; color:var(--accent)}
+
+  .stage{position:relative; width:100%; overflow:hidden; background:#fff}
+  .stage iframe{
+    width:1280px; height:720px; border:0; display:block;
+    transform-origin:0 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>슬라이드 미리보기</h1>
+  <span class="note">학습 과정 축으로 새로 짠 6장 구조 — 이전 슬라이드는 <code>_archive/</code>에 보존</span>
+  <span class="ctrl">
+    <button id="b2" class="on">2단</button>
+    <button id="b1">1단(크게)</button>
+  </span>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<script>
+(function(){
+  var SLIDES = [
+    { f:"Main.dc.html",      n:"—",  t:"표지" },
+    { f:"Start.dc.html",     n:"01", t:"문제 발견 · 35초" },
+    { f:"Learning.dc.html",  n:"02", t:"도메인 리서치 ① 검색은 어떻게 작동하나 · 40초", fresh:true },
+    { f:"Measuring.dc.html", n:"03", t:"도메인 리서치 ② 그래서 무엇을 재는가 · 35초" },
+    { f:"Structure.dc.html", n:"04", t:"문제 구조화 · 40초", fresh:true },
+    { f:"Shifts.dc.html",    n:"05", t:"가설 수립 · 40초", fresh:true },
+    { f:"Built.dc.html",     n:"06", t:"문제 검증 · 60초" },
+    { f:"Tradeoffs.dc.html", n:"07", t:"설계 판단 · 30초", fresh:true },
+    { f:"Closing.dc.html",   n:"08", t:"마무리 · 20초" }
+  ];
+
+  var grid = document.getElementById("grid");
+
+  function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;"); }
+
+  function render(){
+    var h = "", i, s;
+    for(i=0;i<SLIDES.length;i++){
+      s = SLIDES[i];
+      h += '<div class="card">'
+         +   '<div class="cap">'
+         +     '<span class="n">' + esc(s.n) + '</span>'
+         +     '<span class="t">' + esc(s.t) + '</span>'
+         +     (s.fresh ? '<span class="tag">신규</span>' : '')
+         +     '<span class="f">' + esc(s.f) + '</span>'
+         +   '</div>'
+         +   '<div class="stage"><iframe src="./' + s.f + '" loading="lazy" scrolling="no"></iframe></div>'
+         + '</div>';
+    }
+    grid.innerHTML = h;
+    fit();
+  }
+
+  /* 1280×720 슬라이드를 칸 너비에 맞춰 줄인다 */
+  function fit(){
+    var stages = document.querySelectorAll(".stage"), i, w, k;
+    for(i=0;i<stages.length;i++){
+      w = stages[i].clientWidth;
+      k = w / 1280;
+      stages[i].style.height = Math.round(720 * k) + "px";
+      stages[i].querySelector("iframe").style.transform = "scale(" + k + ")";
+    }
+  }
+
+  document.getElementById("b1").addEventListener("click", function(){
+    grid.classList.add("one");
+    this.classList.add("on");
+    document.getElementById("b2").classList.remove("on");
+    fit();
+  });
+  document.getElementById("b2").addEventListener("click", function(){
+    grid.classList.remove("one");
+    this.classList.add("on");
+    document.getElementById("b1").classList.remove("on");
+    fit();
+  });
+
+  window.addEventListener("resize", fit);
+  render();
+  setTimeout(fit, 300);
+})();
+</script>
+</body>
+</html>
