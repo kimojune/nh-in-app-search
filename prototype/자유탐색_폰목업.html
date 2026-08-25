@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-패스카드 찾기 · 사용성 테스트</title>
+<!--
+  자유 탐색 목업 — 폰 홈에서 시작해 NH 4개 앱과 브라우저를 오갈 수 있다.
+
+  실행
+    ?g=a&p=P03   대조군(안내 없음)
+    ?g=b&p=P03   실험군(안내 있음)
+    지정하지 않으면 무작위로 갈린다.
+
+  종료점
+    "결정했어요"를 눌러 채널·다음 행동·근거를 제출하면 끝난다.
+    주 KPI가 "올바른 담당 채널과 다음 행동을 결정한 비율"이기 때문이다.
+
+  검색 결과 근거
+    docs/NH앱4개_카드검색_as-is결과.md 의 실측(2026-08-18~20)
+    실측에 없는 검색어는 0건으로 처리한다 — 지어내지 않는다.
+
+  포털
+    아직 실측 자료가 없어 화면을 비워 두었다.
+    raw/스크린샷/포털/ 이 채워지면 PORTAL_RESULTS 에 넣는다.
+-->
+<style>
+  :root{
+    --nh:#00A651; --nh-dark:#008C44;
+    --ink:#16181d; --sub:#5f6672; --line:#e5e7eb; --bg:#eef0f3;
+    --warn:#c2410c; --bad:#b91c1c;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);color:var(--ink);
+    font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif;
+    line-height:1.55;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;align-items:center;padding:18px 12px 40px;
+  }
+
+  /* ---------- 진행자 띠 ---------- */
+  .facil{
+    width:375px;display:flex;align-items:center;gap:8px;margin-bottom:10px;
+    font-size:11.5px;color:var(--sub);letter-spacing:-.2px;
+  }
+  .facil .tag{
+    background:#fff;border:1px solid var(--line);border-radius:999px;
+    padding:3px 9px;font-weight:700;
+  }
+  .facil .timer{margin-left:auto;font-family:ui-monospace,Consolas,monospace;font-weight:700;color:var(--ink)}
+
+  /* ---------- 폰 ---------- */
+  .phone{
+    width:375px;height:720px;background:#fff;border:1px solid #d8dce3;
+    border-radius:26px;overflow:hidden;display:flex;flex-direction:column;
+    box-shadow:0 6px 24px rgba(16,20,30,.10);
+  }
+  .statusbar{
+    display:flex;justify-content:space-between;align-items:center;flex:0 0 auto;
+    padding:9px 16px 5px;font-size:11.5px;font-weight:700;color:#111;
+  }
+  .batt{background:#111;color:#fff;border-radius:8px;font-size:9px;padding:1px 5px}
+
+  .topbar{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:8px 14px 10px;border-bottom:1px solid var(--line);
+  }
+  .topbar .title{font-size:16px;font-weight:800;letter-spacing:-.4px}
+  .decide-btn{
+    margin-left:auto;border:0;border-radius:9px;background:var(--nh);color:#fff;
+    font-family:inherit;font-size:12.5px;font-weight:800;padding:8px 12px;cursor:pointer;
+    letter-spacing:-.3px;
+  }
+  .scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+  /* ---------- 홈 ---------- */
+  .home{
+    height:100%;background:linear-gradient(170deg,#dfe9f3 0%,#eef1f5 60%,#f6f7f9 100%);
+    padding:26px 20px;display:flex;flex-direction:column;
+  }
+  .home h2{font-size:15px;font-weight:800;letter-spacing:-.4px;margin:0 0 4px}
+  .home .hs{font-size:12.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 22px;line-height:1.55}
+  .icons{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 10px}
+  .icon{
+    background:none;border:0;padding:0;cursor:pointer;font-family:inherit;
+    display:flex;flex-direction:column;align-items:center;gap:6px;
+  }
+  .icon .box{
+    width:56px;height:56px;border-radius:15px;display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:800;color:#fff;letter-spacing:-.4px;text-align:center;line-height:1.2;
+    box-shadow:0 2px 6px rgba(16,20,30,.16);padding:4px;
+  }
+  .icon .cap{font-size:10.5px;color:#31363d;letter-spacing:-.3px;text-align:center;line-height:1.25}
+  .bx-allone{background:#00A651}
+  .bx-kok{background:#1f6f4f}
+  .bx-smart{background:#0b6ec6}
+  .bx-nhpay{background:#f4a01c}
+  .bx-web{background:#4a5568}
+
+  /* ---------- 앱 공통 ---------- */
+  .apphead{
+    display:flex;align-items:center;gap:8px;padding:10px 14px;
+    font-size:15px;font-weight:800;letter-spacing:-.4px;border-bottom:1px solid var(--line);
+  }
+  .apphead .owner{font-size:11px;font-weight:500;color:var(--sub)}
+  .homebtn{
+    margin-left:auto;border:1px solid #d5d9e0;background:#fff;border-radius:8px;
+    font-family:inherit;font-size:11.5px;font-weight:700;color:#41474f;
+    padding:5px 10px;cursor:pointer;
+  }
+  .sbox{
+    display:flex;align-items:center;gap:8px;margin:12px 14px;
+    border:1.6px solid var(--nh);border-radius:11px;padding:9px 12px;background:#fff;
+  }
+  .sbox input{
+    flex:1;border:0;outline:none;background:none;font-family:inherit;
+    font-size:15px;font-weight:600;letter-spacing:-.4px;color:var(--ink);min-width:0;
+  }
+  .sbox input::-webkit-search-cancel-button,
+  .sbox input::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none}
+  .sbox button{border:0;background:none;cursor:pointer;padding:0;color:#6b7280;font-size:15px;font-family:inherit}
+  .chips{display:flex;gap:6px;padding:0 14px 10px;flex-wrap:wrap}
+  .chip{font-size:11px;font-weight:700;padding:5px 11px;border-radius:999px;background:#eff1f4;color:#4b5361}
+  .chip.on{background:#16181d;color:#fff}
+  .body{padding:0 14px 20px}
+  .cnt{font-size:12px;font-weight:700;letter-spacing:-.3px;margin:4px 0 8px;color:#3d434d}
+  .cnt em{color:var(--nh);font-style:normal}
+  .row{
+    font-size:12.5px;line-height:1.5;letter-spacing:-.3px;color:#3d434d;
+    padding:9px 0;border-bottom:1px dashed #eef0f3;background:none;border-left:0;border-right:0;border-top:0;
+    width:100%;text-align:left;font-family:inherit;cursor:default;display:block;
+  }
+  .row.link{cursor:pointer}
+  .row.link:hover{color:var(--nh-dark)}
+  .row .g{color:var(--nh)}
+  .zero{text-align:center;padding:30px 0 14px;color:#8b93a1;font-size:13px;line-height:1.65}
+  .zero .em{font-size:28px;display:block;margin-bottom:8px}
+  .hint{text-align:center;color:#9aa1ad;font-size:13px;padding:44px 12px;line-height:1.75}
+
+  /* 어두운 앱 (콕뱅크) */
+  .dark{background:#17181b}
+  .dark .apphead{color:#f2f3f5;border-bottom-color:#2a2c31}
+  .dark .sbox{border-color:#12b5ad;background:#17181b}
+  .dark .sbox input{color:#f2f3f5}
+  .dark .row{color:#b9bec7;border-bottom-color:#26282d}
+  .dark .cnt{color:#c8ccd3}
+  .dark .homebtn{background:#26282d;border-color:#3a3d44;color:#e8eaee}
+
+  /* ---------- 안내 카드 ---------- */
+  .guide{border:1px solid #bfe6d3;background:#f2faf6;border-radius:12px;padding:13px;margin:12px 0 6px}
+  .guide .gt{font-size:13.5px;font-weight:800;letter-spacing:-.4px;line-height:1.4;margin-bottom:4px;color:var(--ink)}
+  .guide .gs{font-size:11.5px;color:#6b7f74;letter-spacing:-.25px;margin-bottom:10px;line-height:1.5}
+  .gch{
+    background:#fff;border:1px solid #dbeee5;border-radius:9px;padding:9px 10px;margin-bottom:6px;
+    width:100%;text-align:left;font-family:inherit;cursor:pointer;display:block;
+  }
+  .gch .top{display:flex;align-items:center;gap:7px}
+  .gch .nm{font-size:13px;font-weight:700;letter-spacing:-.3px;color:var(--ink)}
+  .role{font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;margin-left:auto;flex:0 0 auto}
+  .role.done{background:#dcf5e8;color:var(--nh-dark)}
+  .role.info{background:#eceef3;color:#5a6480}
+  .gch .ds{font-size:11.5px;color:#6e7671;margin-top:4px;line-height:1.45;letter-spacing:-.25px}
+  .gnext{font-size:11.5px;color:#5c6b63;margin-top:9px;padding-top:9px;border-top:1px dashed #cfe3d8;line-height:1.5}
+
+  /* ---------- 실제 캡처 스택 ---------- */
+  .pshot{overflow:hidden;display:block;background:#fff}
+  .pshot img{display:block;width:100%;border:0}
+  /* 첫 장은 검색창까지 남긴다 — 상태바만 자른다 */
+  .pshot.first img{margin-top:-10.8%;margin-bottom:-32.5%}
+  /* 이후 장은 상태바와 검색창을 자르고 내용만 남긴다 */
+  .pshot.cont img{margin-top:-45.5%;margin-bottom:-32.5%}
+  .plink{
+    display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    background:#fff;border:0;border-top:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;
+    padding:13px 14px;font-size:13px;font-weight:700;color:#0b6ec6;letter-spacing:-.3px;
+  }
+  .pback{
+    display:block;width:100%;text-align:left;font-family:inherit;cursor:pointer;
+    background:#f1f3f5;border:0;padding:11px 14px;font-size:12.5px;color:#41474f;letter-spacing:-.3px;
+  }
+  .pnote{
+    padding:12px 14px 20px;font-size:11.5px;color:#9aa1ad;line-height:1.6;letter-spacing:-.2px;
+  }
+
+  /* ---------- 브라우저 ---------- */
+  .browser-bar{
+    display:flex;align-items:center;gap:6px;padding:9px 12px;background:#f1f3f5;
+    border-bottom:1px solid #dfe3e8;
+  }
+  .dot{width:9px;height:9px;border-radius:50%;background:#cfd4da;flex:0 0 auto}
+  .url{
+    flex:1;background:#fff;border:1px solid #dfe3e8;border-radius:999px;
+    padding:5px 11px;font-size:11.5px;color:#5f6672;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+  }
+  .pending{
+    margin:16px 14px;border:1px dashed #cbd2dc;border-radius:12px;background:#fafbfc;
+    padding:18px 14px;font-size:12.5px;color:#6b7280;line-height:1.65;letter-spacing:-.3px;
+  }
+  .pending b{color:#3d434d}
+
+  /* ---------- 결정 · 종료 ---------- */
+  .pad{padding:18px 16px 26px}
+  .pad h2{font-size:17px;font-weight:800;letter-spacing:-.5px;margin:0 0 6px}
+  .pad .desc{font-size:12.5px;color:var(--sub);letter-spacing:-.3px;line-height:1.6;margin:0 0 16px}
+  .q{display:block;font-weight:700;font-size:13px;margin:16px 0 6px;letter-spacing:-.3px}
+  .opts{display:flex;flex-direction:column;gap:6px}
+  .opt{
+    border:1px solid #d5d9e0;background:#fff;border-radius:10px;padding:10px 12px;
+    font-family:inherit;font-size:13px;text-align:left;cursor:pointer;color:var(--ink);
+  }
+  .opt[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+  textarea{
+    width:100%;min-height:66px;border:1px solid #d5d9e0;border-radius:10px;padding:10px;
+    font-family:inherit;font-size:13px;resize:vertical;color:var(--ink);
+  }
+  .btn{
+    border:0;border-radius:10px;font-family:inherit;font-size:14px;font-weight:800;
+    padding:13px;cursor:pointer;width:100%;margin-top:16px;letter-spacing:-.3px;
+  }
+  .btn.primary{background:var(--nh);color:#fff}
+  .btn.primary:disabled{background:#cfd6dc;cursor:not-allowed}
+  .btn.ghost{background:#fff;border:1px solid #d5d9e0;color:#41474f;margin-top:8px}
+  .logout{
+    background:#0f1115;color:#c8ccd3;border-radius:10px;padding:12px;
+    font-family:ui-monospace,Consolas,monospace;font-size:10.5px;line-height:1.6;
+    max-height:230px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin-top:12px;
+  }
+  .note{
+    font-size:11.5px;color:#8b93a1;line-height:1.65;letter-spacing:-.2px;margin-top:14px;
+  }
+  .foot{width:375px;font-size:11px;color:#9aa1ad;line-height:1.6;margin-top:12px;letter-spacing:-.2px}
+</style>
+</head>
+<body>
+
+<div class="facil">
+  <span class="tag" id="fGroup">—</span>
+  <span class="tag" id="fPart">—</span>
+  <span id="fHint">진행자용 표시 — 참가자에게 설명하지 않습니다</span>
+  <span class="timer" id="fTimer">0:00</span>
+</div>
+
+<div class="phone" id="phone">
+  <div class="statusbar">
+    <span><b>SKT</b> <span id="clock">1:19</span></span>
+    <span><span class="batt">71</span></span>
+  </div>
+  <div id="chrome"></div>
+  <div class="scroll" id="screen"></div>
+</div>
+
+<div class="foot">
+  기획 검증용 <b>목업</b>입니다. 실제 NH농협 서비스가 아니며 NH농협과 무관합니다.
+  실제 신청은 일어나지 않고 개인정보를 수집하지 않습니다.
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var $ = function(id){ return document.getElementById(id); };
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function norm(q){
+    return String(q == null ? "" : q).toLowerCase().replace(/[\s\-_.·]/g,"");
+  }
+
+  /* =====================================================================
+     조건 배정
+     ===================================================================== */
+  var params = new URLSearchParams(location.search);
+  var g = (params.get("g") || "").toLowerCase();
+  if (g !== "a" && g !== "b"){ g = Math.random() < 0.5 ? "a" : "b"; }
+  var SHOW_GUIDE = (g === "b");
+  var PARTICIPANT = params.get("p") || "";
+
+  /* =====================================================================
+     실측 검색 결과 — docs/NH앱4개_카드검색_as-is결과.md (2026-08-18~20)
+     여기 없는 검색어는 0건으로 처리한다. 지어내지 않는다.
+     ===================================================================== */
+  var ALLONE_MENU8 = { label:"메뉴", count:8, rows:[
+    { t:'NH금융그룹 &gt; <span class="g">NH농협카드</span>', go:"allone-card" },
+    { t:'금융편의 &gt; 학생증체크카드' },
+    { t:'내 자산 &gt; 라이프 &gt; 건강카드뉴스' },
+    { t:'내 자산 &gt; 소비관리 &gt; 카드혜택비교' },
+    { t:'내 자산 &gt; 소비관리 &gt; 카드리포트' }
+  ]};
+  var ALLONE_MENU39 = { label:"메뉴", count:39, rows:[
+    { t:'공과금/채권 &gt; 납부하기 &gt; 법원등기<span class="g">신청</span> 수수료' },
+    { t:'퇴직연금 &gt; 연금계좌관리 &gt; 연금<span class="g">신청</span> 조회/취소' },
+    { t:'퇴직연금 &gt; 연금계좌관리 &gt; 해지<span class="g">신청</span>' },
+    { t:'퇴직연금 &gt; 연금계좌관리 &gt; 연금<span class="g">신청</span>' }
+  ]};
+  var ALLONE_PROD4 = { label:"상품", count:4, rows:[
+    { t:'예/적금 · 사업잘되는NH통장' },
+    { t:'예/적금 · Asset글로벌증권통장' },
+    { t:'대출 · NH <span class="g">K</span>-외국인신용대출' },
+    { t:'외환 · NH트래블리 외화예금' }
+  ]};
+  var SMART_MENU15 = { label:"메뉴", count:15, rows:[
+    { t:'보안매체 재발급' },
+    { t:'OTP 이용 안내' },
+    { t:'간편비밀번호 변경' }
+  ]};
+  var KOK_ZERO = { label:"메뉴", count:0, rows:[], zero:true,
+    msg:"검색 결과가 없어요.<br>추천검색어는 어떠세요?" };
+
+  var APPS = [
+    { id:"allone", name:"NH올원뱅크", owner:"농협은행", cls:"bx-allone", cap:"NH올원뱅크",
+      head:"통합검색", chips:["메뉴","상품","FAQ","기타"], dark:false,
+      table:[
+        { keys:["카드신청"], sections:[ALLONE_MENU39] },
+        { keys:["카드발급"], sections:[ALLONE_MENU8] },
+        { keys:["경기패스카드","k패스카드","케이패스카드","k패스","케이패스"],
+          sections:[ALLONE_MENU8, ALLONE_PROD4] }
+      ],
+      empty:{ label:"메뉴", count:0, rows:[] } },
+
+    { id:"kok", name:"NH콕뱅크", owner:"상호금융(지역농협)", cls:"bx-kok", cap:"NH콕뱅크",
+      head:"검색", chips:[], dark:true,
+      table:[
+        { keys:["카드발급","카드신청"],
+          sections:[{ label:"메뉴", count:1, rows:[
+            { t:'금융 &gt; 카드 &gt; <span class="g">NH농협카드 신청</span>', go:"kok-web" }
+          ]}] }
+      ],
+      empty: KOK_ZERO },
+
+    { id:"smart", name:"NH스마트뱅킹", owner:"농협은행", cls:"bx-smart", cap:"NH스마트뱅킹",
+      head:"검색", chips:["전체","메뉴","상품","기타"], dark:false,
+      table:[
+        { keys:["k패스카드","케이패스카드","k패스","케이패스","경기패스카드"],
+          sections:[SMART_MENU15, { label:"상품", count:0, rows:[] }] },
+        { keys:["카드발급","카드신청"],
+          sections:[{ label:"메뉴", count:6, rows:[
+            { t:'마이페이지 &gt; 나의 <span class="g">카드</span> &gt; <span class="g">카드</span>정보' },
+            { t:'내 자산 &gt; 소비관리 &gt; <span class="g">카드</span>혜택비교' }
+          ]}, { label:"상품", count:0, rows:[] }] }
+      ],
+      empty:{ label:"메뉴", count:0, rows:[] } },
+
+    { id:"nhpay", name:"NH Pay", owner:"농협카드", cls:"bx-nhpay", cap:"NH Pay",
+      head:"검색", chips:["전체","카드","혜택"], dark:false,
+      table:[
+        { keys:["k패스카드","케이패스카드","k패스","케이패스","경기패스카드"],
+          sections:[{ label:"카드", count:2, rows:[
+            { t:'<span class="g">K-패스카드</span> (신용) — 대중교통 이용금액 환급', go:"nhpay-detail" },
+            { t:'<span class="g">K-패스카드</span> (체크) — 대중교통 이용금액 환급', go:"nhpay-detail" }
+          ]}] },
+        { keys:["카드신청","카드발급"],
+          sections:[{ label:"메뉴", count:2, rows:[
+            { t:'<span class="g">카드신청</span> &gt; 전체카드', go:"nhpay-list" },
+            { t:'이응패스 카드 (타지역)' }
+          ]}] }
+      ],
+      empty:{ label:"카드", count:0, rows:[] } }
+  ];
+
+  function appById(id){
+    for (var i=0;i<APPS.length;i++){ if (APPS[i].id === id) return APPS[i]; }
+    return null;
+  }
+
+  /* =====================================================================
+     포털 — 실측 자료가 아직 없다.
+     raw/스크린샷/포털/ 이 채워지면 아래 배열에 넣는다.
+     비어 있는 동안에는 "실측 대기" 화면을 보여주고 포털 사용 사실만 기록한다.
+     ===================================================================== */
+  /* 2026-08-25 17:39~17:41 네이버 모바일에서 직접 검색해 캡처한 화면이다.
+     포털 결과는 시점과 개인화에 따라 달라지므로 캡처 시각을 함께 남긴다. */
+  var PORTAL_CAPTURED_AT = "2026-08-25 17:39~17:41 · 네이버 모바일";
+  var SHOT = "../raw/스크린샷/";
+  var PORTAL_RESULTS = [
+    { keys:["k-패스카드","k패스카드","케이패스카드","경기패스카드"],
+      shots:[
+        "Screenshot_20260825_173943_NAVER.jpg",
+        "Screenshot_20260825_173951_NAVER.jpg",
+        "Screenshot_20260825_173956_NAVER.jpg",
+        "Screenshot_20260825_174002_NAVER.jpg",
+        "Screenshot_20260825_174007_NAVER.jpg",
+        "Screenshot_20260825_174012_NAVER.jpg"
+      ] },
+    { keys:["케이패스","k패스"],
+      shots:[
+        "Screenshot_20260825_174038_NAVER.jpg",
+        "Screenshot_20260825_174045_NAVER.jpg",
+        "Screenshot_20260825_174049_NAVER.jpg",
+        "Screenshot_20260825_174056_NAVER.jpg"
+      ] }
+  ];
+  /* 검색 결과에서 "신용카드 관련광고"를 눌러 들어간 화면 */
+  var PORTAL_ADS = [
+    "Screenshot_20260825_174120_NAVER.jpg",
+    "Screenshot_20260825_174128_NAVER.jpg",
+    "Screenshot_20260825_174137_NAVER.jpg",
+    "Screenshot_20260825_174144_NAVER.jpg"
+  ];
+
+  function shotStack(list){
+    var h = "", i;
+    for (i=0;i<list.length;i++){
+      h += '<span class="pshot ' + (i === 0 ? "first" : "cont") + '">' +
+        '<img src="' + esc(SHOT + list[i]) + '" alt=""></span>';
+    }
+    return h;
+  }
+
+  /* =====================================================================
+     안내 카드 — 실험군에만 보인다.
+     노출 조건: 검색 결과가 0건이거나, 결과가 있어도 담당 채널이 드러나지 않을 때.
+     담당 채널 본인(NH Pay)에서는 중복이므로 띄우지 않는다.
+     ===================================================================== */
+  var GUIDE_KEYS = ["k패스카드","케이패스카드","k패스","케이패스","경기패스카드","카드발급","카드신청"];
+  var GUIDE = {
+    title: "K-패스카드는 다음 채널에서 처리할 수 있어요",
+    sub: "이 앱 검색 결과만으로는 담당 채널이 드러나지 않아 안내를 표시했습니다.",
+    channels: [
+      { v:"NH Pay 앱", nm:"NH Pay", role:"완료", cls:"done", ds:"카드 상품을 확인하고 신청까지 마칠 수 있어요." },
+      { v:"NH농협카드 모바일웹", nm:"NH농협카드 모바일웹", role:"완료", cls:"done", ds:"앱 설치 없이 상품을 확인하고 신청할 수 있어요." },
+      { v:"현재앱", nm:"지금 이 앱", role:"안내", cls:"info", ds:"담당 채널 정보만 확인할 수 있고, 이 앱에서는 신청이 끝나지 않아요." }
+    ],
+    next: "카드 목록에서 K-패스카드를 찾아 신청"
+  };
+
+  var DEC_OPTIONS = [
+    "NH Pay 앱", "NH농협카드 모바일웹", "지금 보고 있는 앱 안에서",
+    "NH콕뱅크 앱", "NH스마트뱅킹 앱", "가까운 농협 영업점", "어디인지 모르겠다"
+  ];
+  var CORRECT = ["NH Pay 앱", "NH농협카드 모바일웹"];
+
+  /* =====================================================================
+     상태와 기록
+     ===================================================================== */
+  var LIMIT_SEC = 300;
+  var state = {
+    view: "home",        // home | app | web | decide | end
+    app: null,           // 현재 앱 id
+    sub: null,           // 앱 안의 하위 화면 id
+    query: "",
+    result: null,
+    shots: null,
+    decision: { channel:"", next:"", why:"" }
+  };
+  var startedAt = null, timer = null, ended = false;
+
+  var log = {
+    group: g,
+    groupLabel: SHOW_GUIDE ? "실험군(안내 있음)" : "대조군(안내 없음)",
+    participant: PARTICIPANT,
+    startedAt: null,
+    endedAt: null,
+    elapsedSec: null,
+    appOpens: [],        // { at, app }
+    appSwitches: 0,
+    searches: [],        // { at, app, query, zero }
+    portalOpens: [],     // { at }
+    crossLinks: [],      // { at, from, to }
+    guideShown: [],      // { at, app }
+    guideChannelTaps: [],// { at, channel }
+    decision: null,
+    outcome: null
+  };
+
+  function sec(){ return startedAt ? Math.round((Date.now() - startedAt)/1000) : 0; }
+  function fmt(s){ return Math.floor(s/60) + ":" + ("0" + (s%60)).slice(-2); }
+
+  function startTimer(){
+    startedAt = Date.now();
+    log.startedAt = new Date().toISOString();
+    timer = setInterval(function(){
+      var s = sec();
+      $("fTimer").textContent = fmt(s);
+      if (s >= LIMIT_SEC && !ended){ finish("시간초과"); }
+    }, 1000);
+  }
+
+  /* =====================================================================
+     화면
+     ===================================================================== */
+  function chromeFor(){
+    if (state.view === "home"){
+      return '<div class="topbar"><span class="title">홈</span>' +
+        '<button class="decide-btn" data-act="decide">결정했어요</button></div>';
+    }
+    if (state.view === "app"){
+      var a = appById(state.app);
+      return '<div class="apphead' + (a.dark ? " dark" : "") + '">' +
+        '<span>' + esc(a.name) + '</span><span class="owner">' + esc(a.owner) + '</span>' +
+        '<button class="homebtn" data-act="home">홈</button>' +
+        '<button class="decide-btn" data-act="decide">결정했어요</button></div>';
+    }
+    if (state.view === "web"){
+      return '<div class="browser-bar"><span class="dot"></span><span class="dot"></span>' +
+        '<span class="url">' + esc(state.sub === "kok-web" ? "nonghyup.com/allcard" : "search.naver.com") + '</span>' +
+        '<button class="homebtn" data-act="home">홈</button>' +
+        '<button class="decide-btn" data-act="decide">결정했어요</button></div>';
+    }
+    return "";
+  }
+
+  function renderHome(){
+    var h = '<div class="home"><h2>무엇이든 편하게 사용해 보세요</h2>' +
+      '<p class="hs">평소 하시던 대로 하시면 됩니다.<br>다 정하셨으면 위쪽 <b>결정했어요</b>를 누르세요.</p>' +
+      '<div class="icons">';
+    for (var i=0;i<APPS.length;i++){
+      h += '<button class="icon" data-act="open" data-app="' + esc(APPS[i].id) + '">' +
+        '<span class="box ' + APPS[i].cls + '">' + esc(APPS[i].cap) + '</span>' +
+        '<span class="cap">' + esc(APPS[i].name) + '</span></button>';
+    }
+    h += '<button class="icon" data-act="web"><span class="box bx-web">인터넷</span>' +
+      '<span class="cap">인터넷 검색</span></button>';
+    h += '</div></div>';
+    return h;
+  }
+
+  function lookup(app, q){
+    var key = norm(q);
+    for (var i=0;i<app.table.length;i++){
+      for (var j=0;j<app.table[i].keys.length;j++){
+        if (norm(app.table[i].keys[j]) === key) return app.table[i].sections;
+      }
+    }
+    return null;
+  }
+
+  function guideVisible(app, q){
+    if (!SHOW_GUIDE) return false;
+    if (app.id === "nhpay") return false;          // 담당 채널 본인에게는 중복 안내를 띄우지 않는다
+    var key = norm(q);
+    for (var i=0;i<GUIDE_KEYS.length;i++){
+      if (norm(GUIDE_KEYS[i]) === key) return true;
+    }
+    return false;
+  }
+
+  function renderGuide(){
+    var h = '<div class="guide"><div class="gt">' + esc(GUIDE.title) + '</div>' +
+      '<div class="gs">' + esc(GUIDE.sub) + '</div>';
+    for (var i=0;i<GUIDE.channels.length;i++){
+      var c = GUIDE.channels[i];
+      h += '<button class="gch" data-act="gch" data-chn="' + esc(c.v) + '">' +
+        '<span class="top"><span class="nm">' + esc(c.nm) + '</span>' +
+        '<span class="role ' + c.cls + '">' + esc(c.role) + '</span></span>' +
+        '<span class="ds">' + esc(c.ds) + '</span></button>';
+    }
+    h += '<div class="gnext">다음 행동 · ' + esc(GUIDE.next) + '</div></div>';
+    return h;
+  }
+
+  function renderRows(sections){
+    var h = "", i, j, s, r;
+    for (i=0;i<sections.length;i++){
+      s = sections[i];
+      if (s.zero){
+        h += '<div class="zero"><span class="em">&#128373;</span>' + s.msg + '</div>';
+        continue;
+      }
+      h += '<div class="cnt">' + esc(s.label) + ' <em>' + s.count + '건</em></div>';
+      if (!s.rows.length){
+        h += '<div class="row" style="color:#9aa1ad">결과가 없습니다.</div>';
+      }
+      for (j=0;j<s.rows.length;j++){
+        r = s.rows[j];
+        h += '<button class="row' + (r.go ? " link" : "") + '"' +
+          (r.go ? ' data-act="go" data-go="' + esc(r.go) + '"' : "") + '>' + r.t + '</button>';
+      }
+    }
+    return h;
+  }
+
+  function renderApp(){
+    var a = appById(state.app);
+    var h = '<div class="' + (a.dark ? "dark" : "") + '" style="min-height:100%">';
+    h += '<div class="sbox"><input id="q" type="search" placeholder="검색어를 입력하세요" ' +
+      'autocomplete="off" enterkeyhint="search" value="' + esc(state.query) + '">' +
+      '<button data-act="search">&#9906;</button></div>';
+    if (a.chips.length){
+      h += '<div class="chips">';
+      for (var i=0;i<a.chips.length;i++){
+        h += '<span class="chip' + (i===0 ? " on" : "") + '">' + esc(a.chips[i]) + '</span>';
+      }
+      h += '</div>';
+    }
+    h += '<div class="body">';
+    if (state.sub === "allone-card"){
+      h += '<div class="cnt">NH농협카드</div>' +
+        '<div class="row">카드 소개 · 혜택 안내 화면입니다.</div>' +
+        '<div class="row" style="color:#9aa1ad">이 화면에서는 특정 카드를 바로 신청할 수 없습니다.</div>';
+    } else if (state.sub === "nhpay-detail"){
+      h += '<div class="cnt">K-패스카드</div>' +
+        '<div class="row">대중교통 이용금액 환급 · 연회비 없음</div>' +
+        '<div class="row" style="color:#9aa1ad">신청 화면으로 이어지는 자리입니다. 실제 신청은 하지 않습니다.</div>';
+    } else if (state.sub === "nhpay-list"){
+      h += '<div class="cnt">전체카드 <em>79건</em></div>' +
+        '<div class="row">신용카드 · 체크카드 · 프리미엄 · 공공복지카드</div>' +
+        '<div class="row" style="color:#9aa1ad">목록에서 직접 찾아야 합니다.</div>';
+    } else if (state.result === null){
+      h += '<div class="hint">검색어를 입력해 보세요.</div>';
+    } else {
+      h += renderRows(state.result);
+      if (guideVisible(a, state.query)) h += renderGuide();
+    }
+    h += '</div></div>';
+    return h;
+  }
+
+  function renderWeb(){
+    if (state.sub === "kok-web"){
+      return '<div class="body" style="padding-top:14px">' +
+        '<div class="cnt">전체 카드 <em>79건</em></div>' +
+        '<div class="row">신용카드 · 체크카드 · 프리미엄 · 공공복지카드</div>' +
+        '<div class="row" style="color:#9aa1ad">콕뱅크에서 이 페이지로 이동했습니다. 특정 카드로 바로 가지는 않습니다.</div>' +
+        '</div>';
+    }
+    if (state.sub === "portal-ads"){
+      return '<button class="pback" data-act="pback">‹ 검색 결과로 돌아가기</button>' +
+        shotStack(PORTAL_ADS) +
+        '<div class="pnote">실제 화면 캡처 · ' + esc(PORTAL_CAPTURED_AT) + '</div>';
+    }
+
+    var h = '<div class="sbox"><input id="q" type="search" placeholder="검색어를 입력하세요" ' +
+      'autocomplete="off" enterkeyhint="search" value="' + esc(state.query) + '">' +
+      '<button data-act="search">&#9906;</button></div>';
+    if (state.shots && state.shots.length){
+      h += shotStack(state.shots) +
+        '<button class="plink" data-act="pads">신용카드 관련광고 자세히 보기 ›</button>' +
+        '<div class="pnote">실제 화면 캡처 · ' + esc(PORTAL_CAPTURED_AT) + '</div>';
+    } else if (state.query){
+      h += '<div class="pending"><b>이 검색어의 결과는 준비하지 못했습니다.</b><br>' +
+        '실제로 검색해 기록한 화면만 보여드리고 있어 지어내지 않았습니다. ' +
+        '입력하신 검색어는 기록에 남았습니다.<br><br>' +
+        '아래 말로 다시 검색해 보시거나, 앱으로 돌아가셔도 됩니다.<br>' +
+        '<b>k-패스카드</b> · <b>케이패스</b></div>';
+    } else {
+      h += '<div class="hint">검색어를 입력해 보세요.</div>';
+    }
+    return h;
+  }
+
+  function renderDecide(){
+    var d = state.decision, h = '<div class="pad"><h2>어디에서 처리하시겠어요?</h2>' +
+      '<p class="desc">지금까지 보신 것을 바탕으로 답해주세요. 정답을 맞히는 것이 목적이 아닙니다.</p>' +
+      '<span class="q">1. K-패스카드를 발급받으려면 어디로 가야 한다고 생각하세요?</span><div class="opts">';
+    for (var i=0;i<DEC_OPTIONS.length;i++){
+      h += '<button class="opt" data-act="pick" data-v="' + esc(DEC_OPTIONS[i]) + '" aria-pressed="' +
+        (d.channel === DEC_OPTIONS[i]) + '">' + esc(DEC_OPTIONS[i]) + '</button>';
+    }
+    h += '</div>' +
+      '<span class="q">2. 그곳에 가서 하실 일을 순서대로 적어주세요.</span>' +
+      '<textarea id="dNext" placeholder="">' + esc(d.next) + '</textarea>' +
+      '<span class="q">3. 그렇게 판단하신 근거는 무엇인가요?</span>' +
+      '<textarea id="dWhy" placeholder="화면에서 본 것 중 무엇이 그렇게 생각하게 했나요?">' + esc(d.why) + '</textarea>' +
+      '<button class="btn primary" data-act="submit">제출하기</button>' +
+      '<button class="btn ghost" data-act="back">화면으로 돌아가기</button></div>';
+    return h;
+  }
+
+  function renderEnd(){
+    return '<div class="pad"><h2 id="endT">참여해 주셔서 감사합니다</h2>' +
+      '<p class="desc">아래 기록을 복사해서 진행자에게 보내주세요.</p>' +
+      '<div class="logout">' + esc(JSON.stringify(log, null, 1)) + '</div>' +
+      '<button class="btn primary" data-act="copy">기록 복사하기</button>' +
+      '<p class="note">이 목업은 기획 검증용이며 실제 NH농협 서비스가 아닙니다. 개인정보는 수집하지 않았습니다.</p></div>';
+  }
+
+  function render(){
+    $("chrome").innerHTML = chromeFor();
+    var h;
+    if (state.view === "home") h = renderHome();
+    else if (state.view === "app") h = renderApp();
+    else if (state.view === "web") h = renderWeb();
+    else if (state.view === "decide") h = renderDecide();
+    else h = renderEnd();
+    $("screen").innerHTML = h;
+    var q = $("q");
+    if (q){
+      q.addEventListener("keydown", function(e){
+        if (e.key === "Enter"){ e.preventDefault(); doSearch(); }
+      });
+    }
+  }
+
+  /* =====================================================================
+     동작
+     ===================================================================== */
+  function openApp(id){
+    if (state.app !== id) log.appSwitches++;
+    log.appOpens.push({ at: sec(), app: id });
+    state.view = "app"; state.app = id; state.sub = null;
+    state.query = ""; state.result = null;
+    render();
+  }
+
+  function openWeb(){
+    log.portalOpens.push({ at: sec() });
+    log.appSwitches++;
+    state.view = "web"; state.sub = null; state.query = ""; state.result = null; state.shots = null;
+    render();
+  }
+
+  function goHome(){
+    state.view = "home"; state.sub = null;
+    render();
+  }
+
+  function doSearch(){
+    var el = $("q");
+    if (!el) return;
+    var q = el.value.trim();
+    if (!q) return;
+    state.query = q;
+    state.sub = null;
+
+    if (state.view === "web"){
+      var found = null, i, j;
+      for (i=0;i<PORTAL_RESULTS.length && !found;i++){
+        for (j=0;j<PORTAL_RESULTS[i].keys.length;j++){
+          if (norm(PORTAL_RESULTS[i].keys[j]) === norm(q)){ found = PORTAL_RESULTS[i].shots; break; }
+        }
+      }
+      state.shots = found;
+      state.result = null;
+      log.searches.push({ at: sec(), app: "portal", query: q, zero: !found });
+      render();
+      return;
+    }
+
+    var a = appById(state.app);
+    var hit = lookup(a, q);
+    /* 실측에 없는 검색어는 0건으로 처리한다 */
+    state.result = hit ? hit : [a.empty];
+    var zero = !hit;
+    log.searches.push({ at: sec(), app: a.id, query: q, zero: zero });
+    if (guideVisible(a, q)) log.guideShown.push({ at: sec(), app: a.id });
+    render();
+  }
+
+  function goTo(target){
+    if (target === "kok-web"){
+      log.crossLinks.push({ at: sec(), from: state.app, to: "nhpay-web" });
+      state.view = "web"; state.sub = "kok-web";
+    } else {
+      log.crossLinks.push({ at: sec(), from: state.app, to: target });
+      state.sub = target;
+    }
+    render();
+  }
+
+  function finish(outcome){
+    if (ended) return;
+    ended = true;
+    if (timer) clearInterval(timer);
+    log.outcome = outcome;
+    log.endedAt = new Date().toISOString();
+    log.elapsedSec = sec();
+    log.decision = {
+      channel: state.decision.channel,
+      next: state.decision.next,
+      why: state.decision.why,
+      channelCorrect: CORRECT.indexOf(state.decision.channel) !== -1,
+      portalUsed: log.portalOpens.length > 0
+    };
+    state.view = "end";
+    render();
+    if (outcome === "시간초과"){
+      var t = $("endT");
+      if (t) t.textContent = "5분이 지났습니다";
+    }
+  }
+
+  function submitDecision(){
+    var n = $("dNext"), w = $("dWhy");
+    state.decision.next = n ? n.value.trim() : "";
+    state.decision.why = w ? w.value.trim() : "";
+    if (!state.decision.channel){ alert("1번에서 한 곳을 골라주세요."); return; }
+    finish("결정 완료");
+  }
+
+  /* 클릭은 한 곳에서 받는다 — 화면을 새로 그려도 연결이 끊기지 않는다 */
+  document.addEventListener("click", function(e){
+    var act = null, node = e.target;
+    while (node && node !== document.body){
+      if (node.getAttribute && node.getAttribute("data-act")){ act = node; break; }
+      node = node.parentNode;
+    }
+    if (!act) return;
+    var a = act.getAttribute("data-act");
+
+    if (a === "open"){ openApp(act.getAttribute("data-app")); }
+    else if (a === "web"){ openWeb(); }
+    else if (a === "home"){ goHome(); }
+    else if (a === "search"){ doSearch(); }
+    else if (a === "go"){ goTo(act.getAttribute("data-go")); }
+    else if (a === "gch"){
+      log.guideChannelTaps.push({ at: sec(), channel: act.getAttribute("data-chn") });
+      act.style.borderColor = "#00A651";
+    }
+    else if (a === "pads"){
+      log.crossLinks.push({ at: sec(), from: "portal", to: "portal-ads" });
+      state.sub = "portal-ads"; render();
+    }
+    else if (a === "pback"){ state.sub = null; render(); }
+    else if (a === "decide"){ state.view = "decide"; render(); }
+    else if (a === "back"){ state.view = state.app ? "app" : "home"; render(); }
+    else if (a === "pick"){
+      state.decision.channel = act.getAttribute("data-v");
+      render();
+    }
+    else if (a === "submit"){ submitDecision(); }
+    else if (a === "copy"){
+      var txt = JSON.stringify(log, null, 1);
+      if (navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(function(){ alert("복사했습니다."); },
+          function(){ alert("복사에 실패했습니다. 화면의 기록을 직접 선택해 복사해 주세요."); });
+      } else {
+        alert("이 브라우저에서는 자동 복사가 되지 않습니다. 화면의 기록을 직접 선택해 복사해 주세요.");
+      }
+    }
+  });
+
+  /* 화면을 벗어난 것 — 진짜 외부 검색인지는 진행자가 확인해야 한다 */
+  document.addEventListener("visibilitychange", function(){
+    if (document.hidden && startedAt && !ended){
+      log.portalOpens.push({ at: sec(), note: "화면을 벗어남(목업 밖)" });
+    }
+  });
+
+  /* =====================================================================
+     시작
+     ===================================================================== */
+  var now = new Date();
+  $("clock").textContent = (now.getHours() % 12 || 12) + ":" + ("0" + now.getMinutes()).slice(-2);
+  $("fGroup").textContent = log.groupLabel;
+  $("fPart").textContent = PARTICIPANT ? ("참가자 " + PARTICIPANT) : "참가자 미지정";
+  startTimer();
+  render();
+})();
+</script>
+</body>
+</html>
