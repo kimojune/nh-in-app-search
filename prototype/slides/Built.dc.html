@@ -58,7 +58,10 @@
     .g .gv.pend{ font-family:var(--font-body); font-size:12.5px; color:var(--ink-muted); font-weight:600; }
     .g .gt{ flex:1; font-size:13px; line-height:1.45; }
 
-    .caution{ margin-top:14px; font-size:13px; color:var(--ink-muted); line-height:1.6; }
+    .caution{ margin-top:12px; font-size:13px; color:var(--ink-muted); line-height:1.6; }
+    .demo{ margin-top:14px; margin-bottom:52px; background:var(--line); border-left:3px solid var(--ink-muted); padding:12px 18px; font-size:13.5px; line-height:1.5; color:var(--ink-muted); display:flex; align-items:baseline; gap:14px; }
+    .demo b{ font-weight:800; color:var(--ink); }
+    .demo .steps{ color:var(--ink-muted); }
     .caution b{ color:var(--ink); }
 
     .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
@@ -81,27 +84,26 @@
       <div class="metrics">
         <div class="m"><div class="v">4줄</div><div class="l">명부를 가져오는 코드</div></div>
         <div class="m"><div class="v">0 B</div><div class="l">검색 한 번이 쓰는 네트워크</div></div>
-        <div class="m"><div class="v">하루 1회</div><div class="l"><b>바뀌었는지만 묻는다</b><br>안 바뀌면 0 B · 바뀌면 약 340 KB</div></div>
-        <div class="m"><div class="v">2개</div><div class="l">계열사가 손으로 채우는 칸</div></div>
+        <div class="m"><div class="v">하루 1회</div><div class="l"><b>바뀌었는지만 묻는다</b><br>안 바뀌면 0 B · 바뀌면 약 1.9 MB</div></div>
       </div>
-      <div class="caution"><b>자동으로 이동시키지 않는다.</b> 알려줄 뿐이고 딥링크는 범위 밖이다.<br><b>화면은 앱이 그린다.</b> 데이터만 주고 안내 카드는 앱의 디자인으로 붙인다 — 남의 UI를 넣지 않는 것이 도입 조건이었다.<br><b>서명 검증은 넣지 않았다</b> — 명부가 변조되면 그대로 피싱 화면이 되므로 실서비스에서는 필수다.</div>
     </div>
 
     <div class="col">
       <div class="col-label">어떻게 잴 것인가 <span class="status">효과 미검증</span></div>
       <div class="kpi">
         <div class="t">1차 KPI — 외부 재검색이나 도움 없이 <b>인앱검색만으로 올바른 담당 채널과 다음 행동을 결정한</b> 참가자 비율</div>
-        <div class="obs"><span class="ov">2명 중 2명</span><span>완료 채널에 도착했다</span><span class="cav">실험군 2명 · 대조군 없음</span></div>
+        <div class="obs"><span class="ov">2명 중 2명</span><span>완료 채널에 도착하고 다음 행동을 답했다</span><span class="cav">실험군 2명 · 대조군 없음 · 다음 행동은 판정하지 않았다</span></div>
       </div>
       <div class="guards">
-        <div class="g"><span class="gv">15명 중 7명</span><span class="gt">잘못된 채널을 <b>확신</b>하는 비율</span></div>
+        <div class="g"><span class="gv">15명 중 7명</span><span class="gt">잘못된 채널을 <b>확신</b>하는 비율 — <b>as-is 기준선</b>이다. 이 값이 나빠지면 안 된다</span></div>
       </div>
-      <div class="caution">목표는 담당 채널까지 보내는 것이지만, <b>판정은 더 엄하게 뒀다</b> — 그 채널에서 무엇을 해야 하는지까지 말할 수 있어야 성공이다.<br><b>▶ 여기서 실제로 돌려 보여드립니다</b> — 0건 화면 → 등록·승인·발행 → 동기화 → 안내가 붙는다.</div>
+      <div class="caution">안내 한 줄은 <b>「어느 채널」과 「거기서 무엇을」</b> 둘을 말한다. <b>목표도 판정도 둘 다다</b> — 채널만 맞히면 절반이다.</div>
     </div>
   </div>
+  <div class="demo"><b>▶ 여기서 실제로 돌려 보여드립니다</b><span class="steps">0건 화면 → 등록·승인·발행 → 동기화 → 안내가 붙는다</span></div>
 
   <div class="footer">
-    <span>관찰: 실험군 2명 · 대조군 없음 | 가드레일 15명 중 7명은 자기보고</span>
+    <span>관찰: 실험군 2명 · 대조군 없음 | 기준선 15명 중 7명은 인식설문 자기보고</span>
     <span>6 / 8</span>
   </div>
 </div>
