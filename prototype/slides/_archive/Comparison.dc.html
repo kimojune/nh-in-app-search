@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <style>
+    :root{
+      --bg: oklch(97% 0.008 95);
+      --panel: oklch(99.5% 0.003 95);
+      --ink: oklch(22% 0.015 95);
+      --ink-muted: oklch(52% 0.012 95);
+      --line: oklch(88% 0.008 95);
+      --accent: oklch(48% 0.09 160);
+      --accent-soft: oklch(93% 0.035 160);
+      --warn: oklch(58% 0.12 55);
+      --warn-soft: oklch(95% 0.03 55);
+      --font-display: Georgia, 'Noto Serif KR', serif;
+      --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
+    .head{ display:flex; align-items:baseline; gap:14px; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
+    .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
+    .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
+
+    .lead{ margin:16px 0 14px; font-size:18px; line-height:1.5; }
+    .lead b{ font-weight:700; }
+
+    .two{ display:flex; gap:16px; }
+    .p{ flex:1; background:var(--panel); border:1px solid var(--line); padding:14px 18px; }
+    .p .lbl{ font-size:11.5px; font-weight:800; letter-spacing:0.06em; color:var(--ink-muted); margin-bottom:8px; }
+    .p.b .lbl{ color:var(--warn); }
+    .p .t{ font-size:14.5px; font-weight:700; line-height:1.45; margin-bottom:7px; }
+    .p .d{ font-size:13px; line-height:1.55; color:var(--ink-muted); }
+    .p .d b{ font-weight:700; color:var(--ink); }
+
+    .fork{ margin:15px 0 0; }
+    .fork .cap{ text-align:center; font-size:12.5px; font-weight:800; letter-spacing:0.05em; color:var(--warn); margin-bottom:9px; }
+    .fk{ display:flex; gap:12px; }
+    .f{ flex:1; display:flex; gap:12px; align-items:baseline; background:var(--warn-soft); border:1px solid var(--line); padding:12px 16px; font-size:13.5px; line-height:1.45; }
+    .f b{ font-weight:800; flex:0 0 116px; color:var(--ink); }
+
+    .res{ margin-top:auto; margin-bottom:56px; }
+    .hl{ background:var(--accent-soft); padding:13px 18px; font-size:16.5px; font-weight:700; line-height:1.45; }
+    .mat{ display:flex; flex-direction:column; gap:6px; margin-top:9px; }
+    .m{ display:flex; gap:14px; align-items:baseline; background:var(--panel); border:1px solid var(--line); padding:10px 18px; }
+    .m .k{ flex:0 0 62px; font-size:12px; font-weight:800; letter-spacing:0.04em; color:var(--accent); }
+    .m .v{ flex:1; font-size:13.5px; line-height:1.45; }
+    .m .src{ flex:0 0 232px; font-size:12.5px; color:var(--ink-muted); text-align:right; }
+
+    .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
+  </style>
+</helmet>
+<div class="slide">
+  <div class="head">
+    <span class="num">07</span>
+    <span class="stage">문제 검증</span>
+    <span class="kicker">개선 전후 — 왜 하나의 숫자를 내지 않았나</span>
+    <span class="time">40초</span>
+  </div>
+
+  <div class="lead"><b>숨긴 것이 아니다. 계산하면 거짓말이 된다.</b></div>
+
+  <div class="two">
+    <div class="p b">
+      <div class="lbl">BEFORE</div>
+      <div class="t">포털까지 열어둔 자유 탐색</div>
+      <div class="d">은행·카드사·앱·포털을 지정하지 않았다. 네이버를 켜든 앱을 열든 막지 않았다.<br><b>「막히면 밖으로 나간다」는 행동 자체를 재려던 설계다.</b></div>
+    </div>
+    <div class="p">
+      <div class="lbl">AFTER</div>
+      <div class="t">프로토타입 안</div>
+      <div class="d">같은 조건을 주려면 <b>여기서도 포털로 나갈 수 있어야 한다.</b><br>그런데 나갈 수 있게 만드는 순간 문제가 생긴다.</div>
+    </div>
+  </div>
+
+  <div class="fork">
+    <div class="cap">여기서 갈라진다</div>
+    <div class="fk">
+      <div class="f"><b>나갈 수 있게 두면</b><span>나가는 순간 <b>관찰이 끊긴다</b></span></div>
+      <div class="f"><b>못 나가게 막으면</b><span>Before가 재던 <b>행동 자체가 사라진다</b></span></div>
+    </div>
+  </div>
+
+  <div class="res">
+    <div class="hl">그래서 실험실 비교를 포기하고 <b>배포 후 실사용 로그로 비교하는 설계</b>로 바꿨다</div>
+    <div class="mat">
+      <div class="m"><span class="k">비교군</span><span class="v">앱마다 스냅샷 반영 시점을 달리해 <b>자연 비교군</b>을 만든다</span><span class="src">스냅샷 버전 · ETag</span></div>
+      <div class="m"><span class="k">대상자</span><span class="v"><b>0건 로그</b>로 같은 상황의 사용자를 추린다</span><span class="src">콘솔 「로그로 후보 찾기」</span></div>
+      <div class="m"><span class="k">주 지표</span><span class="v">안내 노출 후 <b>재검색률</b></span><span class="src">운영 단계 지표</span></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>판단: 검증 설계를 바꾼 이유</span>
+    <span>7 / 9</span>
+  </div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>
