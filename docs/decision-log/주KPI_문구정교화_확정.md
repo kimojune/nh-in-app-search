@@ -62,7 +62,7 @@
 | `docs/발표자료_구성안.md` | 6장 지표 구조 (축소 되돌림 포함) |
 | `docs/발표_스피커노트.md` | 지표 체계 · 대응 화법 (축소 되돌림 포함) |
 | `prototype/slides/Built.dc.html` | 「어떻게 잴 것인가」 열 (축소 되돌림 포함) |
-| `prototype/slides/Measuring.dc.html` | 종료점 `신청 완료 → 담당 채널과 거기서 할 일을 알았는가`, 마무리 문장 |
+| `prototype/slides/Measuring.dc.html` | 종료점 `신청 완료 → 담당 채널과 거기서 할 일을 알았는가`, 과업 성공 설명줄, 마무리 문장에 주 KPI 명시 |
 | `prototype/slides/Shifts.dc.html` | 가설 문장에 `다음 행동` 복원, 반증 조건 1 확장 |
 | `docs/평가리포트.md` | 종료점 문장 |
 | `docs/인앱검색_도메인학습기록.md` | 축소를 기정사실로 인용한 2곳, 반증 조건 ①·기각 사유 표 |
