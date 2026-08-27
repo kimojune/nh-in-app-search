@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>연동 진단 · 크로스 앱 라우터</title>
+<style>
+  :root{ --nh:#00A651; --nh-dark:#008C44; --ink:#16181d; --sub:#5f6672;
+         --line:#e5e7eb; --bg:#f4f5f7; --bad:#b91c1c; --warn:#c2410c; }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);line-height:1.6;
+       font-family:"Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR","Segoe UI",system-ui,sans-serif}
+  .wrap{max-width:860px;margin:0 auto;padding:28px 20px 70px}
+  h1{font-size:20px;font-weight:800;letter-spacing:-.6px;margin:0 0 4px}
+  .lede{font-size:13.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 22px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;margin-bottom:16px;overflow:hidden}
+  .ch{padding:13px 16px;border-bottom:1px solid var(--line);background:#fafbfc;
+      font-size:14px;font-weight:800;letter-spacing:-.4px}
+  .cb{padding:16px}
+  .verdict{font-size:15px;font-weight:800;letter-spacing:-.4px;line-height:1.5}
+  .verdict.ok{color:var(--nh-dark)}
+  .verdict.bad{color:var(--bad)}
+  .verdict.warn{color:var(--warn)}
+  .why{font-size:13px;color:var(--sub);letter-spacing:-.3px;margin-top:8px;line-height:1.65}
+  .why b{color:var(--ink)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:8px 10px;font-size:12.5px;border-bottom:1px solid #f0f1f4;vertical-align:top}
+  th{font-size:11px;color:#8b93a1;background:#fcfcfd;font-weight:700}
+  td.k{font-family:ui-monospace,Consolas,monospace;color:#41474f;white-space:nowrap}
+  td.v{color:var(--sub);word-break:break-all}
+  .pill{font-size:10.5px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .pill.yes{background:#dcf5e8;color:var(--nh-dark)}
+  .pill.no{background:#fdeaea;color:var(--bad)}
+  .btn{border:0;border-radius:9px;font-family:inherit;font-size:13.5px;font-weight:700;
+       padding:10px 15px;cursor:pointer;letter-spacing:-.3px;background:var(--nh);color:#fff}
+  .btn.ghost{background:#fff;border:1px solid #d5d9e0;color:#41474f}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .steps{font-size:13px;color:#41474f;letter-spacing:-.3px;margin:0;padding-left:20px;line-height:1.8}
+  .steps b{color:var(--ink)}
+  .foot{font-size:12px;color:#9aa1ad;line-height:1.7;margin-top:22px}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:12px;background:#eef0f3;padding:1px 5px;border-radius:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>연동 진단</h1>
+  <p class="lede">
+    <code>console.html</code>과 <code>bank-app.html</code>이 같은 브라우저 저장소를 쓰고 있는지 판정합니다.
+    이 파일은 진단용이며 시연에는 쓰지 않습니다.
+  </p>
+
+  <div class="card">
+    <div class="ch">판정</div>
+    <div class="cb">
+      <div class="verdict" id="verdict">확인 중…</div>
+      <div class="why" id="why"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">이렇게 확인하세요</div>
+    <div class="cb">
+      <ol class="steps">
+        <li><code>console.html</code>을 열어 <b>계열사 샘플 불러오기 → 등록 요청 → 일괄 검토 요청 → 일괄 승인 → 발행</b>까지 한다</li>
+        <li>발행 바에 <b>「v1 발행됨」</b>이 떴는지 눈으로 확인한다 (경고창이 떴다면 승인이 안 된 것이다)</li>
+        <li>이 파일을 <b>같은 방식으로</b> 열고 <b>다시 검사</b>를 누른다</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">지금 이 문서가 보는 것</div>
+    <div class="cb">
+      <table>
+        <tbody id="env"></tbody>
+      </table>
+      <div class="btns">
+        <button class="btn" id="again">다시 검사</button>
+        <button class="btn ghost" id="mark">이 문서에서 표식 남기기</button>
+      </div>
+      <div class="why" id="markNote"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="ch">저장소에 있는 라우터 관련 키</div>
+    <div class="cb">
+      <table>
+        <thead><tr><th style="width:38%">키</th><th style="width:14%">크기</th><th>값 앞부분</th></tr></thead>
+        <tbody id="keys"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <p class="foot">
+    판정 근거는 <code>routing:published</code> 키 하나입니다. 콘솔이 발행할 때 쓰고, 앱이 동기화할 때 읽습니다.
+    이 문서에서 그 키가 보이면 파일이 달라도 저장소를 공유한다는 뜻이고, 보이지 않으면 공유되지 않는 것입니다.
+  </p>
+</div>
+
+<script src="./routing-client.js"></script>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var MARK = "routing:diag";
+  var PUBLISHED = "routing:published";
+  var CONSOLE_STATE = "routing:console";
+
+  function esc(s){
+    return String(s == null ? "" : s)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+  function bytes(s){ return s == null ? 0 : new TextEncoder().encode(String(s)).length; }
+  function pill(ok, yes, no){
+    return '<span class="pill ' + (ok ? "yes" : "no") + '">' + (ok ? yes : no) + '</span>';
+  }
+
+  function storageState(){
+    try {
+      var probe = "routing:__probe";
+      localStorage.setItem(probe, "1");
+      localStorage.removeItem(probe);
+      return { ok:true, err:null };
+    } catch(e){
+      return { ok:false, err:String(e && e.name || e) };
+    }
+  }
+
+  function run(){
+    var store = storageState();
+    var clientLoaded = !!(window.RoutingClient && window.RoutingClient.normalize);
+
+    var published = null, publishedRaw = null, consoleRaw = null, mark = null;
+    if(store.ok){
+      publishedRaw = localStorage.getItem(PUBLISHED);
+      consoleRaw   = localStorage.getItem(CONSOLE_STATE);
+      mark         = localStorage.getItem(MARK);
+      if(publishedRaw){ try { published = JSON.parse(publishedRaw); } catch(e){} }
+    }
+
+    /* ---- 환경 ---- */
+    var rows = [
+      ["이 문서 주소", esc(location.href)],
+      ["오리진", esc(location.origin) + (location.origin === "null" ? " " + pill(false,"","불투명") : "")],
+      ["프로토콜", esc(location.protocol)],
+      ["localStorage 사용", store.ok ? pill(true,"가능","") : pill(false,"","막힘 · " + esc(store.err))],
+      ["routing-client.js 로드", pill(clientLoaded, "됨", "안 됨")],
+      ["브라우저", esc(navigator.userAgent)]
+    ];
+    var h = "", i;
+    for(i=0;i<rows.length;i++){
+      h += '<tr><td class="k">' + rows[i][0] + '</td><td class="v">' + rows[i][1] + '</td></tr>';
+    }
+    $("env").innerHTML = h;
+
+    /* ---- 키 목록 ---- */
+    h = "";
+    if(!store.ok){
+      h = '<tr><td colspan="3" class="v">저장소를 읽을 수 없습니다.</td></tr>';
+    } else {
+      var found = 0;
+      for(i=0;i<localStorage.length;i++){
+        var k = localStorage.key(i);
+        if(k.indexOf("routing:") !== 0 && k.indexOf("demo:") !== 0) continue;
+        var v = localStorage.getItem(k);
+        found++;
+        h += '<tr><td class="k">' + esc(k) + '</td><td class="v">' + bytes(v).toLocaleString() + ' B</td>'
+           + '<td class="v">' + esc(String(v).slice(0,90)) + (String(v).length > 90 ? "…" : "") + '</td></tr>';
+      }
+      if(!found) h = '<tr><td colspan="3" class="v">라우터 관련 키가 하나도 없습니다.</td></tr>';
+    }
+    $("keys").innerHTML = h;
+
+    /* ---- 판정 ---- */
+    var v = $("verdict"), w = $("why");
+
+    if(!store.ok){
+      v.className = "verdict bad";
+      v.textContent = "저장소 자체를 쓸 수 없습니다 — H2 계열";
+      w.innerHTML = "이 브라우저가 이 주소에서 <b>localStorage를 막고 있습니다</b>(" + esc(store.err) + ")."
+        + " 이 상태에서는 콘솔도 발행을 저장하지 못하므로 두 화면이 연동될 수 없습니다."
+        + " 파일을 직접 여는 대신 <b>간단한 로컬 서버로 띄우거나</b> 배포된 링크를 쓰셔야 합니다.";
+      return;
+    }
+
+    if(!clientLoaded){
+      v.className = "verdict bad";
+      v.textContent = "routing-client.js 가 로드되지 않았습니다 — H2 확정";
+      w.innerHTML = "같은 폴더의 <code>routing-client.js</code>를 읽지 못했습니다."
+        + " 이 경우 <b>두 화면 모두 그려지지 않습니다.</b> 세 파일이 같은 폴더에 있는지,"
+        + " 파일명이 정확한지 확인하세요.";
+      return;
+    }
+
+    if(published && published.etag){
+      v.className = "verdict ok";
+      v.textContent = "저장소는 공유됩니다 — H1·H5 기각";
+      w.innerHTML = "콘솔이 발행한 스냅샷 <b>v" + esc(published.version) + "</b>"
+        + " (기능 " + Object.keys(published.functions || {}).length + "건 · 표현 키 "
+        + Object.keys(published.index || {}).length + "개, etag <code>" + esc(published.etag) + "</code>)를"
+        + " <b>다른 파일인 이 문서에서 그대로 읽었습니다.</b><br><br>"
+        + "그러면 발표에서 연동이 안 된 원인은 저장소가 아니라 <b>H3(승인 없이 발행) 또는 H4(담당 채널 본인이라 미노출)</b>입니다. "
+        + "앱에서 <b>동기화</b>를 누른 뒤 로그가 <code>200 OK</code>였다면 H4, <code>404</code>였다면 H3입니다. "
+        + "H4라면 앱 선택을 <b>NH스마트뱅킹</b>처럼 담당이 아닌 앱으로 바꿔 보세요.";
+      return;
+    }
+
+    if(consoleRaw){
+      v.className = "verdict warn";
+      v.textContent = "콘솔 데이터는 보이는데 발행본이 없습니다 — H3 유력";
+      w.innerHTML = "이 문서에서 <code>routing:console</code>은 읽혔으므로 <b>저장소는 공유됩니다.</b>"
+        + " 그런데 <code>routing:published</code>가 없습니다 — <b>발행이 실제로 되지 않았다</b>는 뜻입니다."
+        + " 콘솔에서 <b>일괄 검토 요청 → 일괄 승인</b>을 먼저 하고 <b>발행</b>을 누르세요."
+        + " 승인이 0건이면 콘솔이 경고창을 띄우고 발행을 멈춥니다.";
+      return;
+    }
+
+    v.className = "verdict bad";
+    v.textContent = "라우터 키가 하나도 안 보입니다 — H1·H5 유력";
+    w.innerHTML = "콘솔에서 발행까지 마친 뒤 이 문서를 열었는데도 <code>routing:published</code>도"
+      + " <code>routing:console</code>도 없습니다. 파일이 다르면 저장소가 갈리는 상태(H1)이거나,"
+      + " 두 문서를 <b>다른 브라우저·다른 창(시크릿 등)에서 열었을 가능성(H5)</b>입니다.<br><br>"
+      + "<b>가리는 방법</b> — 아래 <b>「이 문서에서 표식 남기기」</b>를 누른 뒤,"
+      + " 같은 창에서 <code>console.html</code>을 열고 브라우저 주소창에"
+      + " <code>javascript:alert(localStorage.getItem('routing:diag'))</code> 를 쓸 수는 없으므로,"
+      + " 대신 <b>이 문서를 두 번째 탭으로도 열어</b> 표식이 보이는지 확인하세요."
+      + " 같은 파일끼리는 보이는데 다른 파일에서 안 보이면 H1입니다.";
+  }
+
+  $("again").addEventListener("click", run);
+  $("mark").addEventListener("click", function(){
+    try{
+      var stamp = new Date().toISOString() + " @ " + location.pathname.split("/").pop();
+      localStorage.setItem(MARK, stamp);
+      $("markNote").innerHTML = "표식을 남겼습니다 — <code>routing:diag</code> = <b>" + esc(stamp) + "</b>."
+        + " 다른 파일에서 이 값이 보이면 저장소가 공유되는 것입니다.";
+      run();
+    }catch(e){
+      $("markNote").textContent = "표식을 남길 수 없습니다: " + String(e);
+    }
+  });
+
+  run();
+})();
+</script>
+</body>
+</html>
