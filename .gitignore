@@ -1,0 +1,19 @@
+# Claude Code 기기별 로컬 설정 (파일명의 .local이 "이 기기 전용"이라는 뜻).
+# 하위 폴더의 것까지 모두 무시하려면 **/ 가 필요하다 — 이 규칙이 없으면
+# 다른 기기에서 클론했을 때 노출된다.
+**/.claude/settings.local.json
+
+# git worktree 작업 폴더 (.claude/worktrees/<이름>). 저장소 안에 만들어지므로
+# 본 체크아웃에서 미추적 파일로 잡히지 않게 무시한다.
+.claude/worktrees/
+
+# 스킬 패키지(zip 바이너리). 프로젝트 산출물이 아니라 기기별로 설치하는 도구다.
+*.skill
+
+.git.bak-*/
+
+# 슬랙 인증 정보. 스킬이 읽어 쓰는 실제 토큰이므로 절대 추적하지 않는다.
+# 경로를 고정하지 않고 **/ 로 두어, 폴더를 옮겨도 규칙이 따라가게 한다.
+**/slack_bot_token.txt
+**/slack_channel_id.txt
+**/slack_webhook.txt
