@@ -1,0 +1,17 @@
+# 줄바꿈(CRLF/LF)을 저장소 안에서 LF로 통일한다.
+# 기기마다 git 설정(core.autocrlf)이 달라도 같은 파일이 "전체 수정됨"으로
+# 잡히지 않게 하려는 것 — 두 대 이상에서 같은 저장소를 쓸 때 필요하다.
+* text=auto eol=lf
+
+# 아래는 절대 변환하면 안 되는 이진 파일 (변환 시 파일이 깨진다)
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.pdf  binary
+*.zip  binary
+*.pptx binary
+*.xlsx binary
+*.docx binary
+*.hwp  binary
+*.hwpx binary
