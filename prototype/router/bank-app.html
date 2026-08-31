@@ -46,6 +46,20 @@
   }
   .device .phone{border:0;border-radius:28px;box-shadow:none}
 
+  /* 실제 폰은 화면 크기가 고정이고 내용이 안에서 스크롤된다. 여기는 반대여서
+     검색 결과와 칩 줄에 따라 폰이 491~626px 사이에서 늘었다 줄었다 했고,
+     그때마다 오른쪽 계측 패널까지 밀렸다. 화면을 고정하고 본문만 스크롤한다.
+     안내 카드는 본문 맨 위에 그려지므로 스크롤이 생겨도 늘 보인다. */
+  .device .phone{height:540px}
+  .device .phone .body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin}
+  .device .phone .body::-webkit-scrollbar{width:4px}
+  .device .phone .body::-webkit-scrollbar-thumb{background:rgba(16,20,30,.18);border-radius:2px}
+  /* 비교 뷰의 미니 폰은 고정하지 않는다 — 캡처해서 슬라이드에 넣는 그림이라
+     스크롤이 생기면 잘린 내용이 그림에 담기지 않는다. */
+
+  /* 칩이 0개인 앱(올원뱅크·콕뱅크)에서도 아래 여백 10px 이 남아 있었다 */
+  .chips:empty{display:none}
+
   /* ---------- 폰 ---------- */
   .phone{
     background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;
