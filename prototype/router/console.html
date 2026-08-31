@@ -126,7 +126,10 @@
   .btn.primary{background:var(--brand-accent);color:#fff}
   .btn.primary:disabled{background:#cfd4db;cursor:default}
   .btn.ghost{background:#fff;border:1px solid #d5d9e0;color:#41474f}
+  .btn.del{background:#fff;border:1px solid #e6cfcf;color:var(--bad)}
+  .btn.del:hover{background:#fdf5f5}
   .btn.sm{font-size:11.5px;padding:5px 10px;border-radius:7px}
+  .acts{display:flex;gap:5px;flex-wrap:wrap}
   .flash{font-size:12.5px;font-weight:700;color:var(--brand);letter-spacing:-.3px}
   .flash.bad{color:var(--bad)}
 
@@ -136,6 +139,10 @@
   }
   .kv{font-size:12.5px;color:var(--sub)}
   .kv b{color:var(--ink);font-variant-numeric:tabular-nums}
+  /* 지운 기준이 아직 앱에 나가 있는 상태를 발행 전에 보여준다.
+     클래스 이름을 .drop 으로 두면 위 CSV 끌어놓기 영역(.drop)의 점선 상자를 물려받는다. */
+  .kv.willdrop{color:var(--bad);font-weight:700}
+  .kv.willdrop b{color:var(--bad)}
   pre.snap{
     margin:0;padding:14px 18px;background:#0f1115;color:#c8ccd3;
     font-family:ui-monospace,Consolas,monospace;font-size:11.5px;line-height:1.55;
@@ -219,12 +226,12 @@
         <thead>
           <tr>
             <th style="width:17%">기능 · 업무</th>
-            <th style="width:21%">사용자 표현</th>
-            <th style="width:24%">담당 채널 · 역할</th>
-            <th style="width:13%">등록 부서</th>
-            <th style="width:11%">출처</th>
+            <th style="width:19%">사용자 표현</th>
+            <th style="width:23%">담당 채널 · 역할</th>
+            <th style="width:12%">등록 부서</th>
+            <th style="width:10%">출처</th>
             <th style="width:8%">상태</th>
-            <th style="width:6%"></th>
+            <th style="width:11%"></th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -234,6 +241,7 @@
     <div class="pubbar">
       <button class="btn primary" id="pubBtn">승인된 기준 발행</button>
       <span class="kv" id="kvPend">승인 대기 <b>0</b>건</span>
+      <span class="kv willdrop" id="kvDrop" style="display:none"></span>
       <span class="kv">발행 버전 <b id="kvVer">—</b></span>
       <span class="kv">기능 <b id="kvFn">0</b>건</span>
       <span class="kv">표현 키 <b id="kvKeys">0</b>개</span>
@@ -841,6 +849,7 @@
     for(i=0;i<bs.length;i++){
       bs[i].addEventListener("click", function(){
         var id = this.getAttribute("data-id"), act = this.getAttribute("data-act"), j;
+        if(act === "del"){ deleteRule(id); return; }
         for(j=0;j<st.rules.length;j++){
           if(st.rules[j].id === id){
             st.rules[j].state = (act === "req") ? "review" : "approved";
@@ -852,9 +861,70 @@
   }
 
   function rowAction(r){
-    if(r.state === "draft")  return '<button class="btn ghost sm" data-id="' + r.id + '" data-act="req">검토 요청</button>';
-    if(r.state === "review") return '<button class="btn ghost sm" data-id="' + r.id + '" data-act="appr">승인</button>';
-    return '';
+    var h = "";
+    if(r.state === "draft")  h += '<button class="btn ghost sm" data-id="' + r.id + '" data-act="req">검토 요청</button>';
+    if(r.state === "review") h += '<button class="btn ghost sm" data-id="' + r.id + '" data-act="appr">승인</button>';
+    /* 승인된 기준도 지울 수 있어야 한다 — 잘못 올린 줄을 되돌리는 유일한 길이다 */
+    h += '<button class="btn del sm" data-id="' + r.id + '" data-act="del" title="이 기준을 지웁니다">삭제</button>';
+    return '<div class="acts">' + h + '</div>';
+  }
+
+  /* 지우기 전에 무슨 일이 벌어지는지 계산한다. 순수 함수라 검사에서 그대로 쓴다.
+     핵심은 「이미 발행된 기준인가」다 — 발행된 것을 지우면 계열사 앱에 나가 있는
+     안내가 다음 발행에서 사라지므로, 지우는 순간이 아니라 발행하는 순간에 반영된다. */
+  function deletePlan(rules, id, published){
+    var i, target = null, approvedAfter = 0;
+    for(i=0;i<rules.length;i++){
+      if(rules[i].id === id){ target = rules[i]; continue; }
+      if(rules[i].state === "approved") approvedAfter++;
+    }
+    if(!target) return null;
+    var fns = (published && published.functions) || {};
+    var wasPublished = Object.prototype.hasOwnProperty.call(fns, id);
+    return {
+      name: target.func,
+      wasPublished: wasPublished,
+      approvedAfter: approvedAfter,
+      /* 지운 것을 앱에 반영하려면 다시 발행해야 하는데 승인이 0건이면 관문 1이
+         발행을 막는다. 그 막다른 길을 지우기 전에 알린다. */
+      blocksPublish: wasPublished && approvedAfter === 0
+    };
+  }
+
+  var NL = String.fromCharCode(10);
+
+  function deleteMessage(plan){
+    var L = ["「" + plan.name + "」 기준을 지웁니다.", ""];
+    if(plan.wasPublished){
+      L.push("이 기준은 지금 계열사 앱에 나가 있습니다.");
+      L.push("지운 뒤 [승인된 기준 발행]을 눌러야 앱에서 사라집니다.");
+      if(plan.blocksPublish){
+        L.push("");
+        L.push("그런데 이걸 지우면 승인된 기준이 0건이 됩니다.");
+        L.push("빈 기준은 발행되지 않도록 막혀 있어서, 앱에 나가 있는 안내를 지우려면");
+        L.push("다른 기준을 승인해 함께 발행하거나 계열사 앱에서 [캐시 비우기]를 써야 합니다.");
+      }
+    } else {
+      L.push("아직 발행된 적이 없어 계열사 앱에는 영향이 없습니다.");
+    }
+    L.push("");
+    L.push("지울까요?");
+    return L.join(NL);
+  }
+
+  function deleteRule(id){
+    var plan = deletePlan(st.rules, id, lastPublished());
+    if(!plan) return;
+    if(!confirm(deleteMessage(plan))) return;
+
+    st.rules = st.rules.filter(function(r){ return r.id !== id; });
+    save();
+    renderTable();
+
+    $("pubFlash").className = "flash" + (plan.wasPublished ? " bad" : "");
+    $("pubFlash").textContent = plan.wasPublished
+      ? "「" + plan.name + "」 삭제 — 앱에 반영하려면 발행이 필요합니다"
+      : "「" + plan.name + "」 삭제";
   }
 
   function calcSuppress(channels){
@@ -899,8 +969,23 @@
 
   /* 승인 대기 건수를 발행 바에 계속 보여준다 — 발행 직전에 눈에 들어오게 한다 */
   function renderPending(){
-    var pend = st.rules.filter(function(r){ return r.state !== "approved"; }).length;
+    var approved = st.rules.filter(function(r){ return r.state === "approved"; });
+    var pend = st.rules.length - approved.length;
     $("kvPend").innerHTML = "승인 대기 <b" + (pend ? " style=\"color:var(--bad)\"" : "") + ">" + pend + "</b>건";
+
+    /* 지웠거나 승인이 풀린 기준이 아직 앱에 나가 있으면 발행 전에 보여준다.
+       발행을 눌러야 알게 되는 것과, 누르기 전에 아는 것은 다르다. */
+    var dropped = droppedFromLast(approved);
+    var el = $("kvDrop");
+    if(dropped.length){
+      el.innerHTML = "발행하면 앱에서 <b>" + dropped.length + "</b>건이 사라집니다";
+      el.title = dropped.join(", ");
+      el.style.display = "";
+    } else {
+      el.innerHTML = "";
+      el.title = "";
+      el.style.display = "none";
+    }
   }
 
   /* 이번 발행에서 빠지는 기준을 찾는다.
