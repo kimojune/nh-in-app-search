@@ -832,7 +832,7 @@ function fresh(appId = "allone") {
 
   /* 폰에 고정 높이가 없어서 검색 결과와 칩 줄에 따라 491~626px 사이를 오갔다.
      실제 폰은 화면이 고정이고 내용이 안에서 스크롤된다. */
-  ok("폰 화면 높이가 고정돼 있다", bankSrc.includes(".device .phone{height:540px}"));
+  ok("폰 화면 높이가 고정돼 있다", /\.device \.phone\{[^}]*height:540px/.test(bankSrc));
   ok("본문만 스크롤한다",
     /\.device \.phone \.body\{[^}]*overflow-y:auto/.test(bankSrc));
   ok("본문 최소 높이가 풀려 있다 — 안 풀면 고정 높이를 넘어선다",
@@ -840,6 +840,15 @@ function fresh(appId = "allone") {
   /* 비교 뷰의 미니 폰은 캡처해서 슬라이드에 넣는 그림이라 고정하지 않는다 */
   ok("높이 고정이 프레임 안쪽으로만 걸려 있다", !/(^|[^ ])\.phone\{[^}]*height:540px/.test(bankSrc));
   ok("칩이 0개면 줄을 감춘다", bankSrc.includes(".chips:empty{display:none}"));
+
+  /* 폭도 고정한다. 프레임이 그리드 칼럼만큼 늘어나면 발표 모드(auto 칼럼)와
+     좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
+  ok("화면 폭도 고정돼 있다", /\.device \.phone\{[^}]*width:336px/.test(bankSrc));
+  ok("프레임이 화면 크기만큼만 차지한다",
+    /\.device\{[^}]*display:inline-block/.test(bankSrc));
+  /* 비교 패널은 폰과 계측 아래에 생겨 첫 화면 밖이다 — 켤 때 그 자리로 데려간다 */
+  ok("비교를 켜면 패널로 데려간다",
+    /cmpBtn[\s\S]{0,600}scrollIntoView/.test(bankSrc));
 
   /* ---------------------------------------------------------------- */
   group("앱 디자인 컴포넌트 — 앱 화면과의 연결");
