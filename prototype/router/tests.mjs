@@ -850,6 +850,20 @@ function fresh(appId = "allone") {
   ok("비교를 켜면 패널로 데려간다",
     /cmpBtn[\s\S]{0,600}scrollIntoView/.test(bankSrc));
 
+  /* 비교 패널의 목적은 「같은 데이터가 네 디자인으로 그려진다」다.
+     client.lookup() 은 미노출 앱에서 null 을 돌려주므로, 담당 본인 앱을 고른
+     상태에서 비교 패널이 예시 데이터로 떨어지는 결함이 있었다. */
+  ok("비교 패널은 스냅샷에서 직접 꺼낸다", /function publishedFunction\(query\)\{/.test(bankSrc));
+  ok("비교 패널이 조회 함수를 쓰지 않는다",
+    /function renderCompare\(\)\{[\s\S]{0,400}publishedFunction\(query\)/.test(bankSrc)
+    && !/function renderCompare\(\)\{[\s\S]{0,400}client\.lookup/.test(bankSrc));
+  ok("비교 패널도 검색어 길이 상한을 지킨다",
+    /function publishedFunction[\s\S]{0,300}MAX_QUERY/.test(bankSrc));
+  /* 폰 한 개는 실제 동작을 보여주는 자리라 그대로 조회 함수를 쓴다 */
+  ok("폰은 그대로 조회 함수를 쓴다", /function search\(\)\{[\s\S]{0,300}client\.lookup\(query\)/.test(bankSrc));
+  ok("두 화면이 무엇을 보여주는지 화면에 적혀 있다",
+    bankSrc.includes("cmppurpose") && bankSrc.includes("실제 동작은 위 폰에서"));
+
   /* ---------------------------------------------------------------- */
   group("앱 디자인 컴포넌트 — 앱 화면과의 연결");
 
