@@ -567,6 +567,85 @@ function fresh(appId = "allone") {
 }
 
 /* =========================================================================
+   기준 삭제 — console.html 에서 함수만 꺼내 확인한다
+
+   삭제는 지우고 끝나는 동작이 아니다. 이미 발행된 기준을 지우면 계열사 앱에
+   나가 있는 안내가 다음 발행에서 사라진다. 지우기 전에 그 사실을 알리는지,
+   그리고 발행이 막히는 막다른 길(승인 0건)을 미리 집어내는지 본다.
+   ========================================================================= */
+{
+  group("기준 삭제");
+
+  const consoleSrc = fs.readFileSync(new URL("./console.html", import.meta.url), "utf8");
+  const planSrc = consoleSrc.match(/function deletePlan\(rules, id, published\)\{[\s\S]*?\n  \}/);
+  const msgSrc = consoleSrc.match(/function deleteMessage\(plan\)\{[\s\S]*?\n  \}/);
+  ok("console.html 에서 deletePlan 을 찾았다", !!planSrc);
+  ok("console.html 에서 deleteMessage 를 찾았다", !!msgSrc);
+
+  if (planSrc && msgSrc) {
+    const deletePlan = new Function(planSrc[0] + "; return deletePlan;")();
+    const deleteMessage = new Function("NL", msgSrc[0] + "; return deleteMessage;")("\n");
+
+    const rules = [
+      { id: "f-101", func: "자동이체 해지", state: "approved" },
+      { id: "f-103", func: "조합원 배당 조회", state: "approved" },
+      { id: "f-201", func: "통장사본 발급", state: "draft" }
+    ];
+    const published = { functions: { "f-101": { name: "자동이체 해지" } } };
+
+    check("없는 id 는 계획을 내지 않는다", deletePlan(rules, "f-999", published), null);
+
+    const a = deletePlan(rules, "f-101", published);
+    check("발행된 기준임을 알아낸다", a.wasPublished, true);
+    check("지울 대상은 남는 승인 수에서 뺀다", a.approvedAfter, 1);
+    check("다른 승인이 남아 있으면 발행이 막히지 않는다", a.blocksPublish, false);
+    check("이름을 그대로 넘긴다", a.name, "자동이체 해지");
+
+    const b = deletePlan(rules, "f-201", published);
+    check("발행된 적 없는 기준은 앱에 영향이 없다", b.wasPublished, false);
+    check("미발행 기준은 발행을 막지 않는다", b.blocksPublish, false);
+    check("승인 상태가 아닌 대상을 지워도 승인 수는 그대로", b.approvedAfter, 2);
+
+    /* 발행된 기준이 유일한 승인이면, 지운 뒤 발행하려 해도 관문 1이 막는다 */
+    const only = [{ id: "f-101", func: "자동이체 해지", state: "approved" }];
+    const c = deletePlan(only, "f-101", published);
+    check("승인이 하나뿐이면 발행이 막힌다고 알린다", c.blocksPublish, true);
+    check("남는 승인은 0건", c.approvedAfter, 0);
+
+    /* 발행 스냅샷이 없을 때도 예외 없이 계획이 나온다 */
+    const d = deletePlan(rules, "f-101", null);
+    check("발행한 적이 없으면 발행된 기준이 아니다", d.wasPublished, false);
+    check("스냅샷이 손상돼 functions 가 없어도 버틴다",
+      deletePlan(rules, "f-101", { version: 1 }).wasPublished, false);
+
+    /* ---- 확인창 문구 ---- */
+    const mA = deleteMessage(a);
+    ok("발행된 기준은 앱에 나가 있다고 알린다", mA.includes("계열사 앱에 나가 있습니다"));
+    ok("발행을 눌러야 반영된다고 알린다", mA.includes("승인된 기준 발행"));
+    ok("문구에 기준 이름이 들어간다", mA.includes("자동이체 해지"));
+    ok("마지막에 되묻는다", mA.trim().endsWith("지울까요?"));
+
+    const mB = deleteMessage(b);
+    ok("미발행 기준은 영향이 없다고 알린다", mB.includes("영향이 없습니다"));
+    ok("미발행 기준에는 발행 안내를 붙이지 않는다", !mB.includes("계열사 앱에 나가 있습니다"));
+
+    const mC = deleteMessage(c);
+    ok("발행이 막히는 경우를 문구로 알린다", mC.includes("승인된 기준이 0건이 됩니다"));
+    ok("막혔을 때 무엇을 하면 되는지 알린다",
+      mC.includes("캐시 비우기") && mC.includes("다른 기준을 승인"));
+  }
+
+  /* ---- 화면 쪽 계약 ---- */
+  ok("모든 행에 삭제 버튼이 붙는다", /data-act="del"/.test(consoleSrc));
+  ok("확인 없이 지우지 않는다",
+    /function deleteRule\(id\)\{[\s\S]*?confirm\(deleteMessage\(plan\)\)/.test(consoleSrc));
+  ok("삭제는 목록에서 걸러내는 방식이다 — 인덱스로 잘라내지 않는다",
+    consoleSrc.includes('st.rules.filter(function(r){ return r.id !== id; })'));
+  ok("발행 바가 사라질 기준 수를 미리 보여준다",
+    consoleSrc.includes("발행하면 앱에서 <b>") && consoleSrc.includes('$("kvDrop")'));
+}
+
+/* =========================================================================
    앱 디자인 컴포넌트 — app-themes.js
 
    라우터는 데이터만 주고 화면은 각 앱이 그린다는 설계를 검사로 못박는다.
