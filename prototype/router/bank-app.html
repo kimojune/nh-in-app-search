@@ -226,8 +226,12 @@
   .mini .body{padding:0 12px 4px;min-height:0}
   .cmpnote{font-size:10.5px;color:#9aa1ad;margin-top:8px;line-height:1.55;letter-spacing:-.2px}
   .cmpnote b{color:#6b7280}
-  .cmpsrc{font-size:11.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 14px}
+  .cmpsrc{font-size:11.5px;color:var(--sub);letter-spacing:-.3px;margin:0 0 5px}
   .cmpsrc b{color:var(--ink)}
+  /* 목적을 화면에 적어 둔다. 이 패널과 위 폰이 서로 다른 것을 보여준다는 것을
+     읽는 사람이 알아야 두 화면이 어긋나 보이지 않는다. */
+  .cmppurpose{font-size:11.5px;color:#9aa1ad;letter-spacing:-.2px;margin:0 0 14px;line-height:1.55}
+  .cmppurpose b{color:#6b7280}
   #cmpPanel{display:none}
   body.cmp-on #cmpPanel{display:block}
 
@@ -370,6 +374,8 @@
     </div>
     <div class="pb">
       <p class="cmpsrc" id="cmpSrc"></p>
+      <p class="cmppurpose">이 패널은 <b>디자인 비교</b>용입니다 — 미노출로 지정된 앱도 함께 그려 네 화면을 나란히 둡니다.
+        미노출·동기화 상태 같은 <b>실제 동작은 위 폰에서</b> 봅니다.</p>
       <div class="cmp" id="cmpGrid"></div>
     </div>
   </div>
@@ -667,16 +673,32 @@
     ]
   };
 
+  /* 이 패널의 목적은 「같은 데이터가 네 디자인으로 그려진다」다.
+     client.lookup() 은 미노출로 지정된 앱에서 null 을 돌려주므로, 담당 본인
+     앱(NH Pay)을 고른 상태에서는 스냅샷이 있어도 예시 데이터로 떨어졌다.
+     여기서는 미노출 여부와 무관하게 스냅샷에서 직접 꺼낸다.
+     폰 한 개는 그대로 client.lookup() 을 쓴다 — 그쪽이 실제 동작을 보여주는 자리다. */
+  function publishedFunction(query){
+    if(!query) return null;
+    /* 조회와 같은 길이 상한을 둔다. 정규화가 글자 수에 비례하기 때문이다. */
+    if(String(query).length > window.RoutingClient.MAX_QUERY) return null;
+    var snap = client.snapshot();
+    if(!snap) return null;
+    var id = snap.index[normalize(query)];
+    if(!id) return null;
+    return snap.functions[id] || null;
+  }
+
   function renderCompare(){
     var query = $("q").value.trim();
-    var hit = query ? client.lookup(query) : null;
+    var hit = publishedFunction(query);
     var live = !!hit;
     var data = hit || CMP_SAMPLE;
     var shown = query || "k패스카드";
 
     $("cmpSrc").innerHTML = live
-      ? '지금 검색한 <b>' + esc(query) + '</b>의 실제 조회 결과입니다. 네 앱에 같은 데이터가 들어갔습니다.'
-      : '아직 조회된 결과가 없어 <b>예시 데이터</b>로 그렸습니다. 동기화 후 검색하면 실제 조회 결과로 바뀝니다.';
+      ? '지금 발행된 기준에서 <b>' + esc(query) + '</b>를 꺼내 네 앱에 <b>같은 데이터</b>로 넣었습니다.'
+      : '발행된 기준에 없는 검색어라 <b>예시 데이터</b>로 그렸습니다. 콘솔에서 발행하고 같은 검색어로 검색하면 실제 기준으로 바뀝니다.';
 
     var h = "", i, k, a, th;
     for(i=0;i<APPS.length;i++){
