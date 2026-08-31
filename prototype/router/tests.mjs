@@ -791,10 +791,48 @@ function fresh(appId = "allone") {
   }
   ok("NH Pay 링크색도 본문 기준을 지킨다", onWhite(AT.themes.nhpay.linkText) >= 4.5);
 
+  const bankSrc = fs.readFileSync(new URL("./bank-app.html", import.meta.url), "utf8");
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 기기 껍데기");
+
+  /* 상태바와 하단 내비게이션 색은 앱이 정한다. 캡처에서 픽셀로 뽑은 값이므로
+     눈대중으로 바뀌지 않게 여기서 못박는다. 근거는 docs/디자인_기준.md. */
+  const DEVICE = {
+    allone: { navBar: "light", navBarColor: "#FFFFFF", statusBar: "light", statusBarColor: "#FFFFFF" },
+    kok:    { navBar: "light", navBarColor: "#FFFFFF", statusBar: "light", statusBarColor: "#FFFFFF" },
+    smart:  { navBar: "dark",  navBarColor: "#343434", statusBar: "light", statusBarColor: "#FFFFFF" },
+    nhpay:  { navBar: "dark",  navBarColor: "#1D1D1D", statusBar: "dark",  statusBarColor: "#303030" }
+  };
+
+  for (const id of AT.ids) {
+    const th = AT.themes[id];
+    check(id + " 내비게이션 바 실측값", th.navBarColor, DEVICE[id].navBarColor);
+    check(id + " 상태바 실측값", th.statusBarColor, DEVICE[id].statusBarColor);
+    check(id + " 내비게이션 바 밝기", th.navBar, DEVICE[id].navBar);
+    check(id + " 상태바 밝기", th.statusBar, DEVICE[id].statusBar);
+    ok(id + " 내비게이션 바 색이 스타일시트에 들어간다",
+      css.includes(".theme-" + id + " .navbar{background:" + DEVICE[id].navBarColor));
+  }
+
+  /* 앱마다 다르다는 것이 이 토큰을 둔 이유다 — 넷이 다 같으면 의미가 없다 */
+  ok("네 앱의 기기 껍데기가 한 벌로 통일돼 있지 않다",
+    new Set(AT.ids.map((id) => AT.themes[id].navBarColor + AT.themes[id].statusBarColor)).size > 1);
+
+  ok("어두운 상태바에는 밝은 글자를 쓴다",
+    css.includes(".theme-nhpay .statusbar{background:#303030;color:#f2f3f5}"));
+
+  /* 프레임은 CSS 도형으로 그린다 — 목업 도구나 기기 사진을 쓰지 않는다.
+     실측이 삼성/안드로이드라 아이폰 프레임을 쓰면 리서치와 어긋난다. */
+  ok("폰을 디바이스 프레임으로 감싼다", bankSrc.includes('<div class="device">'));
+  ok("하단 내비게이션 세 버튼을 그린다",
+    bankSrc.includes('class="nb-recent"') && bankSrc.includes('class="nb-home"') && bankSrc.includes('class="nb-back"'));
+  ok("프레임에 기기 사진을 쓰지 않는다", !/\.device[^{]*\{[^}]*background-image/.test(bankSrc));
+  ok("발표 모드가 프레임째로 확대한다", bankSrc.includes("body.present .device{zoom:1.3}"));
+
   /* ---------------------------------------------------------------- */
   group("앱 디자인 컴포넌트 — 앱 화면과의 연결");
 
-  const bankSrc = fs.readFileSync(new URL("./bank-app.html", import.meta.url), "utf8");
   ok("앱이 app-themes.js 를 읽어들인다", bankSrc.includes('src="./app-themes.js"'));
   ok("안내 카드를 직접 조립하지 않는다", !bankSrc.includes('h += \'<div class="guide">\''));
   ok("안내 카드를 앱 컴포넌트로 그린다", bankSrc.includes('AT.safe(appId, "guideCard", hit)'));
