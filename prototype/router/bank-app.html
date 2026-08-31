@@ -41,6 +41,9 @@
      실측 캡처가 삼성/안드로이드다. 아이폰 프레임을 쓰면 리서치와 어긋나므로
      베젤·라운드·그림자만 안드로이드 비율로 그린다. 목업 도구나 이미지는 쓰지 않는다. */
   .device{
+    /* 화면 크기만큼만 차지한다. 그리드 칼럼 폭에 따라 늘어나면
+       발표 모드(auto 칼럼)와 좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
+    display:inline-block;
     background:#1b1d22;padding:9px 8px;border-radius:36px;
     box-shadow:0 12px 32px rgba(16,20,30,.20), 0 2px 6px rgba(16,20,30,.10);
   }
@@ -50,7 +53,8 @@
      검색 결과와 칩 줄에 따라 폰이 491~626px 사이에서 늘었다 줄었다 했고,
      그때마다 오른쪽 계측 패널까지 밀렸다. 화면을 고정하고 본문만 스크롤한다.
      안내 카드는 본문 맨 위에 그려지므로 스크롤이 생겨도 늘 보인다. */
-  .device .phone{height:540px}
+  /* 화면은 336 x 540. 프레임까지 352 x 558 로 어디서든 같다. */
+  .device .phone{width:336px;height:540px}
   .device .phone .body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin}
   .device .phone .body::-webkit-scrollbar{width:4px}
   .device .phone .body::-webkit-scrollbar-thumb{background:rgba(16,20,30,.18);border-radius:2px}
@@ -777,7 +781,12 @@
     localStorage.setItem("demo:cmp", on ? "1" : "0");
     this.style.background = on ? "var(--brand-accent)" : "";
     this.style.color = on ? "#fff" : "";
-    if(on) renderCompare();
+    if(on){
+      renderCompare();
+      /* 패널은 폰과 계측 아래에 생긴다. 첫 화면 밖이라 눌러도 아무 변화가
+         없는 것처럼 보였다. 켤 때는 그 자리로 데려간다. */
+      $("cmpPanel").scrollIntoView({ behavior:"smooth", block:"start" });
+    }
   });
 
   /* 헤더의 닫기 — 검색어와 결과를 지우고 첫 화면으로 되돌린다.
