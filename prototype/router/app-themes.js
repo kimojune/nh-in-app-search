@@ -55,6 +55,11 @@
       chipStyle: "none",
       matchStyle: "underline",
       emptyStyle: "plain",
+      /* 기기 껍데기 — 캡처에서 픽셀로 뽑은 값. 앱마다 다르다 */
+      navBar: "light",
+      navBarColor: "#FFFFFF",
+      statusBar: "light",
+      statusBarColor: "#FFFFFF",
       radius: "14px"
     },
     kok: {
@@ -69,6 +74,11 @@
       chipStyle: "none",
       matchStyle: "plain",
       emptyStyle: "illust",
+      /* 기기 껍데기 — 캡처에서 픽셀로 뽑은 값. 앱마다 다르다 */
+      navBar: "light",
+      navBarColor: "#FFFFFF",
+      statusBar: "light",
+      statusBarColor: "#FFFFFF",
       radius: "18px"
     },
     smart: {
@@ -84,6 +94,11 @@
       chipActive: "#121212",
       matchStyle: "plain",
       emptyStyle: "plain",
+      /* 기기 껍데기 — 캡처에서 픽셀로 뽑은 값. 앱마다 다르다 */
+      navBar: "dark",
+      navBarColor: "#343434",
+      statusBar: "light",
+      statusBarColor: "#FFFFFF",
       radius: "10px"
     },
     nhpay: {
@@ -101,6 +116,11 @@
       chipActive: "#313E60",
       matchStyle: "plain",
       emptyStyle: "plain",
+      /* 기기 껍데기 — 캡처에서 픽셀로 뽑은 값. 앱마다 다르다 */
+      navBar: "dark",
+      navBarColor: "#1D1D1D",
+      statusBar: "dark",
+      statusBarColor: "#303030",
       radius: "0px"
     }
   };
@@ -329,6 +349,21 @@
     s += '.phone.theme-nhpay .chip{border-radius:999px;background:#fff;border:1px solid #d8dbe1;color:#4b5361}';
     s += '.phone.theme-nhpay .chip.on{background:' + t.nhpay.chipActive + ';color:#fff;'
        + 'border-color:' + t.nhpay.chipActive + '}';
+
+    /* ---- 기기 껍데기: 상태바와 하단 내비게이션 ----
+       안드로이드는 앱이 두 바의 색을 정한다. 실측이 앱마다 달라서 테마에 담았다. */
+    s += '.phone.theme-allone .statusbar{background:#FFFFFF;color:#111}';
+    s += '.phone.theme-allone .batt{background:#111;color:#fff}';
+    s += '.phone.theme-allone .navbar{background:#FFFFFF;color:#3d434d}';
+    s += '.phone.theme-kok .statusbar{background:#FFFFFF;color:#111}';
+    s += '.phone.theme-kok .batt{background:#111;color:#fff}';
+    s += '.phone.theme-kok .navbar{background:#FFFFFF;color:#3d434d}';
+    s += '.phone.theme-smart .statusbar{background:#FFFFFF;color:#111}';
+    s += '.phone.theme-smart .batt{background:#111;color:#fff}';
+    s += '.phone.theme-smart .navbar{background:#343434;color:#e8eaee}';
+    s += '.phone.theme-nhpay .statusbar{background:#303030;color:#f2f3f5}';
+    s += '.phone.theme-nhpay .batt{background:#e8eaee;color:#1d1d1d}';
+    s += '.phone.theme-nhpay .navbar{background:#1D1D1D;color:#e8eaee}';
 
     /* ---- 안내 카드 공통 골격 ---- */
     s += '.gd{margin:10px 0 14px}';

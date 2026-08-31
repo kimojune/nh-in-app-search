@@ -21,19 +21,30 @@
     line-height:1.55;-webkit-font-smoothing:antialiased;
   }
   .wrap{max-width:1060px;margin:0 auto;padding:0 20px 70px}
-  header.top{background:#fff;border-bottom:1px solid var(--line);padding:16px 0}
+  /* 아래 여백은 본문에만 필요하다. 헤더 안에서도 걸리면 헤더 밑에 빈 띠가 생긴다. */
+  header.top .wrap{padding-bottom:0}
+  header.top{background:#fff;border-bottom:1px solid var(--line);padding:13px 0}
   .brand{font-size:12.5px;color:var(--sub);letter-spacing:-.2px}
   .row1{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:2px}
-  h1{font-size:20px;font-weight:800;letter-spacing:-.6px;margin:0}
+  h1{font-size:20px;font-weight:800;letter-spacing:-.6px;margin:0 auto 0 0}
   .openc{
-    margin-left:auto;font-size:13px;font-weight:700;color:var(--brand);
+    font-size:13px;font-weight:700;color:var(--brand);
     text-decoration:none;border:1px solid #C6DAE6;background:#EFF5F9;
     padding:8px 13px;border-radius:9px;letter-spacing:-.3px;white-space:nowrap;
   }
-  .lede{font-size:13.5px;color:var(--sub);letter-spacing:-.3px;margin:6px 0 0;max-width:800px}
+  .lede{font-size:13px;color:var(--sub);letter-spacing:-.3px;margin:5px 0 0;max-width:800px}
 
-  .cols{display:grid;grid-template-columns:340px 1fr;gap:20px;margin-top:20px}
+  .cols{display:grid;grid-template-columns:352px 1fr;gap:18px;margin-top:18px}
   @media (max-width:860px){ .cols{grid-template-columns:1fr} }
+
+  /* ---------- 디바이스 프레임 ----------
+     실측 캡처가 삼성/안드로이드다. 아이폰 프레임을 쓰면 리서치와 어긋나므로
+     베젤·라운드·그림자만 안드로이드 비율로 그린다. 목업 도구나 이미지는 쓰지 않는다. */
+  .device{
+    background:#1b1d22;padding:9px 8px;border-radius:36px;
+    box-shadow:0 12px 32px rgba(16,20,30,.20), 0 2px 6px rgba(16,20,30,.10);
+  }
+  .device .phone{border:0;border-radius:28px;box-shadow:none}
 
   /* ---------- 폰 ---------- */
   .phone{
@@ -42,7 +53,25 @@
   }
   .statusbar{
     display:flex;justify-content:space-between;align-items:center;
-    padding:8px 14px 4px;font-size:12px;font-weight:700;color:#111;letter-spacing:-.2px;
+    padding:9px 15px 5px;font-size:12px;font-weight:700;color:#111;letter-spacing:-.2px;
+  }
+
+  /* 하단 내비게이션 — 실측 캡처에 늘 있었는데 목업에는 없었다.
+     세 버튼(최근·홈·뒤로)을 CSS 도형으로 그린다. 동작하지 않는다. */
+  .navbar{
+    display:flex;justify-content:space-around;align-items:center;
+    height:34px;flex:0 0 auto;background:#fff;color:#3d434d;
+  }
+  .navbar span{opacity:.6}
+  .nb-recent{
+    position:relative;width:13px;height:12px;
+    border-left:2px solid currentColor;border-right:2px solid currentColor;
+  }
+  .nb-recent::before{content:"";position:absolute;left:4.5px;top:0;bottom:0;width:2px;background:currentColor}
+  .nb-home{width:13px;height:13px;border:2px solid currentColor;border-radius:50%}
+  .nb-back{
+    width:9px;height:9px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;
+    transform:rotate(45deg);
   }
   .batt{background:#111;color:#fff;border-radius:8px;font-size:9.5px;padding:1px 5px}
   .apphead{
@@ -106,7 +135,10 @@
   .mrow{display:flex;justify-content:space-between;gap:10px;padding:5px 0;border-bottom:1px solid #1d2027}
   .mrow:last-child{border-bottom:0}
   .mrow .k{color:#8b93a1}
-  .mrow .v{font-family:ui-monospace,Consolas,monospace;color:#e8eaee;font-weight:600}
+  .mrow .v{
+    font-family:ui-monospace,Consolas,monospace;color:#e8eaee;font-weight:600;
+    font-variant-numeric:tabular-nums;
+  }
   .mrow .v.zero{color:#3ecf8e}
   .mrow .v.warn{color:#e0a458}
   .mlog{
@@ -118,13 +150,14 @@
   .mlog i{color:#e0a458;font-style:normal}
 
   /* ---------- 패널 ---------- */
-  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:20px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:16px}
+  /* 표·패널의 테두리를 줄이고 밀도를 올린다. 구분은 선 하나와 배경으로만 한다. */
   .ph{
-    padding:13px 16px;border-bottom:1px solid var(--line);background:#fafbfc;
-    font-size:14px;font-weight:800;letter-spacing:-.4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:11px 14px;border-bottom:1px solid var(--line);background:#fafbfc;
+    font-size:13.5px;font-weight:800;letter-spacing:-.4px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
   }
   .ph .sm{font-size:12px;font-weight:500;color:var(--sub)}
-  .pb{padding:16px}
+  .pb{padding:14px}
   .btn{
     border:0;border-radius:9px;font-family:inherit;font-size:13.5px;font-weight:700;
     padding:10px 15px;cursor:pointer;letter-spacing:-.3px;
@@ -216,7 +249,7 @@
     grid-template-columns:auto 300px;
     justify-content:center;align-items:start;gap:26px;margin-top:16px;
   }
-  body.present .phone{zoom:1.3}
+  body.present .device{zoom:1.3}
 
   /* 검색창은 청중이 무엇을 입력하는지 보이는 자리다 */
   body.present .sbox{border-width:2.2px}
@@ -224,7 +257,7 @@
 
   @media (max-width:900px){
     body.present .cols{grid-template-columns:1fr}
-    body.present .phone{zoom:1}
+    body.present .device{zoom:1}
   }
 </style>
 </head>
@@ -256,6 +289,7 @@
   <div class="cols">
     <!-- 폰 -->
     <div>
+      <div class="device">
       <div class="phone" id="phone">
         <div class="statusbar">
           <span><b>SKT</b> <span id="clock">1:19</span></span>
@@ -270,6 +304,10 @@
         <div class="body" id="body">
           <div class="hint">검색어를 입력해 보세요.<br><b>k패스카드</b>, <b>카드신청</b>, <b>자동이체 해지</b></div>
         </div>
+        <div class="navbar" aria-hidden="true">
+          <span class="nb-recent"></span><span class="nb-home"></span><span class="nb-back"></span>
+        </div>
+      </div>
       </div>
       <p class="mockcap">
         화면 안의 <b>탭 · 추천검색어</b>는 실제 앱 화면을 재현한 것이라 동작하지 않습니다
