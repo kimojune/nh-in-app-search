@@ -877,6 +877,47 @@ function fresh(appId = "allone") {
     bankSrc.includes('classList.toggle("present"') && !bankSrc.includes('document.body.className = on'));
 }
 
+/* =========================================================================
+   검사 건수가 문서로 번지지 않는지
+
+   건수는 이 파일을 고칠 때마다 바뀐다. 문서마다 손으로 박아두면 검사를 더할
+   때마다 전부 고쳐야 하고, 하나라도 빠뜨리면 문서끼리 숫자가 어긋난다.
+   실제로 일곱 개 파일에 박혀 있어서 여섯 번 동기화했다.
+
+   단일 기준은 prototype/router/README.md 다. 예외는 발표 슬라이드 표지
+   한 곳으로, 발표에서 숫자로 말하는 자리라 남겼다.
+   ========================================================================= */
+{
+  group("검사 건수 중복 방지");
+
+  /* 「자동 검사 ...123건」과 「123개 항목」을 찾는다. 설문 25건처럼 다른 건수는 건드리지 않는다. */
+  const COUNT = /자동\s*검사[^\n]{0,14}\d+\s*건|\d+\s*개 항목/;
+  const GUARDED = [
+    "README.md",
+    "docs/B축_MVP_설계.md",
+    "docs/발표_스피커노트.md",
+    "docs/발표자료_구성안.md",
+    "docs/평가리포트.md",
+    "docs/원페이저_기획안.md"
+  ];
+
+  for (const rel of GUARDED) {
+    const src = fs.readFileSync(new URL("../../" + rel, import.meta.url), "utf8");
+    const m = src.match(COUNT);
+    ok(rel + " 에 검사 건수를 적지 않는다" + (m ? " — 발견: " + JSON.stringify(m[0]) : ""), !m);
+  }
+
+  /* 단일 기준에는 반드시 있어야 한다 */
+  const routerReadme = fs.readFileSync(new URL("./README.md", import.meta.url), "utf8");
+  ok("라우터 README 에는 건수가 있다", COUNT.test(routerReadme));
+  ok("라우터 README 가 단일 기준임을 밝힌다",
+    routerReadme.includes("검사 건수의 단일 기준은 이 문서다"));
+
+  /* 표지는 예외다 — 발표에서 숫자로 말하는 자리 */
+  const cover = fs.readFileSync(new URL("../slides/Main.dc.html", import.meta.url), "utf8");
+  ok("슬라이드 표지에는 건수가 있다", /자동검사\s*\d+건/.test(cover));
+}
+
 /* ---------- 결과 ---------- */
 console.log("\n" + "-".repeat(52));
 console.log("통과 " + pass + " · 실패 " + fail + " (총 " + (pass + fail) + "건)");
