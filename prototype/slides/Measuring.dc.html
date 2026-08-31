@@ -9,15 +9,16 @@
 <helmet>
   <style>
     :root{
-      --bg: oklch(97% 0.008 95);
-      --panel: oklch(99.5% 0.003 95);
-      --ink: oklch(22% 0.015 95);
-      --ink-muted: oklch(52% 0.012 95);
-      --line: oklch(88% 0.008 95);
-      --accent: oklch(48% 0.09 160);
-      --accent-soft: oklch(93% 0.035 160);
-      --warn: oklch(58% 0.12 55);
-      --warn-soft: oklch(95% 0.03 55);
+      --bg: #F7F8F7;
+      --panel: #FFFFFF;
+      --ink: #16181D;
+      --ink-muted: #5A6169;
+      --line: #E3E6E3;
+      --accent: #007A33;
+      --accent-brand: #00963C;
+      --accent-soft: #E8F5EC;
+      --warn: #9A5320;
+      --warn-soft: #FFEADC;
       --font-display: Georgia, 'Noto Serif KR', serif;
       --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
     }
@@ -25,7 +26,7 @@
     body { margin: 0; }
     .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
     .head{ display:flex; align-items:baseline; gap:14px; }
-    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent-brand); font-weight:600; }
     .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
     .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
@@ -42,7 +43,7 @@
     .neq{ background:var(--bg); border:1px solid var(--line); padding:12px 14px; font-size:15px; line-height:1.6; font-weight:600; }
     .neq .x{ color:var(--warn); font-weight:800; margin:0 6px; }
 
-    .case{ font-size:14px; line-height:1.55; padding-left:13px; border-left:2px solid var(--accent); }
+    .case{ font-size:14px; line-height:1.55; padding-left:13px; border-left:2px solid var(--accent-brand); }
     .case b{ font-weight:700; }
     .case .tagx{ font-size:11px; font-weight:800; color:var(--warn); letter-spacing:0.03em; display:block; margin-bottom:3px; }
     .moved{ display:flex; flex-direction:column; gap:7px; margin-top:2px; }
@@ -63,7 +64,7 @@
     .z.bad .v{ color:var(--warn); }
     .z.ok .v{ color:var(--accent); }
 
-    .law{ background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:11px 14px; font-size:13.5px; line-height:1.55; }
+    .law{ background:var(--warn-soft); border:1px solid #F0D6BC; padding:11px 14px; font-size:13.5px; line-height:1.55; }
     .law b{ font-weight:700; }
 
     .close{ margin-top:16px; background:var(--accent-soft); padding:13px 18px; font-size:15.5px; font-weight:600; line-height:1.5; }

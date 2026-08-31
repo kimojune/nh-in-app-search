@@ -9,15 +9,16 @@
 <helmet>
   <style>
     :root{
-      --bg: oklch(97% 0.008 95);
-      --panel: oklch(99.5% 0.003 95);
-      --ink: oklch(22% 0.015 95);
-      --ink-muted: oklch(52% 0.012 95);
-      --line: oklch(88% 0.008 95);
-      --accent: oklch(48% 0.09 160);
-      --accent-soft: oklch(93% 0.035 160);
-      --warn: oklch(58% 0.12 55);
-      --warn-soft: oklch(95% 0.03 55);
+      --bg: #F7F8F7;
+      --panel: #FFFFFF;
+      --ink: #16181D;
+      --ink-muted: #5A6169;
+      --line: #E3E6E3;
+      --accent: #007A33;
+      --accent-brand: #00963C;
+      --accent-soft: #E8F5EC;
+      --warn: #9A5320;
+      --warn-soft: #FFEADC;
       --font-display: Georgia, 'Noto Serif KR', serif;
       --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
     }
@@ -25,7 +26,7 @@
     body { margin: 0; }
     .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:56px 96px; }
     .head{ display:flex; align-items:baseline; gap:14px; }
-    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent-brand); font-weight:600; }
     .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
     .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
@@ -39,7 +40,7 @@
     .row-label{ font-size:12.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-muted); }
 
     .ev{ display:flex; align-items:baseline; gap:14px; font-size:16px; line-height:1.5; }
-    .ev .v{ font-family:var(--font-display); font-size:27px; font-weight:600; color:var(--accent); min-width:72px; text-align:right; }
+    .ev .v{ font-family:var(--font-display); font-size:27px; font-weight:600; color:var(--accent-brand); min-width:72px; text-align:right; }
     .ev .t{ flex:1; }
     .ev .t b{ font-weight:700; }
 
@@ -50,7 +51,7 @@
     .ph .nm{ font-size:11.5px; font-weight:700; text-align:center; line-height:1.25; }
     .ph .rs{ font-size:10.5px; font-weight:800; text-align:center; color:var(--warn); line-height:1.25; }
     .ph .q{ font-size:10px; color:var(--ink-muted); text-align:center; line-height:1.25; }
-    .ph.ok img{ border-color:var(--accent); border-width:2px; }
+    .ph.ok img{ border-color:var(--accent-brand); border-width:2px; }
     .ph.ok .rs{ color:var(--accent); }
     .shots .note{ font-size:11.5px; color:var(--ink-muted); line-height:1.45; }
 
