@@ -3,7 +3,9 @@
 
    실행:  node tests.mjs        (외부 라이브러리 없음)
 
-   검사 대상은 화면이 아니라 계열사 앱이 실제로 심는 routing-client.js다.
+   검사 대상은 화면이 아니라 계열사 앱이 실제로 심는 코드다.
+     routing-client.js  라우터에서 기준을 받아 조회하는 부분
+     app-themes.js      받은 데이터를 그 앱의 디자인으로 그리는 부분
    브라우저 전역(window·localStorage)은 이 파일 안에서 최소한으로 흉내낸다.
    ========================================================================= */
 import fs from "node:fs";
@@ -562,6 +564,166 @@ function fresh(appId = "allone") {
     const rendered = 'lookup("' + esc('<img src=x onerror="alert(1)">') + '")';
     ok("로그에 넣어도 태그가 살아나지 않는다", !rendered.includes("<img"));
   }
+}
+
+/* =========================================================================
+   앱 디자인 컴포넌트 — app-themes.js
+
+   라우터는 데이터만 주고 화면은 각 앱이 그린다는 설계를 검사로 못박는다.
+   같은 데이터를 넣어 마크업이 서로 달라야 하고, 렌더러가 깨져도 검색은
+   멈추지 않아야 하며, 앱별 강조색은 접근성 대비 기준을 지켜야 한다.
+   측정값의 출처와 기준은 docs/디자인_기준.md.
+   ========================================================================= */
+{
+  group("앱 디자인 컴포넌트 — 로드와 토큰");
+
+  const themeSrc = fs.readFileSync(new URL("./app-themes.js", import.meta.url), "utf8");
+  const twin = {};
+  new Function("window", themeSrc)(twin);
+  const AT = twin.AppThemes;
+
+  ok("app-themes.js 가 전역에 붙는다", !!AT);
+  check("네 앱의 id", AT.ids, ["allone", "kok", "smart", "nhpay"]);
+
+  for (const id of AT.ids) {
+    ok(id + " 테마가 있다", !!AT.themes[id]);
+    ok(id + " 렌더러가 있다", !!AT.renderers[id]);
+  }
+
+  /* 앱마다 강조색이 달라야 한다 — 이 프로젝트가 관찰한 사실이 그렇다 */
+  const accents = AT.ids.map((id) => AT.themes[id].accent);
+  check("네 앱의 강조색이 서로 다르다", new Set(accents).size, 4);
+  check("콕뱅크는 청록", AT.themes.kok.accent, "#0296A2");
+  check("NH Pay 는 네이비", AT.themes.nhpay.accent, "#313E60");
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 같은 데이터, 다른 화면");
+
+  const HIT = {
+    name: "교통비 환급 카드 신청",
+    next: "카드 목록에서 K-패스카드를 찾아 신청",
+    channels: [
+      { id: "nhpay", name: "NH Pay", role: "완료" },
+      { id: "cardweb", name: "NH농협카드 모바일웹", role: "경유" },
+      { id: "allone", name: "NH올원뱅크", role: "안내" }
+    ]
+  };
+
+  const cards = {};
+  for (const id of AT.ids) cards[id] = AT.safe(id, "guideCard", HIT);
+
+  check("네 앱의 안내 카드 마크업이 모두 다르다",
+    new Set(Object.values(cards)).size, AT.ids.length);
+
+  const ownClass = { allone: "gd-allone", kok: "gd-kok", smart: "gd-smart", nhpay: "gd-pay" };
+  for (const id of AT.ids) {
+    ok(id + " 는 자기 클래스로 그린다", cards[id].includes(ownClass[id]));
+    /* 다른 앱의 클래스가 섞여 들어가지 않는다 */
+    const others = AT.ids.filter((x) => x !== id).map((x) => ownClass[x]);
+    ok(id + " 에 다른 앱 클래스가 섞이지 않는다", others.every((c) => !cards[id].includes(c)));
+  }
+
+  /* 라우터가 준 값이 빠짐없이 화면에 실려야 한다 */
+  for (const id of AT.ids) {
+    ok(id + " 에 기능명이 실린다", cards[id].includes(HIT.name));
+    ok(id + " 에 다음 행동이 실린다", cards[id].includes(HIT.next));
+    ok(id + " 에 채널 세 개가 모두 실린다",
+      HIT.channels.every((c) => cards[id].includes(c.name)));
+    ok(id + " 에 역할이 실린다",
+      HIT.channels.every((c) => cards[id].includes(c.role)));
+  }
+
+  /* 섹션 머리글도 앱마다 표기가 다르다 (실측: "메뉴 39건" / "메뉴 (총 15건)" / "카드 2") */
+  const heads = AT.ids.map((id) => AT.safe(id, "sectionHeader", { label: "메뉴", count: 39 }));
+  check("섹션 머리글도 앱마다 다르다", new Set(heads).size, AT.ids.length);
+  ok("스마트뱅킹은 괄호 표기", heads[AT.ids.indexOf("smart")].includes("(총 39건)"));
+  ok("NH Pay 는 전체보기 어피던스", heads[AT.ids.indexOf("nhpay")].includes("전체보기"));
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 실패 방어");
+
+  ok("모르는 앱 id 는 최소 구현으로 떨어진다",
+    AT.safe("없는앱", "guideCard", HIT).includes("gd-base"));
+
+  const keep = AT.renderers.smart.guideCard;
+  AT.renderers.smart.guideCard = () => { throw new Error("boom"); };
+  ok("렌더러가 예외를 던져도 최소 구현이 나온다",
+    AT.safe("smart", "guideCard", HIT).includes("gd-base"));
+  AT.renderers.smart.guideCard = () => 42;
+  ok("렌더러가 문자열이 아닌 것을 줘도 최소 구현이 나온다",
+    AT.safe("smart", "guideCard", HIT).includes("gd-base"));
+  AT.renderers.smart.guideCard = keep;
+  ok("되돌린 뒤 원래 렌더러로 돌아온다",
+    AT.safe("smart", "guideCard", HIT).includes("gd-smart"));
+
+  /* 어떤 경우에도 문자열을 준다 — 화면 조립이 undefined 로 오염되지 않는다 */
+  ok("safe 는 항상 문자열을 준다",
+    AT.ids.concat(["없는앱"]).every((id) =>
+      ["guideCard", "sectionHeader", "resultRow", "emptyState"].every((fn) =>
+        typeof AT.safe(id, fn, fn === "sectionHeader" ? { label: "x", count: 0 } : HIT) === "string")));
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 이스케이프");
+
+  const NASTY = {
+    name: '<img src=x onerror="alert(1)">',
+    next: '"><b>next</b>',
+    channels: [{ id: "x", name: "<script>alert(1)</script>", role: "완료" }]
+  };
+  for (const id of AT.ids.concat(["없는앱"])) {
+    const out = AT.safe(id, "guideCard", NASTY);
+    ok(id + " — img 태그가 살아나지 않는다", !out.includes("<img"));
+    ok(id + " — script 태그가 살아나지 않는다", !out.includes("<script"));
+    /* 꺾쇠와 따옴표가 실체참조로 바뀌어 태그도 속성도 만들어지지 않는다.
+       이스케이프된 뒤의 문자열은 화면에 글자로 보일 뿐이므로 그대로 있어도 된다. */
+    ok(id + " — 사용자 값이 실체참조로 바뀐다",
+      out.includes("&lt;img src=x onerror=&quot;alert(1)&quot;&gt;"));
+    ok(id + " — 다음 행동의 따옴표도 막힌다",
+      out.includes("&quot;&gt;&lt;b&gt;next&lt;/b&gt;"));
+  }
+  ok("결과 행은 as-is 실측 마크업이라 그대로 통과시킨다",
+    AT.safe("allone", "resultRow", '<span class="g">카드</span>').includes('<span class="g">'));
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 스타일시트와 대비");
+
+  const css = AT.css();
+  for (const id of AT.ids) {
+    ok(id + " 테마 규칙이 스타일시트에 있다", css.includes(".theme-" + id));
+    ok(id + " 안내 카드 규칙이 스타일시트에 있다", css.includes("." + ownClass[id]));
+  }
+  ok("실측 청록이 스타일시트에 들어간다", css.includes("#0296A2"));
+  ok("실측 네이비가 스타일시트에 들어간다", css.includes("#313E60"));
+
+  /* 접근성 — WCAG 2.1 상대 휘도로 흰 배경 대비를 계산한다.
+     docs/디자인_기준.md 에서 실측 강조색이 본문 크기 기준(4.5:1)에 미달함을
+     확인했으므로, 글자에 쓰는 값(accentText)은 반드시 통과해야 한다. */
+  const lin = (c) => (c /= 255) <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  const lum = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+  };
+  const onWhite = (hex) => (1.05) / (lum(hex) + 0.05);
+
+  for (const id of AT.ids) {
+    const th = AT.themes[id];
+    ok(id + " 본문 강조색이 흰 배경 대비 4.5:1 이상", onWhite(th.accentText) >= 4.5);
+    ok(id + " 면·테두리색이 흰 배경 대비 3:1 이상", onWhite(th.accent) >= 3.0);
+  }
+  ok("NH Pay 링크색도 본문 기준을 지킨다", onWhite(AT.themes.nhpay.linkText) >= 4.5);
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 앱 화면과의 연결");
+
+  const bankSrc = fs.readFileSync(new URL("./bank-app.html", import.meta.url), "utf8");
+  ok("앱이 app-themes.js 를 읽어들인다", bankSrc.includes('src="./app-themes.js"'));
+  ok("안내 카드를 직접 조립하지 않는다", !bankSrc.includes('h += \'<div class="guide">\''));
+  ok("안내 카드를 앱 컴포넌트로 그린다", bankSrc.includes('AT.safe(appId, "guideCard", hit)'));
+  ok("결과 행도 앱 컴포넌트로 그린다", bankSrc.includes('AT.safe(appId, "resultRow"'));
+  ok("폰에 테마 클래스를 붙인다", bankSrc.includes('"phone theme-" + a.id'));
+  /* 발표 모드가 body 클래스를 통째로 덮어쓰면 비교 패널 상태가 지워진다 */
+  ok("발표 모드가 다른 body 클래스를 지우지 않는다",
+    bankSrc.includes('classList.toggle("present"') && !bankSrc.includes('document.body.className = on'));
 }
 
 /* ---------- 결과 ---------- */
