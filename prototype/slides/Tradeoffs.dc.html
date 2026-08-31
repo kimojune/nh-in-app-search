@@ -9,15 +9,16 @@
 <helmet>
   <style>
     :root{
-      --bg: oklch(97% 0.008 95);
-      --panel: oklch(99.5% 0.003 95);
-      --ink: oklch(22% 0.015 95);
-      --ink-muted: oklch(52% 0.012 95);
-      --line: oklch(88% 0.008 95);
-      --accent: oklch(48% 0.09 160);
-      --accent-soft: oklch(93% 0.035 160);
-      --warn: oklch(58% 0.12 55);
-      --warn-soft: oklch(95% 0.03 55);
+      --bg: #F7F8F7;
+      --panel: #FFFFFF;
+      --ink: #16181D;
+      --ink-muted: #5A6169;
+      --line: #E3E6E3;
+      --accent: #007A33;
+      --accent-brand: #00963C;
+      --accent-soft: #E8F5EC;
+      --warn: #9A5320;
+      --warn-soft: #FFEADC;
       --font-display: Georgia, 'Noto Serif KR', serif;
       --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
     }
@@ -25,29 +26,30 @@
     body { margin: 0; }
     .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
     .head{ display:flex; align-items:baseline; gap:14px; }
-    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent-brand); font-weight:600; }
     .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
     .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
 
-    .lead{ margin:18px 0 14px; font-size:18px; line-height:1.5; }
-    .lead b{ font-weight:700; }
+    .lead{ margin:10px 0 8px; font-size:16px; line-height:1.5; color:var(--ink-muted); }
+    .lead b{ font-weight:700; color:var(--ink); }
 
-    .hdr{ display:flex; gap:16px; padding:0 16px 7px; font-size:11.5px; font-weight:800; letter-spacing:0.05em; color:var(--ink-muted); }
-    .hdr .c1{ flex:0 0 268px; }
-    .hdr .c2{ flex:0 0 300px; color:var(--warn); }
-    .hdr .c3{ flex:1; color:var(--accent); }
+    .hdr{ display:flex; gap:16px; padding:0 14px 4px; font-size:11px; font-weight:800; letter-spacing:0.05em; color:var(--ink-muted); }
+    .hdr .c1{ flex:0 0 340px; }
+    .hdr .c2{ flex:1; color:var(--warn); }
 
-    .rows{ display:flex; flex-direction:column; gap:8px; }
-    .r{ display:flex; gap:16px; align-items:flex-start; background:var(--panel); border:1px solid var(--line); padding:13px 16px; }
-    .r .c1{ flex:0 0 268px; font-size:14.5px; font-weight:700; line-height:1.45; }
-    .r .c2{ flex:0 0 300px; font-size:13.5px; line-height:1.5; color:var(--ink); }
-    .r .c3{ flex:1; font-size:13.5px; line-height:1.5; color:var(--ink-muted); min-width:0; }
+    .rows{ display:flex; flex-direction:column; gap:4px; }
+    .r{ display:flex; gap:16px; align-items:baseline; background:var(--panel); border:1px solid var(--line); padding:6px 14px; }
+    .r .c1{ flex:0 0 340px; font-size:14px; font-weight:700; line-height:1.4; }
+    .r .c2{ flex:1; font-size:13.5px; line-height:1.4; color:var(--ink); min-width:0; }
     .r .c2 b{ font-weight:700; color:var(--warn); }
-    .r .c3 b{ font-weight:700; color:var(--ink); }
+    /* 아래 그림이 근거로 붙는 행 */
+    .r.hi{ border-color:var(--accent-brand); background:var(--accent-soft); }
 
-    .close{ margin-top:auto; margin-bottom:22px; background:var(--accent-soft); padding:15px 20px; font-size:17px; font-weight:700; line-height:1.5; }
-    .close .sm{ display:block; margin-top:6px; font-size:13.5px; font-weight:500; color:var(--ink-muted); }
+    .figcap{ margin:9px 0 5px; font-size:12.5px; line-height:1.5; color:var(--ink-muted); }
+    .figcap b{ color:var(--ink); font-weight:700; }
+    .figcap .warnnote{ display:block; color:var(--warn); }
+    .fig{ display:block; width:97%; height:auto; }
 
     .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
   </style>
@@ -60,52 +62,25 @@
     <span class="time">30초</span>
   </div>
 
-  <div class="lead">이 설계에 공짜는 없다. <b>다섯 번 맞바꿨고, 다섯 번 다 같은 것을 우선했다.</b></div>
+  <div class="lead">이 설계에 공짜는 없다 — <b>다섯 번 맞바꿨고, 다섯 번 다 「계열사 앱이 부담을 지지 않는다」를 우선했다.</b></div>
 
-  <div class="hdr">
-    <span class="c1">택했다</span>
-    <span class="c2">대신 포기한 것</span>
-    <span class="c3">왜 그렇게 골랐나</span>
-  </div>
+  <div class="hdr"><span class="c1">택했다</span><span class="c2">대신 포기한 것</span></div>
 
   <div class="rows">
-    <div class="r">
-      <span class="c1">지능을 중앙에 둔다</span>
-      <span class="c2">중앙이 틀리면 <b>네 앱이 한꺼번에 틀린다</b></span>
-      <span class="c3">앱마다 판단이 갈리지 않는다. 그래서 <b>「안내한 채널이 실제 담당이 아니다」를 반증 조건에 넣었다</b></span>
-    </div>
-
-    <div class="r">
-      <span class="c1">안내만 하고 보내지 않는다</span>
-      <span class="c2">사용자가 <b>한 번 더 움직여야 한다</b></span>
-      <span class="c3">딥링크는 앱마다 별도 합의가 필요하다. <b>협의 없이 붙는 것</b>이 도입의 조건이었다</span>
-    </div>
-
-    <div class="r">
-      <span class="c1">검색어를 밖으로 보내지 않는다</span>
-      <span class="c2">라우터가 <b>사용자 행동을 전혀 보지 못한다</b>. 그룹 안 이동률도 못 잰다</span>
-      <span class="c3">검색할 때 <b>네트워크가 0</b>이라 <b>제3자 제공 동의가 필요 없다</b>. 측정하려고 사용자를 식별해 맞추면 <b>도입 장벽을 도로 올린다</b></span>
-    </div>
-
-    <div class="r">
-      <span class="c1">데이터만 주고 화면은 앱이 그린다</span>
-      <span class="c2">앱에 <b>렌더링 작업이 생긴다</b></span>
-      <span class="c3">남의 UI가 들어가면 <b>디자인 시스템 · 접근성 · 심사에서 막힌다</b>. 노출 여부도 계열사가 정하게 된다</span>
-    </div>
-
-    <div class="r">
-      <span class="c1">통합을 기다리지 않고 다리를 놓는다</span>
-      <span class="c2">슈퍼앱 전환이 끝나면 <b>역할이 사라진다</b></span>
-      <span class="c3">통합은 몇 년이 걸린다. <b>그 사이에도 사용자는 매일 헤맨다</b></span>
-    </div>
+    <div class="r"><span class="c1">지능을 중앙에 둔다</span><span class="c2">중앙이 틀리면 <b>네 앱이 한꺼번에 틀린다</b></span></div>
+    <div class="r"><span class="c1">안내만 하고 보내지 않는다</span><span class="c2">사용자가 <b>한 번 더 움직여야 한다</b></span></div>
+    <div class="r"><span class="c1">검색어를 밖으로 보내지 않는다</span><span class="c2">라우터가 <b>사용자 행동을 전혀 보지 못한다</b></span></div>
+    <div class="r hi"><span class="c1">데이터만 주고 화면은 앱이 그린다</span><span class="c2">앱에 <b>렌더링 작업이 생긴다</b></span></div>
+    <div class="r"><span class="c1">통합을 기다리지 않고 다리를 놓는다</span><span class="c2">슈퍼앱 전환이 끝나면 <b>역할이 사라진다</b></span></div>
   </div>
 
-  <div class="close">다섯 번 다 <b>“계열사 앱이 부담을 지지 않는다”</b>를 우선했다
-    <span class="sm">운영 주체가 다른 앱들이라, 도입 비용이 크면 채택되지 않는다 — 그게 이 설계의 한 문장이다</span>
-  </div>
+  <div class="figcap"><b>왜 화면을 내려보내지 않는가</b> — 같은 안내 데이터를 네 앱이 각자의 디자인으로 그린 결과다.
+    <span class="warnnote">실측 강조색 셋은 본문 대비 4.5:1에 미달한다 — 라우터가 UI를 주면 그 기준까지 떠안는다</span></div>
+  <img class="fig" src="./images/fig-guide-four-designs.png"
+       alt="같은 안내 데이터를 NH올원뱅크·NH콕뱅크·NH스마트뱅킹·NH Pay 네 앱이 각자의 디자인으로 그린 안내 카드 네 개">
 
   <div class="footer">
-    <span>판단: 고른 값과 버린 값을 나란히 적었다</span>
+    <span>판단: 고른 값과 버린 값을 나란히 적었다 · 행별 근거는 평가 리포트에 있다</span>
     <span>7 / 8</span>
   </div>
 </div>

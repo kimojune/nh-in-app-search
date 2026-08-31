@@ -9,15 +9,16 @@
 <helmet>
   <style>
     :root{
-      --bg: oklch(97% 0.008 95);
-      --panel: oklch(99.5% 0.003 95);
-      --ink: oklch(22% 0.015 95);
-      --ink-muted: oklch(52% 0.012 95);
-      --line: oklch(88% 0.008 95);
-      --accent: oklch(48% 0.09 160);
-      --accent-soft: oklch(93% 0.035 160);
-      --warn: oklch(58% 0.12 55);
-      --warn-soft: oklch(95% 0.03 55);
+      --bg: #F7F8F7;
+      --panel: #FFFFFF;
+      --ink: #16181D;
+      --ink-muted: #5A6169;
+      --line: #E3E6E3;
+      --accent: #007A33;
+      --accent-brand: #00963C;
+      --accent-soft: #E8F5EC;
+      --warn: #9A5320;
+      --warn-soft: #FFEADC;
       --font-display: Georgia, 'Noto Serif KR', serif;
       --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
     }
@@ -25,44 +26,54 @@
     body { margin: 0; }
     .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:52px 96px; }
     .head{ display:flex; align-items:baseline; gap:14px; }
-    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent-brand); font-weight:600; }
     .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
     .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
 
-    .flow{ margin:18px 0 8px; font-size:22px; font-weight:700; line-height:1.4; }
+    .flow{ margin:16px 0 0; font-size:21px; font-weight:700; line-height:1.35; }
+    .flow .flowsub{ display:block; margin-top:5px; font-size:13.5px; font-weight:500; color:var(--ink-muted); }
     .flow .arrow{ color:var(--accent); margin:0 12px; }
-    .sub{ font-size:14.5px; color:var(--ink-muted); line-height:1.6; }
-    .sub b{ color:var(--ink); font-weight:700; }
 
-    .body-row{ display:flex; gap:26px; flex:1; min-height:0; margin-top:18px; }
-    .col{ flex:1; display:flex; flex-direction:column; gap:10px; min-width:0; }
+    /* ---- 아키텍처 그림 ----
+       색 띠 넷은 실측한 각 앱의 강조색이다(docs/디자인_기준.md). 같은 데이터를
+       받아도 화면이 달라진다는 것을 색으로만 먼저 보여준다. */
+    .arch{ margin:14px 0 4px; }
+    .arch .bt{ font-family:var(--font-body); font-size:14px; font-weight:700; fill:var(--ink); }
+    .arch .bt.mono{ font-family:ui-monospace,Consolas,monospace; font-size:13px; }
+    .arch .bs{ font-size:11px; fill:var(--ink-muted); }
+    .arch .al{ font-size:11.5px; font-weight:700; fill:var(--ink); }
+    .arch .ah{ font-size:11px; fill:var(--ink-muted); }
+    .arch .ct{ font-size:11.5px; font-weight:700; fill:var(--ink); }
+    .arch .cs{ font-size:11px; fill:var(--ink-muted); }
+    .body-row{ display:flex; gap:26px; flex:1; min-height:0; margin-top:8px; }
+    .col{ flex:1; display:flex; flex-direction:column; gap:8px; min-width:0; }
     .col-label{ font-size:12.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-muted); display:flex; align-items:center; gap:8px; }
     .status{ font-size:10.5px; font-weight:700; padding:2px 7px; text-transform:none; letter-spacing:0; background:var(--line); color:var(--ink-muted); }
     .status.have{ background:var(--accent-soft); color:var(--accent); }
 
     .metrics{ display:grid; grid-template-columns:1fr 1fr; gap:9px; }
     .m{ background:var(--panel); border:1px solid var(--line); padding:12px 13px; }
-    .m .v{ font-family:var(--font-display); font-size:24px; font-weight:600; color:var(--accent); line-height:1.15; }
+    .m .v{ font-family:var(--font-display); font-size:24px; font-weight:600; color:var(--accent-brand); line-height:1.15; }
     .m .l{ font-size:12.5px; color:var(--ink-muted); margin-top:4px; line-height:1.4; }
     .m .l b{ color:var(--ink); font-weight:700; }
 
-    .kpi{ background:var(--accent-soft); padding:14px 16px; }
-    .kpi .t{ font-size:15px; line-height:1.5; font-weight:600; }
-    .kpi .obs{ margin-top:10px; padding-top:9px; border-top:1px solid oklch(86% 0.04 160); display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; font-size:13px; line-height:1.45; }
+    .kpi{ background:var(--accent-soft); padding:11px 14px; }
+    .kpi .t{ font-size:14px; line-height:1.45; font-weight:600; }
+    .kpi .obs{ margin-top:8px; padding-top:7px; border-top:1px solid #C6E2CF; display:flex; align-items:baseline; gap:9px; flex-wrap:wrap; font-size:13px; line-height:1.45; }
     .kpi .obs .ov{ font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--accent); }
     .kpi .obs .cav{ font-size:11.5px; color:var(--ink-muted); }
     .guards{ display:flex; flex-direction:column; gap:7px; }
-    .g{ background:var(--panel); border:1px solid var(--line); padding:9px 12px; display:flex; gap:12px; align-items:baseline; }
+    .g{ background:var(--panel); border:1px solid var(--line); padding:8px 11px; display:flex; gap:12px; align-items:baseline; }
     .g .gv{ font-family:var(--font-display); font-size:17px; font-weight:600; color:var(--accent); flex:0 0 92px; }
     .g .gv.pend{ font-family:var(--font-body); font-size:12.5px; color:var(--ink-muted); font-weight:600; }
     .g .gt{ flex:1; font-size:13px; line-height:1.45; }
 
-    .caution{ margin-top:12px; font-size:13px; color:var(--ink-muted); line-height:1.6; }
-    .demo{ margin-top:14px; margin-bottom:52px; background:var(--line); border-left:3px solid var(--ink-muted); padding:12px 18px; font-size:13.5px; line-height:1.5; color:var(--ink-muted); display:flex; align-items:baseline; gap:14px; }
+    .kpi .qual{ margin-top:7px; padding-top:7px; border-top:1px solid #C6E2CF; font-size:12px; line-height:1.5; color:var(--ink-muted); }
+    .kpi .qual b{ color:var(--ink); font-weight:700; }
+    .demo{ margin-top:10px; margin-bottom:50px; background:var(--line); border-left:3px solid var(--ink-muted); padding:12px 18px; font-size:13.5px; line-height:1.5; color:var(--ink-muted); display:flex; align-items:baseline; gap:14px; }
     .demo b{ font-weight:800; color:var(--ink); }
     .demo .steps{ color:var(--ink-muted); }
-    .caution b{ color:var(--ink); }
 
     .footer{ position:absolute; left:96px; right:96px; bottom:26px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
   </style>
@@ -75,8 +86,58 @@
     <span class="time">60초</span>
   </div>
 
-  <div class="flow">검색어<span class="arrow">→</span>담당 채널 + 역할(완료 · 경유 · 안내) + 다음 행동</div>
-  <div class="sub"><b>검색 결과를 바꾸지 않는다. 그 위에 안내만 얹는다.</b> 지능은 중앙에 두고 앱은 조회만 한다.</div>
+  <div class="flow">검색어<span class="arrow">→</span>담당 채널 + 역할(완료 · 경유 · 안내) + 다음 행동
+    <span class="flowsub">검색 결과를 바꾸지 않는다. 그 위에 안내만 얹는다.</span></div>
+  <div class="arch">
+    <svg viewBox="0 0 1088 108" width="100%" height="108" role="img"
+         aria-label="라우터 콘솔이 스냅샷을 발행하고, 네 계열사 앱이 하루 한 번 받아 로컬에서 조회한다">
+      <!-- 라우터 콘솔 -->
+      <rect x="1" y="19" width="206" height="70" rx="2" fill="var(--panel)"
+            stroke="var(--accent-brand)" stroke-width="1.5"/>
+      <text x="104" y="47" class="bt" text-anchor="middle">라우터 콘솔</text>
+      <text x="104" y="66" class="bs" text-anchor="middle">중앙에서 검수 · 승인</text>
+      <text x="104" y="80" class="bs" text-anchor="middle">동의어 · 담당 · 미노출 판단</text>
+
+      <!-- 발행 -->
+      <text x="252" y="48" class="al" text-anchor="middle">발행</text>
+      <line x1="213" y1="54" x2="288" y2="54" stroke="var(--accent-brand)" stroke-width="1.5"/>
+      <path d="M288 54 L281 50.5 L281 57.5 Z" fill="var(--accent-brand)"/>
+
+      <!-- 스냅샷 -->
+      <rect x="296" y="19" width="228" height="70" rx="2" fill="var(--accent-soft)" stroke="none"/>
+      <text x="410" y="45" class="bt mono" text-anchor="middle">routing-index.json</text>
+      <text x="410" y="64" class="bs" text-anchor="middle">version + etag</text>
+      <text x="410" y="78" class="bs" text-anchor="middle">승인된 것만 실린다</text>
+
+      <!-- 하루 1회 -->
+      <text x="599" y="41" class="al" text-anchor="middle">하루 1회 조건부 GET</text>
+      <line x1="530" y1="54" x2="668" y2="54" stroke="var(--ink-muted)" stroke-width="1.5"/>
+      <path d="M668 54 L661 50.5 L661 57.5 Z" fill="var(--ink-muted)"/>
+      <text x="599" y="72" class="ah" text-anchor="middle">데이터만 · UI 없음</text>
+
+      <!-- 계열사 앱 네 개 -->
+      <g>
+        <rect x="676" y="19" width="96" height="48" rx="2" fill="var(--panel)" stroke="var(--line)"/>
+        <rect x="676" y="19" width="96" height="4" fill="#18983B"/>
+        <text x="724" y="48" class="ct" text-anchor="middle">NH올원뱅크</text>
+
+        <rect x="780" y="19" width="96" height="48" rx="2" fill="var(--panel)" stroke="var(--line)"/>
+        <rect x="780" y="19" width="96" height="4" fill="#0296A2"/>
+        <text x="828" y="48" class="ct" text-anchor="middle">NH콕뱅크</text>
+
+        <rect x="884" y="19" width="96" height="48" rx="2" fill="var(--panel)" stroke="var(--line)"/>
+        <rect x="884" y="19" width="96" height="4" fill="#229142"/>
+        <text x="932" y="48" class="ct" text-anchor="middle">NH스마트뱅킹</text>
+
+        <rect x="988" y="19" width="96" height="48" rx="2" fill="var(--panel)" stroke="var(--line)"/>
+        <rect x="988" y="19" width="96" height="4" fill="#313E60"/>
+        <text x="1036" y="48" class="ct" text-anchor="middle">NH Pay</text>
+
+        <text x="880" y="83" class="cs" text-anchor="middle">lookup() — 검색마다 · 네트워크 0</text>
+        <text x="880" y="97" class="cs" text-anchor="middle">화면은 각 앱이 자기 컴포넌트로 그린다</text>
+      </g>
+    </svg>
+  </div>
 
   <div class="body-row">
     <div class="col">
@@ -93,11 +154,11 @@
       <div class="kpi">
         <div class="t">1차 KPI — 외부 재검색이나 도움 없이 <b>인앱검색만으로 올바른 담당 채널과 다음 행동을 결정한</b> 참가자 비율</div>
         <div class="obs"><span class="ov">2명 중 2명</span><span>완료 채널에 도착하고 다음 행동을 답했다</span><span class="cav">실험군 2명 · 대조군 없음 · 다음 행동은 판정하지 않았다</span></div>
+        <div class="qual">안내 한 줄이 <b>「어느 채널」과 「거기서 무엇을」</b> 둘을 말하므로 <b>판정도 둘 다 본다</b> — 채널만 맞히면 절반이다.</div>
       </div>
       <div class="guards">
-        <div class="g"><span class="gv">15명 중 7명</span><span class="gt">잘못된 채널을 <b>확신</b>하는 비율 — <b>as-is 기준선</b>이다. 이 값이 나빠지면 안 된다</span></div>
+        <div class="g"><span class="gv">15명 중 7명</span><span class="gt">잘못된 채널을 <b>확신</b>하는 비율 — <b>as-is 기준선</b>. 나빠지면 안 된다</span></div>
       </div>
-      <div class="caution">안내 한 줄은 <b>「어느 채널」과 「거기서 무엇을」</b> 둘을 말한다. <b>목표도 판정도 둘 다다</b> — 채널만 맞히면 절반이다.</div>
     </div>
   </div>
   <div class="demo"><b>▶ 여기서 실제로 돌려 보여드립니다</b><span class="steps">0건 화면 → 등록·승인·발행 → 동기화 → 안내가 붙는다</span></div>

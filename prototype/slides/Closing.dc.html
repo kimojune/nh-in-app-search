@@ -9,15 +9,16 @@
 <helmet>
   <style>
     :root{
-      --bg: oklch(97% 0.008 95);
-      --panel: oklch(99.5% 0.003 95);
-      --ink: oklch(22% 0.015 95);
-      --ink-muted: oklch(52% 0.012 95);
-      --line: oklch(88% 0.008 95);
-      --accent: oklch(48% 0.09 160);
-      --accent-soft: oklch(93% 0.035 160);
-      --warn: oklch(58% 0.12 55);
-      --warn-soft: oklch(95% 0.03 55);
+      --bg: #F7F8F7;
+      --panel: #FFFFFF;
+      --ink: #16181D;
+      --ink-muted: #5A6169;
+      --line: #E3E6E3;
+      --accent: #007A33;
+      --accent-brand: #00963C;
+      --accent-soft: #E8F5EC;
+      --warn: #9A5320;
+      --warn-soft: #FFEADC;
       --font-display: Georgia, 'Noto Serif KR', serif;
       --font-body: 'Pretendard Variable', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
     }
@@ -25,7 +26,7 @@
     body { margin: 0; }
     .slide{ width:1280px; height:720px; background:var(--bg); color:var(--ink); font-family:var(--font-body); position:relative; display:flex; flex-direction:column; padding:56px 96px; }
     .head{ display:flex; align-items:baseline; gap:14px; }
-    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent); font-weight:600; }
+    .num{ font-family:var(--font-display); font-size:28px; color:var(--accent-brand); font-weight:600; }
     .stage{ font-size:12px; font-weight:800; letter-spacing:0.08em; background:var(--accent-soft); color:var(--accent); padding:4px 10px; }
     .kicker{ font-size:15px; font-weight:700; color:var(--ink); letter-spacing:-0.01em; }
     .time{ margin-left:auto; font-size:14px; color:var(--ink-muted); }
@@ -35,16 +36,20 @@
 
     .cols{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; flex:1; min-height:0; }
     .col{ background:var(--panel); border:1px solid var(--line); padding:20px 18px; display:flex; flex-direction:column; gap:9px; }
-    .col.good{ border-top:3px solid var(--accent); }
+    .col.good{ border-top:3px solid var(--accent-brand); }
     .col.bad{ border-top:3px solid var(--warn); }
     .col.next{ border-top:3px solid var(--ink-muted); }
     .col-label{ font-size:14.5px; font-weight:700; }
     .col.good .col-label{ color:var(--accent); }
     .col.bad .col-label{ color:var(--warn); }
-    .line{ font-size:14px; line-height:1.55; }
-    .line b{ font-weight:700; }
+    .line{ font-size:13px; line-height:1.5; color:var(--ink-muted); }
+    .line b{ font-weight:700; color:var(--ink); }
+    /* 각 열의 첫 줄이 그 열의 머리줄이다. 20초 안에 이 셋만 읽어도 통한다.
+       nth-of-type 은 .col-label 까지 같은 div 로 세므로 인접 선택자를 쓴다. */
+    .col-label + .line{ font-size:14.5px; line-height:1.5; color:var(--ink); font-weight:600; }
+    .col-label + .line b{ font-weight:800; }
 
-    .cond{ margin-top:18px; background:var(--warn-soft); border:1px solid oklch(88% 0.05 55); padding:14px 18px; font-size:14.5px; line-height:1.6; }
+    .cond{ margin-top:18px; background:var(--warn-soft); border:1px solid #F0D6BC; padding:13px 18px; font-size:13.5px; line-height:1.6; }
     .cond b{ font-weight:700; }
 
     .footer{ position:absolute; left:96px; right:96px; bottom:28px; display:flex; justify-content:space-between; font-size:13px; color:var(--ink-muted); border-top:1px solid var(--line); padding-top:12px; }
