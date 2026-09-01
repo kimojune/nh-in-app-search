@@ -11,9 +11,10 @@
 
 ## 보류
 
-- [ ] `_process/` 층을 다시 합친 이유가 무엇인가 — `_meta/PRACTICES.md`와 `_meta/WORKLOG.md` 두 곳의 `이유` 줄이 이 답을 기다린다 (2026-09-01, from: WORKLOG#2026-09-01)
-- [ ] `WORKSPACE_RULES.md` 사본을 워크스페이스 최신판과 언제 맞출 것인가 — 사본은 분리 시점 스냅샷이라 자동으로 내려오지 않는다(`_meta/PRACTICES.md` 「AI_Workspace와의 관계」) (2026-09-01, from: WORKLOG#2026-09-01)
+- (없음)
 
 ## 처리 완료
 
-- (없음)
+- [x] `WORKSPACE_RULES.md` 사본을 워크스페이스 최신판과 언제 맞출 것인가 (2026-09-01, from: WORKLOG#2026-09-01) → 맞추지 않기로 했다. 바깥에 세대가 셋이라 "최신판"이 하나로 정해지지 않는다. `_meta/PRACTICES.md` 「AI_Workspace와의 관계」와 `WORKSPACE_RULES.md` 머리말에 반영
+
+- [x] `_process/` 층을 다시 합친 이유가 무엇인가 (2026-09-01, from: WORKLOG#2026-09-01) → WORKLOG 도입이 목적. 규격이 `_meta/`를 루트 바로 아래로 전제한다. `_meta/PRACTICES.md` 2026-09-01 항목과 `_meta/WORKLOG.md` 「`_process/` 층 해체」 칸에 반영

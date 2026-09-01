@@ -4,9 +4,9 @@
 
 ## 지금 (2026-09-01)
 
-- 하던 것: 저장소 구조 정리 — `_process/` 층을 걷어내 과정 기록을 결과물과 같은 층으로 되돌리고, `_meta/`를 워크스페이스 규격(WORKLOG·INBOX)에 맞췄다
-- 다음 한 걸음: `_meta/PRACTICES.md`의 2026-09-01 항목 `이유` 줄을 사용자가 채운다
-- 막힌 것: 위 한 줄. 왜 `_process/` 층을 다시 합쳤는지는 사용자만 아는 것이라 에이전트가 추측해 쓰지 않는다
+- 하던 것: 규칙 문서를 이 저장소 기준으로 정리했다 — 바깥 워크스페이스를 따라가지 않기로 정하고, 없는 스크립트·없는 섹션·폐지된 문서를 가리키던 규칙을 실제와 맞췄다
+- 다음 한 걸음: 없음. 열린 항목은 `_meta/INBOX.md` 「보류」가 비어 있다
+- 막힌 것: 없음
 
 ## 이 파일에 대하여
 
@@ -52,27 +52,40 @@
 
 ---
 
+## 2026-09-01 규칙 문서를 저장소 기준으로 정리
+
+- 문제: `WORKSPACE_RULES.md`가 폐지된 `ACTIVE_WORK.md`·`HANDOFF.md`에 기록하라고 지시해 진입 문서와 어긋났고, 이 저장소에 없는 스크립트·섹션을 가리켰다
+- 종료조건: 규칙 문서가 저장소 밖이나 없는 대상을 가리키지 않는다
+- 한 일: `WORKSPACE_RULES.md`(제목·작업 전 확인·인수인계·커밋·Git 5개 절), `NAMING.md`(적용 범위 명시), `_meta/PROJECT_RULES.md`, `_meta/PRACTICES.md`
+- 검증: 저장소 밖·없는 대상을 가리키는 살아 있는 규칙 0건(`_meta/ACTIVE_WORK.md`·`_meta/HANDOFF.md`의 과거 기록은 제외). 상대경로 링크 0건 깨짐. `prototype/router/tests.mjs` 270건 통과·0 실패
+- 결론: 규칙 문서는 바깥 워크스페이스를 따라가지 않고 이 저장소 안에서 통하는 것만 담는다
+- 이유: 사본이라 자동으로 내려오지 않는데 바깥에는 세대가 셋(85·102·30줄)이라 "최신판"이 하나로 정해지지 않는다. 2026-09-01 사용자가 외부와 별개로 판단하라고 정했다
+- 남은 것:
+  - [x] `WORKSPACE_RULES.md` 사본이 폐지된 두 문서를 가리키는 문제 — 이 칸에서 해결
+  - [x] `_meta/PROJECT_RULES.md`의 `_ai원본_백업/` 조항 — 폴더가 없다는 사실을 조항에 적어 해결
+- 미결정: 없음
+
 ## 2026-09-01 WORKLOG·INBOX 설치
 
 - 문제: `_meta/`가 워크스페이스의 다른 프로젝트 5개와 구성이 갈려 있어 진행 기록을 쓸 규격 자리가 없었다
 - 종료조건: `_meta/WORKLOG.md`·`_meta/INBOX.md`가 생기고, 진입 문서가 둘을 가리킨다
-- 한 일: `_meta/WORKLOG.md` 신설, `_meta/INBOX.md` 신설, `_meta/PROJECT_RULES.md`(Worklog 미보유 조항·진행 상황 기록처), `CLAUDE.md`, `AGENTS.md`
+- 한 일: 커밋 `8d4a173`. `_meta/WORKLOG.md` 신설, `_meta/INBOX.md` 신설, `_meta/PROJECT_RULES.md`(Worklog 미보유 조항·진행 상황 기록처), `CLAUDE.md`, `AGENTS.md`
 - 검증: `_meta/` 구성이 규격 4종(`PROJECT_RULES` `WORKLOG` `INBOX` `PRACTICES`)을 포함하는지 확인. 상대경로 링크 검사 통과
 - 결론: 규격 4종을 갖췄다. 다만 `ACTIVE_WORK.md`·`HANDOFF.md`를 남기기로 해 `_meta/`는 6개 파일이다
 - 이유: 두 폐지 문서는 종료된 프로젝트의 기록이고 `docs/decision-log/` 4곳이 근거로 인용하고 있어, 사용자가 2026-09-01에 존치를 택했다
 - 남은 것:
-  - [ ] `WORKSPACE_RULES.md` 사본(85줄, 분리 시점 스냅샷)이 아직 `ACTIVE_WORK.md`·`HANDOFF.md`에 기록하라고 지시한다 — 2026-09-01에 손대지 않기로 했으므로, 이 파일과 어긋난 채로 남아 있다
-  - [ ] `_meta/PROJECT_RULES.md`의 `_ai원본_백업/` 조항이 이 저장소에 없는 폴더를 가리킨다
+  - [x] `WORKSPACE_RULES.md` 사본(85줄, 분리 시점 스냅샷)이 아직 `ACTIVE_WORK.md`·`HANDOFF.md`에 기록하라고 지시한다 — 위 「규칙 문서를 저장소 기준으로 정리」 칸에서 해결
+  - [x] `_meta/PROJECT_RULES.md`의 `_ai원본_백업/` 조항이 이 저장소에 없는 폴더를 가리킨다 — 같은 칸에서 해결
 - 미결정: 없음
 
 ## 2026-09-01 `_process/` 층 해체
 
-- 문제: 2026-08-31에 만든 결과물 층/과정 층 분리를 되돌린다
-- 종료조건: `_process/` 폴더가 없고 상대경로 링크가 전부 살아 있다
-- 한 일: `_process/{_meta,_done,WORKSPACE_RULES.md,NAMING.md,생각정리노트.md}` → 루트로 `git mv`. 경로 갱신 16개 문서. `README.md`·`PROJECT_GUIDE.md` 폴더 트리 재작성. `_done/prototype/자유탐색_폰목업.html`의 `SHOT` 경로 수정
+- 문제: 2026-08-31에 만든 결과물 층/과정 층 분리가 `_meta/`를 한 층 내려놔 워크스페이스 규격과 어긋난다
+- 종료조건: `_process/` 폴더가 없고, `_meta/`가 루트 바로 아래 있으며, 상대경로 링크가 전부 살아 있다
+- 한 일: 커밋 `8d4a173`. `_process/{_meta,_done,WORKSPACE_RULES.md,NAMING.md,생각정리노트.md}` → 루트로 `git mv`. 경로 갱신 16개 문서. `README.md`·`PROJECT_GUIDE.md` 폴더 트리 재작성. `_done/prototype/자유탐색_폰목업.html`의 `SHOT` 경로 수정
 - 검증: 저장소 전체 `.md` 상대경로 링크 0건 깨짐. `prototype/router/tests.mjs` 270건 통과·0 실패
 - 결론: `_process/` 층을 걷어냈다
-- 이유: 아직 없음 — `_meta/PRACTICES.md`의 해당 항목 `이유` 줄과 함께 사용자가 채운다
+- 이유: WORKLOG 도입이 목적이었다. 워크스페이스 규격은 `_meta/`가 프로젝트 루트 바로 아래 있는 것을 전제하므로, 그 위에 `_process/` 층이 얹혀 있으면 규격을 맞출 수 없다 (2026-09-01 사용자 확인)
 - 남은 것:
-  - [ ] `_meta/PRACTICES.md` 2026-09-01 항목의 `이유` 줄 채우기
+  - [x] `_meta/PRACTICES.md` 2026-09-01 항목의 `이유` 줄 채우기 — 2026-09-01 사용자 확인
 - 미결정: 없음
