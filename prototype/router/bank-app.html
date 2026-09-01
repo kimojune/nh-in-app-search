@@ -13,16 +13,10 @@
     --ink:#16181d; --sub:#5f6672; --line:#e5e7eb;
     --warn:#c2410c; --ok:#047857; --bad:#b91c1c;
 
-    /* 폰 뒤 바탕만 검다. 흰 폰이 도드라져 시연에서 몰입이 덜 깨진다.
-       헤더·흰 패널·폰 화면 안쪽은 그대로 둔다 — 폰 안쪽 흰색은 실측 캡처
-       네 장이 전부 라이트모드라는 재현 근거이고, 앱별 강조색의 대비 기준도
-       흰 배경 기준으로 잡혀 있다.
-       베젤(#1b1d22)보다 어둡게 잡아 기기 테두리가 바탕에 묻히지 않게 한다. */
-    --bg:#0d0f13;
-    /* 바탕 위에 직접 놓이는 글자. 밝은 배경용 색을 그대로 쓰면 읽히지 않는다.
-       강조는 더 어둡게가 아니라 더 밝게 간다 — 방향이 뒤집힌다.
-       대비는 tests.mjs 가 계산해 4.5:1 이상을 요구한다. */
-    --on-bg:#9aa1ad; --on-bg-strong:#d5d9e0; --on-bg-line:rgba(255,255,255,.12);
+    /* 바탕은 밝게 둔다. 2026-09-01 에 어둡게(#0d0f13) 해봤으나 흰색이 낫다는
+       판단으로 되돌렸다. 흰 폰을 도드라지게 하는 일은 바탕을 어둡게 하는 대신
+       기기 베젤을 두껍게 해서 푼다. */
+    --bg:#f4f5f7;
   }
   *{box-sizing:border-box}
   html,body{margin:0;padding:0}
@@ -45,7 +39,7 @@
   }
   .lede{font-size:13px;color:var(--sub);letter-spacing:-.3px;margin:5px 0 0;max-width:800px}
 
-  .cols{display:grid;grid-template-columns:376px 1fr;gap:18px;margin-top:18px}
+  .cols{display:grid;grid-template-columns:384px 1fr;gap:18px;margin-top:18px}
   @media (max-width:860px){ .cols{grid-template-columns:1fr} }
 
   /* ---------- 디바이스 프레임 ----------
@@ -55,11 +49,11 @@
     /* 화면 크기만큼만 차지한다. 그리드 칼럼 폭에 따라 늘어나면
        발표 모드(auto 칼럼)와 좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
     display:inline-block;
-    background:#1b1d22;padding:9px 8px;border-radius:36px;
-    /* 어두운 바탕에서는 베젤과 바탕의 명도차가 작아 기기 테두리가 묻힌다.
-       흰 배경용 그림자도 보이지 않는다. 가는 림 라이트로 윤곽을 세우고
-       그림자는 어두운 바탕에서 보이는 세기로 다시 잡는다. */
-    box-shadow:0 0 0 1px rgba(255,255,255,.10), 0 18px 44px rgba(0,0,0,.55);
+    /* 베젤 여백을 1.5배로 넓혔다(9px 8px → 13.5px 12px). 밝은 바탕에서 흰 폰이
+       배경에 붙어 보이던 것을 어두운 테두리 두께로 푼다.
+       라운드는 화면 28px + 베젤 12px = 40px 으로 맞춰 안팎을 동심으로 둔다. */
+    background:#1b1d22;padding:13.5px 12px;border-radius:40px;
+    box-shadow:0 12px 32px rgba(16,20,30,.20), 0 2px 6px rgba(16,20,30,.10);
   }
   .device .phone{border:0;border-radius:28px;box-shadow:none}
 
@@ -174,11 +168,11 @@
   }
   .subtabs span.on{border-color:currentColor;font-weight:700}
   .mockcap{
-    font-size:11.5px;color:var(--on-bg);line-height:1.65;margin:11px 2px 0;letter-spacing:-.2px;
+    font-size:11.5px;color:#9aa1ad;line-height:1.65;margin:11px 2px 0;letter-spacing:-.2px;
   }
-  .mockcap b{color:var(--on-bg-strong)}
+  .mockcap b{color:#6b7280}
   .mockcap .tmp{
-    font-size:10.5px;font-weight:800;background:rgba(255,255,255,.10);color:#b8bfc9;
+    font-size:10.5px;font-weight:800;background:#eff1f4;color:#8b93a1;
     padding:2px 6px;border-radius:5px;
   }
 
@@ -247,8 +241,8 @@
     overflow:auto;max-height:340px;white-space:pre;
   }
   .foot{
-    margin-top:26px;padding-top:14px;border-top:1px solid var(--on-bg-line);
-    font-size:12px;color:var(--on-bg);letter-spacing:-.2px;line-height:1.7;max-width:820px;
+    margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+    font-size:12px;color:#9aa1ad;letter-spacing:-.2px;line-height:1.7;max-width:820px;
   }
 
   /* ---------- 네 앱 비교 ----------
@@ -307,7 +301,7 @@
   body.present #presentBtn{background:var(--brand-accent);color:#fff;border-color:var(--brand-accent)}
 
   body.present .foot-min{
-    display:block;text-align:center;color:var(--on-bg);
+    display:block;text-align:center;color:var(--sub);
     font-size:12px;letter-spacing:-.3px;margin-top:26px;
   }
 

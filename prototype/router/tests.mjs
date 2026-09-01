@@ -860,43 +860,25 @@ const lum = (hex) => {
     !/\.sb-(wifi|sig)[^{]*\{[^}]*background-image/.test(bankSrc));
 
   /* ---------------------------------------------------------------- */
-  group("앱 디자인 컴포넌트 — 어두운 바탕");
+  group("앱 디자인 컴포넌트 — 바탕과 베젤");
 
-  /* 폰 뒤 바탕만 어둡게 한다. 흰 폰이 도드라져 시연에서 몰입이 덜 깨진다.
-     밝은 배경용 글자색을 그대로 두면 바탕 위에서 읽히지 않으므로,
-     바탕 위에 직접 놓이는 색은 따로 두고 대비를 여기서 계산한다. */
-  const tok = (name) => {
-    const m = bankSrc.match(new RegExp("--" + name + ":\s*(#[0-9a-fA-F]{6})"));
-    return m && m[1];
-  };
-  const bgHex = tok("bg");
+  /* 2026-09-01 에 바탕을 어둡게(#0d0f13) 해봤으나 흰색이 낫다는 판단으로
+     되돌렸다. 흰 폰을 도드라지게 하는 일은 바탕이 아니라 베젤 두께로 푼다.
+     되돌린 결정이 조용히 다시 어두워지지 않게 여기서 못박는다. */
+  const bgHex = (bankSrc.match(/--bg:\s*(#[0-9a-fA-F]{6})/) || [])[1];
   ok("바탕색이 토큰으로 있다", !!bgHex);
-  ok("바탕이 어둡다", lum(bgHex) < 0.05);
-  /* 베젤보다 어두워야 기기 테두리가 바탕에 묻히지 않는다 */
-  ok("바탕이 기기 베젤보다 어둡다", lum(bgHex) < lum("#1b1d22"));
-
-  const ratio = (a, b) => {
-    const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)];
-    return (hi + 0.05) / (lo + 0.05);
-  };
-  for (const name of ["on-bg", "on-bg-strong"]) {
-    const hex = tok(name);
-    ok("--" + name + " 이 토큰으로 있다", !!hex);
-    ok("--" + name + " 이 바탕 대비 4.5:1 이상", ratio(hex, bgHex) >= 4.5);
-  }
-  /* 밝은 배경에서는 강조가 더 어두웠다. 어두운 바탕에서는 방향이 뒤집힌다. */
-  ok("바탕 위 강조색이 본문보다 밝다", lum(tok("on-bg-strong")) > lum(tok("on-bg")));
-
-  /* 어둡게 하는 범위는 바탕뿐이다 */
+  ok("바탕이 밝다", lum(bgHex) > 0.7);
   ok("헤더는 흰색을 유지한다", /header\.top\{[^}]*background:#fff/.test(bankSrc));
   ok("패널은 흰색을 유지한다", /\.panel\{[^}]*background:#fff/.test(bankSrc));
   ok("폰 화면 안쪽은 흰색이다 — 실측 캡처가 라이트모드다",
     /\.phone\{\s*background:#fff/.test(bankSrc));
 
-  /* 베젤과 바탕은 둘 다 어두워 명도차가 작다. 림 라이트가 없으면 기기
-     테두리가 바탕에 묻혀 프레임을 그린 의미가 사라진다. */
-  ok("어두운 바탕에서 기기 테두리를 림 라이트로 세운다",
-    /\.device\{[^}]*box-shadow:0 0 0 1px rgba\(255,255,255/.test(bankSrc));
+  /* 베젤 여백이 흰 폰과 밝은 바탕을 가르는 유일한 장치다. 얇아지면
+     폰이 배경에 붙어 보인다. 라운드는 화면 28px + 베젤 12px 로 동심이다. */
+  ok("기기 베젤 여백이 고정돼 있다", /\.device\{[^}]*padding:13\.5px 12px/.test(bankSrc));
+  ok("베젤 라운드가 화면 라운드와 동심이다", /\.device\{[^}]*border-radius:40px/.test(bankSrc));
+  ok("왼쪽 칼럼이 넓어진 프레임을 담는다",
+    /\.cols\{[^}]*grid-template-columns:384px/.test(bankSrc));
 
   /* 폭도 고정한다. 프레임이 그리드 칼럼만큼 늘어나면 발표 모드(auto 칼럼)와
      좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
