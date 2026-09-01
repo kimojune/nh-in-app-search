@@ -95,6 +95,19 @@
     width:9px;height:9px;border-left:2px solid currentColor;border-bottom:2px solid currentColor;
     transform:rotate(45deg);
   }
+  /* 실측 캡처의 상태바에는 통신사·시계 오른쪽에 아이콘 줄이 있다.
+     이미지를 쓰지 않고 도형으로만 그린다 — 프레임과 같은 규칙이다. */
+  .sbicons{display:flex;align-items:center;gap:5px}
+  .sb-wifi{
+    width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+    border-bottom:8px solid currentColor;opacity:.85;
+  }
+  .sb-sig{display:flex;align-items:flex-end;gap:1px;height:8px;opacity:.85}
+  .sb-sig i{width:2px;background:currentColor;border-radius:.5px}
+  .sb-sig i:nth-child(1){height:3px}
+  .sb-sig i:nth-child(2){height:5px}
+  .sb-sig i:nth-child(3){height:6.5px}
+  .sb-sig i:nth-child(4){height:8px}
   .batt{background:#111;color:#fff;border-radius:8px;font-size:9.5px;padding:1px 5px}
   .apphead{
     display:flex;align-items:center;justify-content:space-between;
@@ -131,6 +144,21 @@
   .body{padding:0 14px 16px;flex:1;min-height:300px}
   .hint{text-align:center;color:#9aa1ad;font-size:13px;padding:40px 10px;line-height:1.7}
   .dead{cursor:default;opacity:.72}
+
+  /* 실측 캡처에서 결과 목록 아래에 있는 더보기 버튼과 하위 필터 탭.
+     as-is 재현물이라 동작하지 않는다(.dead). 앱이 형태를 달리하면
+     app-themes.js 의 css() 가 .theme-<앱> 으로 덮어쓴다. */
+  .more{
+    margin:14px 14px 4px;padding:11px 0;text-align:center;
+    border:1px solid #dcdfe4;border-radius:8px;background:#fff;
+    font-size:13.5px;letter-spacing:-.3px;color:var(--ink);
+  }
+  .subtabs{display:flex;gap:7px;margin:10px 14px 4px}
+  .subtabs span{
+    flex:1;text-align:center;padding:9px 0;border:1px solid #dcdfe4;border-radius:7px;
+    background:#fff;font-size:12px;letter-spacing:-.3px;color:#4b5361;
+  }
+  .subtabs span.on{border-color:currentColor;font-weight:700}
   .mockcap{
     font-size:11.5px;color:#9aa1ad;line-height:1.65;margin:11px 2px 0;letter-spacing:-.2px;
   }
@@ -320,7 +348,7 @@
       <div class="phone" id="phone">
         <div class="statusbar">
           <span><b>SKT</b> <span id="clock">1:19</span></span>
-          <span><span class="batt">71</span></span>
+          <span class="sbicons"><span class="sb-wifi"></span><span class="sb-sig"><i></i><i></i><i></i><i></i></span><span class="batt">71</span></span>
         </div>
         <div class="apphead"><span class="back" id="backBtn" aria-hidden="true">&lsaquo;</span><span id="headTitle">통합검색</span><button class="x" id="closeBtn" type="button" aria-label="검색 닫기" title="검색어와 결과를 지웁니다">&times;</button></div>
         <div class="sbox">
@@ -337,7 +365,7 @@
       </div>
       </div>
       <p class="mockcap">
-        화면 안의 <b>탭 · 추천검색어</b>는 실제 앱 화면을 재현한 것이라 동작하지 않습니다
+        화면 안의 <b>탭 · 추천검색어 · 더보기</b>는 실제 앱 화면을 재현한 것이라 동작하지 않습니다
         <span class="tmp">임시</span><br>
         동작하는 것은 <b>검색창</b>과 헤더의 <b>닫기</b>, 오른쪽의 <b>동기화 · 캐시 비우기 · 스냅샷 손상시키기</b>입니다.<br>
         안내 카드의 채널은 <b>정보 표시</b>입니다 — 자동 이동은 설계상 제외한 것이라 임시가 아닙니다.
@@ -430,7 +458,8 @@
     '내 자산 &gt; 소비관리 &gt; <span class="g">카드리포트</span>'
   ]};
 
-  var ALLONE_MENU39 = { label:"메뉴", count:39, rows:[
+  /* more · filters 는 실측 캡처에 실제로 있는 것만 적는다 */
+  var ALLONE_MENU39 = { label:"메뉴", count:39, more:"더보기", rows:[
     '공과금/채권 &gt; 납부하기 &gt; <span class="g">법원등기신청 수수료</span>',
     '퇴직연금 &gt; 연금계좌관리 &gt; <span class="g">연금신청 조회/취소</span>',
     '퇴직연금 &gt; 연금계좌관리 &gt; <span class="g">해지신청</span>',
@@ -445,7 +474,7 @@
     '외환 · NH트래블리 외화예금 — NH트래블리 <span class="g">체크카드</span> 전용 다통화 외화예금'
   ]};
 
-  var SMART_MENU15 = { label:"메뉴", count:15, rows:[
+  var SMART_MENU15 = { label:"메뉴", count:15, more:"메뉴 전체결과", rows:[
     '인증/보안 &gt; 보안매체 &gt; 보안<span class="g">카드</span>/OTP 오류 해제',
     '고객센터 &gt; 사고신고 &gt; 보안<span class="g">카드</span>/OTP 분실신고',
     '마이페이지 &gt; 나의 <span class="g">카드</span> &gt; <span class="g">카드</span>정보(내 <span class="g">카드</span>-다른<span class="g">카드</span>)',
@@ -483,7 +512,8 @@
       head:"검색", chips:["전체","메뉴","상품","기타"],
       table:[
         { keys:["k패스카드","케이패스카드","k패스","케이패스","올바른이음카드","경기패스카드"],
-          sections:[SMART_MENU15, { label:"상품", count:0, rows:[] }] },
+          sections:[SMART_MENU15,
+                    { label:"상품", count:0, rows:[], filters:["NH농협은행","농축협"] }] },
         { keys:["카드발급","카드신청"],
           sections:[{ label:"메뉴", count:6, rows:[
             '마이페이지 &gt; 나의 <span class="g">카드</span> &gt; <span class="g">카드</span>정보',
@@ -640,6 +670,18 @@
         h += AT.safe(appId, "emptyState", s);
       }
       for(j=0;j<s.rows.length;j++){ h += AT.safe(appId, "resultRow", s.rows[j]); }
+      /* 실측 캡처에 있는 더보기·하위 탭. 재현물이라 동작하지 않는다. */
+      if(s.more){
+        h += '<div class="more dead" title="(임시) 실제 앱 화면 재현용 · 동작하지 않음">'
+           + esc(s.more) + '</div>';
+      }
+      if(s.filters){
+        h += '<div class="subtabs dead" title="(임시) 실제 앱 화면 재현용 · 동작하지 않음">';
+        for(j=0;j<s.filters.length;j++){
+          h += '<span' + (j === 0 ? ' class="on"' : '') + '>' + esc(s.filters[j]) + '</span>';
+        }
+        h += '</div>';
+      }
     }
 
     $("body").innerHTML = h;

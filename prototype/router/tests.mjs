@@ -841,6 +841,22 @@ function fresh(appId = "allone") {
   ok("높이 고정이 프레임 안쪽으로만 걸려 있다", !/(^|[^ ])\.phone\{[^}]*height:780px/.test(bankSrc));
   ok("칩이 0개면 줄을 감춘다", bankSrc.includes(".chips:empty{display:none}"));
 
+  /* 실측 캡처에는 결과 목록 아래에 더보기 버튼과 하위 필터 탭이 있다.
+     폰 높이를 실기기 비율로 맞추자 이 자리가 비어 차이가 드러났다.
+     재현물이므로 동작하지 않는다는 표시(.dead)를 함께 검사한다. */
+  ok("올원뱅크 39건 아래에 더보기가 있다",
+    /count:39,\s*more:"더보기"/.test(bankSrc));
+  ok("스마트뱅킹은 더보기 문구가 다르다 — 실측이 그렇다",
+    /count:15,\s*more:"메뉴 전체결과"/.test(bankSrc));
+  ok("스마트뱅킹 상품 0건 아래에 하위 필터 탭이 있다",
+    /filters:\["NH농협은행","농축협"\]/.test(bankSrc));
+  ok("더보기와 하위 탭은 동작하지 않는다고 표시한다",
+    bankSrc.includes('class="more dead"') && bankSrc.includes('class="subtabs dead"'));
+  ok("상태바 아이콘을 도형으로 그린다",
+    bankSrc.includes('class="sb-wifi"') && bankSrc.includes('class="sb-sig"'));
+  ok("상태바에도 이미지를 쓰지 않는다",
+    !/\.sb-(wifi|sig)[^{]*\{[^}]*background-image/.test(bankSrc));
+
   /* 폭도 고정한다. 프레임이 그리드 칼럼만큼 늘어나면 발표 모드(auto 칼럼)와
      좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
   ok("화면 폭도 고정돼 있다", /\.device \.phone\{[^}]*width:360px/.test(bankSrc));
