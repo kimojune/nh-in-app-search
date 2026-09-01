@@ -645,6 +645,13 @@ function fresh(appId = "allone") {
     consoleSrc.includes("발행하면 앱에서 <b>") && consoleSrc.includes('$("kvDrop")'));
 }
 
+/* WCAG 2.1 상대 휘도. 강조색 대비와 어두운 바탕 대비가 함께 쓴다. */
+const lin = (c) => (c /= 255) <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+const lum = (hex) => {
+  const n = parseInt(hex.slice(1), 16);
+  return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
+};
+
 /* =========================================================================
    앱 디자인 컴포넌트 — app-themes.js
 
@@ -777,11 +784,6 @@ function fresh(appId = "allone") {
   /* 접근성 — WCAG 2.1 상대 휘도로 흰 배경 대비를 계산한다.
      docs/디자인_기준.md 에서 실측 강조색이 본문 크기 기준(4.5:1)에 미달함을
      확인했으므로, 글자에 쓰는 값(accentText)은 반드시 통과해야 한다. */
-  const lin = (c) => (c /= 255) <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-  const lum = (hex) => {
-    const n = parseInt(hex.slice(1), 16);
-    return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
-  };
   const onWhite = (hex) => (1.05) / (lum(hex) + 0.05);
 
   for (const id of AT.ids) {
@@ -856,6 +858,45 @@ function fresh(appId = "allone") {
     bankSrc.includes('class="sb-wifi"') && bankSrc.includes('class="sb-sig"'));
   ok("상태바에도 이미지를 쓰지 않는다",
     !/\.sb-(wifi|sig)[^{]*\{[^}]*background-image/.test(bankSrc));
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 어두운 바탕");
+
+  /* 폰 뒤 바탕만 어둡게 한다. 흰 폰이 도드라져 시연에서 몰입이 덜 깨진다.
+     밝은 배경용 글자색을 그대로 두면 바탕 위에서 읽히지 않으므로,
+     바탕 위에 직접 놓이는 색은 따로 두고 대비를 여기서 계산한다. */
+  const tok = (name) => {
+    const m = bankSrc.match(new RegExp("--" + name + ":\s*(#[0-9a-fA-F]{6})"));
+    return m && m[1];
+  };
+  const bgHex = tok("bg");
+  ok("바탕색이 토큰으로 있다", !!bgHex);
+  ok("바탕이 어둡다", lum(bgHex) < 0.05);
+  /* 베젤보다 어두워야 기기 테두리가 바탕에 묻히지 않는다 */
+  ok("바탕이 기기 베젤보다 어둡다", lum(bgHex) < lum("#1b1d22"));
+
+  const ratio = (a, b) => {
+    const [hi, lo] = lum(a) > lum(b) ? [lum(a), lum(b)] : [lum(b), lum(a)];
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  for (const name of ["on-bg", "on-bg-strong"]) {
+    const hex = tok(name);
+    ok("--" + name + " 이 토큰으로 있다", !!hex);
+    ok("--" + name + " 이 바탕 대비 4.5:1 이상", ratio(hex, bgHex) >= 4.5);
+  }
+  /* 밝은 배경에서는 강조가 더 어두웠다. 어두운 바탕에서는 방향이 뒤집힌다. */
+  ok("바탕 위 강조색이 본문보다 밝다", lum(tok("on-bg-strong")) > lum(tok("on-bg")));
+
+  /* 어둡게 하는 범위는 바탕뿐이다 */
+  ok("헤더는 흰색을 유지한다", /header\.top\{[^}]*background:#fff/.test(bankSrc));
+  ok("패널은 흰색을 유지한다", /\.panel\{[^}]*background:#fff/.test(bankSrc));
+  ok("폰 화면 안쪽은 흰색이다 — 실측 캡처가 라이트모드다",
+    /\.phone\{\s*background:#fff/.test(bankSrc));
+
+  /* 베젤과 바탕은 둘 다 어두워 명도차가 작다. 림 라이트가 없으면 기기
+     테두리가 바탕에 묻혀 프레임을 그린 의미가 사라진다. */
+  ok("어두운 바탕에서 기기 테두리를 림 라이트로 세운다",
+    /\.device\{[^}]*box-shadow:0 0 0 1px rgba\(255,255,255/.test(bankSrc));
 
   /* 폭도 고정한다. 프레임이 그리드 칼럼만큼 늘어나면 발표 모드(auto 칼럼)와
      좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
