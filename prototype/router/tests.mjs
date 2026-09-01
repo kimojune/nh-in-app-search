@@ -880,6 +880,17 @@ const lum = (hex) => {
   ok("왼쪽 칼럼이 넓어진 프레임을 담는다",
     /\.cols\{[^}]*grid-template-columns:384px/.test(bankSrc));
 
+  /* docs/디자인_기준.md 가 디자인 값의 단일 기준이다. 값을 문서와 코드
+     양쪽에 적어두면 갈라지므로, 어긋나면 여기서 잡는다. */
+  const designDoc = fs.readFileSync(
+    new URL("../../docs/디자인_기준.md", import.meta.url), "utf8");
+  ok("기준 문서가 화면 크기를 같은 값으로 말한다",
+    designDoc.includes("`360 × 780`") && /width:360px;height:780px/.test(bankSrc));
+  ok("기준 문서가 베젤 여백을 같은 값으로 말한다",
+    designDoc.includes("`13.5px 12px`") && /padding:13\.5px 12px/.test(bankSrc));
+  ok("기준 문서가 상표 요소를 채우지 않는다고 밝힌다",
+    designDoc.includes("자리를 새로 채우지도 않는다"));
+
   /* 폭도 고정한다. 프레임이 그리드 칼럼만큼 늘어나면 발표 모드(auto 칼럼)와
      좁은 화면(1fr 칼럼)에서 폰 폭이 달라진다. */
   ok("화면 폭도 고정돼 있다", /\.device \.phone\{[^}]*width:360px/.test(bankSrc));
