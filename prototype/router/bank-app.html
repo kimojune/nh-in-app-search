@@ -167,6 +167,14 @@
     background:#fff;font-size:12px;letter-spacing:-.3px;color:#4b5361;
   }
   .subtabs span.on{border-color:currentColor;font-weight:700}
+  /* 기록에 없는 검색어임을 폰 안에 밝히는 쪽지. 관찰자용이지만 발표 모드에서도
+     남긴다 — 측정하지 않은 값이 실측처럼 보이는 것을 막는 자리다. */
+  .norec{
+    border:1px dashed #d8b48a;border-radius:12px;background:#fdf8f2;padding:12px;
+    margin:10px 0 14px;font-size:11.5px;color:#7a5a34;letter-spacing:-.3px;line-height:1.55;
+  }
+  .norec b{color:#8a4b12}
+
   .mockcap{
     font-size:11.5px;color:#9aa1ad;line-height:1.65;margin:11px 2px 0;letter-spacing:-.2px;
   }
@@ -274,6 +282,7 @@
   .cmppurpose b{color:#6b7280}
   #cmpPanel{display:none}
   body.cmp-on #cmpPanel{display:block}
+  .cmptoggle{margin:0 0 16px}
 
   /* ---------- 발표 모드 ----------
      발표에서는 발표자가 말로 설명하므로 화면의 설명을 접고 폰을 키운다.
@@ -289,6 +298,7 @@
   body.present .ph .sm,
   body.present .mrow.opt,
   body.present #codePanel,
+  body.present .cmptoggle,
   body.present #cmpPanel{display:none}
 
   /* 안내가 안 뜬 이유를 밝히는 쪽지는 관찰자용 설명이지 사용자 화면이 아니다.
@@ -332,7 +342,6 @@
     <div class="row1">
       <h1>통합검색</h1>
       <a class="openc" href="./console.html" target="_blank">라우터 콘솔 열기 ↗</a>
-      <button class="openc" id="cmpBtn" type="button">네 앱 비교</button>
       <button class="openc" id="presentBtn" type="button">발표 모드</button>
     </div>
     <p class="lede">
@@ -407,6 +416,12 @@
         <pre class="code" id="codeView"></pre>
       </div>
     </div>
+  </div>
+
+  <!-- 비교를 켜는 버튼은 패널 바로 위에 둔다. 헤더에 있을 때는 눌러도 화면 밖에서
+       패널이 열려 scrollIntoView 로 끌어내려야 했다. 여기 있으면 그 장치가 필요 없다. -->
+  <div class="cmptoggle">
+    <button class="openc" id="cmpBtn" type="button">네 앱 비교</button>
   </div>
 
   <div class="panel" id="cmpPanel">
@@ -504,16 +519,17 @@
         { keys:["경기패스카드","k패스카드","케이패스카드","k패스","케이패스"],
           sections:[ALLONE_MENU8, ALLONE_PROD4] }
       ],
-      empty:{ label:"메뉴", count:0, rows:[] }
     },
     {
       id:"kok", name:"NH콕뱅크", owner:"상호금융(지역농협)",
       head:"검색", chips:[],
       table:[
         { keys:["카드발급","카드신청"],
-          sections:[{ label:"메뉴", count:1, rows:['금융 &gt; 카드 &gt; <span class="g">NH농협카드 신청</span>'] }] }
-      ],
-      empty: KOK_ZERO
+          sections:[{ label:"메뉴", count:1, rows:['금융 &gt; 카드 &gt; <span class="g">NH농협카드 신청</span>'] }] },
+        /* 0건도 기록된 결과다. empty 폴백으로 도달하게 두면 기록 여부를 구분할 수 없다 */
+        { keys:["경기패스카드","k패스카드","케이패스카드","k패스","케이패스"],
+          sections:[KOK_ZERO] }
+      ]
     },
     {
       id:"smart", name:"NH스마트뱅킹", owner:"농협은행(통합형)",
@@ -528,7 +544,6 @@
             '내 자산 &gt; 소비관리 &gt; <span class="g">카드</span>혜택비교'
           ]}, { label:"상품", count:0, rows:[] }] }
       ],
-      empty:{ label:"메뉴", count:0, rows:[] }
     },
     {
       id:"nhpay", name:"NH Pay", owner:"농협카드",
@@ -546,7 +561,7 @@
             '이응패스 카드 (타지역)'
           ]}] }
       ],
-      empty:{ label:"카드", count:0, rows:[] }
+
     }
   ];
 
@@ -574,6 +589,16 @@
     );
   }
 
+  /* 기록된 검색어에만 응답한다. 기록에 없으면 null 을 돌려주고 화면에 그 사실을
+     밝힌다.
+
+     이전에는 양방향 부분 일치로 폴백했다. keys[j].indexOf(key) 쪽 때문에
+     "카드" 만 넣어도 "카드신청" 에 기록된 39건이 붙었고, "k" 한 글자로
+     k패스카드 결과가 떴다. 기록하지 않은 검색어에 기록된 수치가 붙으면
+     as-is 가 실측이라는 전제가 깨진다.
+
+     반대로 0건을 지어내는 것도 실측이 아니다. 그래서 empty 폴백도 없앴고,
+     실제로 0건이 기록된 화면(콕뱅크 패스카드 계열)은 표에 명시했다. */
   function asIs(query){
     var a = app(), key = normalize(query), i, j, e;
     for(i=0;i<a.table.length;i++){
@@ -582,14 +607,7 @@
         if(e.keys[j] === key) return e.sections;
       }
     }
-    // 부분 일치 — 실제 앱의 넓은 부분 일치를 흉내낸다
-    for(i=0;i<a.table.length;i++){
-      e = a.table[i];
-      for(j=0;j<e.keys.length;j++){
-        if(key.indexOf(e.keys[j]) > -1 || e.keys[j].indexOf(key) > -1) return e.sections;
-      }
-    }
-    return [a.empty];
+    return null;
   }
 
   /* 앱 컴포넌트의 스타일을 주입한다. 인라인 <style> 보다 뒤에 오므로
@@ -663,6 +681,17 @@
       if(reason){
         h += '<div class="suppnote"><b>안내 미노출</b><br>' + esc(reason) + '</div>';
       }
+    }
+
+    /* 기록에 없는 검색어. 결과를 지어내지 않고 그 사실을 밝힌다.
+       .suppnote 와 달리 발표 모드에서도 남긴다 — 이건 앱 동작 설명이 아니라
+       측정하지 않은 값을 보여주지 않기 위한 안전장치이고, 폰이 아무것도 없이
+       비면 그게 실제 앱의 0건인지 미기록인지 구분되지 않는다. */
+    if(sections === null){
+      h += '<div class="norec"><b>실측 기록 없음</b><br>'
+         + '이 앱에서 <b>' + esc(query) + '</b>로 검색한 결과는 기록하지 않았습니다. '
+         + '기록한 검색어는 카드신청 · 카드발급 · 경기패스카드 · k패스카드입니다.</div>';
+      sections = [];
     }
 
     /* as-is 결과도 그 앱의 컴포넌트로 그린다. 섹션 머리글 표기와 결과 행의
@@ -858,12 +887,9 @@
     localStorage.setItem("demo:cmp", on ? "1" : "0");
     this.style.background = on ? "var(--brand-accent)" : "";
     this.style.color = on ? "#fff" : "";
-    if(on){
-      renderCompare();
-      /* 패널은 폰과 계측 아래에 생긴다. 첫 화면 밖이라 눌러도 아무 변화가
-         없는 것처럼 보였다. 켤 때는 그 자리로 데려간다. */
-      $("cmpPanel").scrollIntoView({ behavior:"smooth", block:"start" });
-    }
+    /* 버튼이 패널 바로 위에 있으므로 켜면 그 아래에 바로 펼쳐진다.
+       끌어내리는 장치가 필요 없다. */
+    if(on) renderCompare();
   });
 
   /* 헤더의 닫기 — 검색어와 결과를 지우고 첫 화면으로 되돌린다.

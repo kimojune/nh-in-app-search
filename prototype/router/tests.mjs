@@ -896,9 +896,31 @@ const lum = (hex) => {
   ok("화면 폭도 고정돼 있다", /\.device \.phone\{[^}]*width:360px/.test(bankSrc));
   ok("프레임이 화면 크기만큼만 차지한다",
     /\.device\{[^}]*display:inline-block/.test(bankSrc));
-  /* 비교 패널은 폰과 계측 아래에 생겨 첫 화면 밖이다 — 켤 때 그 자리로 데려간다 */
-  ok("비교를 켜면 패널로 데려간다",
-    /cmpBtn[\s\S]{0,600}scrollIntoView/.test(bankSrc));
+  /* 버튼이 헤더에 있을 때는 눌러도 패널이 화면 밖에서 열려 scrollIntoView 로
+     끌어내려야 했다. 버튼을 패널 바로 위로 옮겨 그 장치를 없앴다. */
+  ok("비교 버튼이 패널 바로 위에 있다",
+    /class="cmptoggle"[\s\S]{0,200}id="cmpBtn"[\s\S]{0,400}id="cmpPanel"/.test(bankSrc));
+  ok("헤더에는 비교 버튼이 없다",
+    !/<header[\s\S]*?id="cmpBtn"[\s\S]*?<\/header>/.test(bankSrc));
+  /* 주석에서 경위를 설명하느라 이름이 나올 수 있다. 호출 형태로만 본다. */
+  ok("끌어내리는 장치를 쓰지 않는다", !/scrollIntoView\s*\(/.test(bankSrc));
+  ok("발표 모드에서 비교 버튼을 감춘다",
+    /body\.present \.cmptoggle/.test(bankSrc));
+
+  /* ---------------------------------------------------------------- */
+  group("앱 디자인 컴포넌트 — 기록된 검색어에만 응답한다");
+
+  /* 이전에는 양방향 부분 일치로 폴백해서 "카드" 만 넣어도 "카드신청" 에 기록된
+     39건이 붙었다. 기록하지 않은 검색어에 기록된 수치가 붙으면 as-is 가
+     실측이라는 전제가 깨진다. 0건을 지어내는 것도 마찬가지다. */
+  ok("부분 일치로 폴백하지 않는다", !/e\.keys\[j\]\.indexOf\(key\)/.test(bankSrc));
+  ok("기록에 없으면 null 을 돌려준다",
+    /function asIs\(query\)\{[\s\S]*?return null;\s*\}/.test(bankSrc));
+  ok("empty 폴백을 두지 않는다", !/^\s*empty:/m.test(bankSrc));
+  ok("0건이 기록된 화면은 표에 명시한다 — 콕뱅크 패스카드 계열",
+    /keys:\["경기패스카드"[^\]]*\],[\s\S]{0,120}?sections:\[KOK_ZERO\]/.test(bankSrc));
+  ok("미기록임을 화면에 밝힌다", bankSrc.includes('class="norec"') && bankSrc.includes("실측 기록 없음"));
+  ok("미기록 쪽지는 발표 모드에서도 남는다", !/body\.present[^{]*\.norec/.test(bankSrc));
 
   /* 비교 패널의 목적은 「같은 데이터가 네 디자인으로 그려진다」다.
      client.lookup() 은 미노출 앱에서 null 을 돌려주므로, 담당 본인 앱을 고른
