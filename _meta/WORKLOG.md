@@ -7,6 +7,8 @@
 - 하던 것: INBOX 보류 두 건을 처리했다 — as-is 가 기록에 없는 검색어에 기록된 결과를 붙이던 것과, 비교 버튼 위치·발표 모드 처리
 - 다음 한 걸음: 없음. `_meta/INBOX.md` 「보류」가 비었다
 - 막힌 것: 없음
+- 다음에 할 것:
+  - 진입 문서에서 베낀 사람 규칙 문단을 지우고 경로 지도만 남긴다. `WORKSPACE_RULES.md` 사본도 지운다 — 사람 규칙은 홈 전역 파일 하나로 모았다(원본 `_workspace/Environment/CLAUDE.global.md`, `sync-environment.ps1 -Apply`가 설치). 사본은 곧 낡는다 (요청: _workspace, 2026-09-06)
 
 ## 이 파일에 대하여
 
