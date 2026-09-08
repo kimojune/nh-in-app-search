@@ -8,6 +8,7 @@
 - 다음 한 걸음: 없음. `_meta/INBOX.md` 「보류」가 비었다
 - 막힌 것: 없음
 - 다음에 할 것:
+  - `_ai원본_백업/` 폴더 이름 — 워크스페이스에 남은 유일한 한글 폴더 예외다. 이 저장소가 보류 중이라 급하지 않고, 보류를 풀 때 함께 본다 (요청: _workspace, 2026-09-08)
   - 진입 문서에서 베낀 사람 규칙 문단을 지우고 경로 지도만 남긴다. `WORKSPACE_RULES.md` 사본도 지운다 — 사람 규칙은 홈 전역 파일 하나로 모았다(원본 `_workspace/Environment/CLAUDE.global.md`, `sync-environment.ps1 -Apply`가 설치). 사본은 곧 낡는다 (요청: _workspace, 2026-09-06)
 
 ## 이 파일에 대하여
