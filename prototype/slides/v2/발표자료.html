@@ -16,10 +16,11 @@
   없는 이미지        자리표시자가 뜬다. 이미지 없이도 순서와 시간을 확인할 수 있다
 
   띄우는 법
-    라우터와 같은 서버에 올린다. 그래야 05장 링크가 상대경로로 동작한다.
-      cd prototype/router
+    라우터와 같은 서버에 올린다. prototype/ 에서 띄워야 둘 다 잡힌다.
+      cd prototype
       npx -y serve .
-    슬라이드를 router 폴더 아래 두거나, 아래 ROUTER_URL을 절대주소로 바꾼다.
+      http://localhost:3000/slides/v2/발표자료.html
+    router/ 에서 띄우면 슬라이드가 그 밖에 있어 열리지 않는다.
 
   조작
     → · Space · PageDown · 화면 클릭     다음 장
@@ -27,6 +28,7 @@
     Home / End                           처음 / 마지막
     D                                    라우터 열기 (새 탭)
     T                                    타이머 켜기/끄기
+    H                                    핫스팟 조정 모드. 드래그해서 클릭 영역을 잡는다
     Ctrl+P                               장당 한 페이지로 PDF 저장
 
   주소창 끝에 #5 를 붙이면 05장에서 시작한다. 발표 중 새로고침해도 자리를 잃지 않는다.
@@ -88,6 +90,30 @@
   #demo.on { display: flex; }
   #demo:hover { filter: brightness(1.08); }
 
+  /* ---------- 핫스팟 ---------- */
+  /* 이미지 위에 얹는 투명한 클릭 영역.
+     Figma에서 그린 "데모 열기" 블록 자리에 맞춘다 */
+  .hot {
+    position: absolute; z-index: 4;
+    display: block; border-radius: 6px;
+    background: transparent; cursor: pointer;
+  }
+  body.tune .hot { background: rgba(0,102,179,.22); outline: 2px solid #0066B3; }
+
+  #tune {
+    position: fixed; left: 50%; top: 24px; transform: translateX(-50%); z-index: 9;
+    display: none; padding: 12px 20px; border-radius: 8px;
+    background: rgba(16,44,65,.92); color: #fff;
+    font-size: 16px; font-family: ui-monospace, Consolas, monospace;
+    white-space: pre; text-align: center; pointer-events: none;
+  }
+  body.tune #tune { display: block; }
+
+  #drag {
+    position: absolute; z-index: 8; display: none;
+    background: rgba(255,194,14,.28); outline: 2px solid #FFC20E;
+  }
+
   /* ---------- 표시기 ---------- */
   #hud {
     position: fixed; left: 24px; bottom: 24px; z-index: 5;
@@ -104,7 +130,8 @@
     @page { size: landscape; margin: 0; }
     html, body { background: #fff; height: auto; overflow: visible; }
     #stage { position: static; display: block; }
-    #demo, #hud { display: none !important; }
+    #demo, #hud, #tune, #drag { display: none !important; }
+    .hot { display: none !important; }
     .slide {
       position: relative; display: block !important;
       width: 100%; height: auto; aspect-ratio: 16 / 9;
@@ -120,6 +147,8 @@
 <div id="stage"></div>
 
 <a id="demo" href="#" target="_blank" rel="noopener">▶ 라우터 열기</a>
+
+<div id="tune"></div>
 
 <div id="hud">
   <span id="count"></span>
@@ -139,15 +168,17 @@ const SLIDES = [
   { file: "02.png", 절: "01-1",  이름: "농협 앱은 넷이다",                 초: 10 },
   { file: "03.png", 절: "02·03", 이름: "나눠도 됐다 / 합쳐서 풀리지 않았다", 초: 20 },
   { file: "04.png", 절: "04",    이름: "같은 질문인데 답이 넷이다",         초: 40 },
-  { file: "05.png", 절: "05",    이름: "라우터",                          초: 90, 데모: true },
+  /* 핫스팟은 1920×1080 기준 백분율이다. H 키로 조정 모드를 켜고 드래그하면 값이 나온다 */
+  { file: "05.png", 절: "05",    이름: "라우터",                          초: 90, 데모: true,
+    핫스팟: { x: 4.7, y: 44.0, w: 34.0, h: 7.0 } },
   { file: "06.png", 절: "06",    이름: "노린 것",                         초: 30 },
   { file: "07.png", 절: "07",    이름: "잃는 것",                         초: 30 },
   { file: "08.png", 절: "08",    이름: "얻는 것",                         초: 30 },
   { file: "09.png", 절: "09",    이름: "사용자가 아는 농협은 하나다",        초: 10 }
 ];
 
-/* 라우터 주소. 슬라이드를 router 폴더 아래에 두면 상대경로가 맞는다.
-   다른 자리에 두면 http://localhost:3000/bank-app.html 처럼 절대주소로 바꾼다. */
+/* 라우터 주소. prototype/ 에서 서버를 띄우면 이 상대경로가 맞는다.
+   포트를 타지 않으므로 3000이 아니어도 된다. */
 const ROUTER_URL = "../../router/bank-app.html";
 
 /* ---------- 만들기 ---------- */
@@ -181,6 +212,21 @@ SLIDES.forEach((s, i) => {
     (s.초 ? `<div class="tm">${s.초}초</div>` : `<div class="tm">흘림</div>`);
   el.appendChild(ph);
 
+  /* 이미지 위에 얹는 클릭 영역 */
+  if (s.핫스팟) {
+    const a = document.createElement("a");
+    a.className = "hot";
+    a.href = ROUTER_URL;
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.title = "라우터 열기";
+    a.style.left = s.핫스팟.x + "%";
+    a.style.top = s.핫스팟.y + "%";
+    a.style.width = s.핫스팟.w + "%";
+    a.style.height = s.핫스팟.h + "%";
+    el.appendChild(a);
+  }
+
   stage.appendChild(el);
 });
 
@@ -212,13 +258,66 @@ document.addEventListener("keydown", (e) => {
     case "End": e.preventDefault(); go(slides.length - 1); break;
     case "d": case "D": case "ㅇ": window.open(ROUTER_URL, "_blank", "noopener"); break;
     case "t": case "T": case "ㅅ": 타이머토글(); break;
+    case "h": case "H": case "ㅗ": 조정토글(); break;
   }
 });
 
-/* 화면 클릭으로도 넘긴다. 라우터 버튼 클릭은 넘기지 않는다 */
+/* 화면 클릭으로도 넘긴다. 라우터 버튼과 핫스팟 클릭은 넘기지 않는다 */
 document.addEventListener("click", (e) => {
-  if (e.target.closest("#demo")) return;
+  if (document.body.classList.contains("tune")) return;
+  if (e.target.closest("#demo") || e.target.closest(".hot")) return;
   다음();
+});
+
+/* ---------- 핫스팟 조정 ---------- */
+/* H 를 누르고 이미지 위에서 드래그하면 그 사각형의 백분율이 뜬다.
+   그 값을 위 SLIDES 의 핫스팟에 적으면 클릭 영역이 디자인과 맞는다 */
+const tuneBox = document.getElementById("tune");
+const dragBox = document.createElement("div");
+dragBox.id = "drag";
+stage.appendChild(dragBox);
+
+let 끌기 = null;
+
+function 조정토글() {
+  document.body.classList.toggle("tune");
+  const on = document.body.classList.contains("tune");
+  tuneBox.textContent = on
+    ? "핫스팟 조정 모드 · 이미지 위를 드래그하세요 · H 로 끝내기"
+    : "";
+  dragBox.style.display = "none";
+}
+
+stage.addEventListener("mousedown", (e) => {
+  if (!document.body.classList.contains("tune")) return;
+  const r = slides[cur].getBoundingClientRect();
+  끌기 = { r, x0: e.clientX, y0: e.clientY };
+  dragBox.style.display = "block";
+  e.preventDefault();
+});
+
+document.addEventListener("mousemove", (e) => {
+  if (!끌기) return;
+  const { r, x0, y0 } = 끌기;
+  const l = Math.min(x0, e.clientX), t = Math.min(y0, e.clientY);
+  const w = Math.abs(e.clientX - x0), h = Math.abs(e.clientY - y0);
+  dragBox.style.left = (l - r.left) + "px";
+  dragBox.style.top = (t - r.top) + "px";
+  dragBox.style.width = w + "px";
+  dragBox.style.height = h + "px";
+
+  const pc = (v) => (Math.round(v * 10) / 10).toFixed(1);
+  tuneBox.textContent =
+    `핫스팟: { x: ${pc((l - r.left) / r.width * 100)}, ` +
+    `y: ${pc((t - r.top) / r.height * 100)}, ` +
+    `w: ${pc(w / r.width * 100)}, ` +
+    `h: ${pc(h / r.height * 100)} }`;
+});
+
+document.addEventListener("mouseup", () => {
+  if (!끌기) return;
+  끌기 = null;
+  tuneBox.textContent += String.fromCharCode(10) + "이 줄을 SLIDES 의 해당 장에 붙여 넣으세요";
 });
 
 /* ---------- 타이머 ---------- */
