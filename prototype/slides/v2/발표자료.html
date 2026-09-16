@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>담당 앱 안내 · 사용자가 아는 농협은 하나다</title>
+
+<!--
+  v2 발표자료 껍데기
+
+  Figma에서 내보낸 1920×1080 PNG 열 장을 순서대로 띄운다.
+  v1(../발표자료.html)은 소스가 .dc.html이라 build.mjs로 만들었지만,
+  v2는 디자인이 Figma에 있으므로 이미지를 그대로 얹는다.
+
+  넣을 파일          images/00.png ~ images/09.png
+  없는 이미지        자리표시자가 뜬다. 이미지 없이도 순서와 시간을 확인할 수 있다
+
+  띄우는 법
+    라우터와 같은 서버에 올린다. 그래야 05장 링크가 상대경로로 동작한다.
+      cd prototype/router
+      npx -y serve .
+    슬라이드를 router 폴더 아래 두거나, 아래 ROUTER_URL을 절대주소로 바꾼다.
+
+  조작
+    → · Space · PageDown · 화면 클릭     다음 장
+    ← · PageUp                           이전 장
+    Home / End                           처음 / 마지막
+    D                                    라우터 열기 (새 탭)
+    T                                    타이머 켜기/끄기
+    Ctrl+P                               장당 한 페이지로 PDF 저장
+
+  주소창 끝에 #5 를 붙이면 05장에서 시작한다. 발표 중 새로고침해도 자리를 잃지 않는다.
+-->
+
+<style>
+  /* ---------- 설정 ---------- */
+  :root {
+    --ink: #102C41;
+    --muted: #5B6B7C;
+    --rule: #D9DFE6;
+    --panel: #F6F8F9;
+    --accent: #0066B3;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: #000; overflow: hidden;
+    font-family: "IBM Plex Sans KR", "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  /* ---------- 무대 ---------- */
+  /* 16:9 를 화면에 맞추고 남는 자리는 검게 둔다 */
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .slide {
+    position: absolute;
+    width: 100vw; height: 56.25vw;      /* 16:9 */
+    max-height: 100vh; max-width: 177.78vh;
+    display: none;
+    background: #fff center/contain no-repeat;
+  }
+  .slide.on { display: block; }
+
+  /* 이미지가 아직 없을 때 */
+  .ph {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; background: var(--panel); color: var(--muted);
+    border: 1px solid var(--rule);
+  }
+  .ph .no { font-size: 92px; font-weight: 700; color: var(--ink); letter-spacing: -2px; }
+  .ph .nm { font-size: 28px; color: var(--ink); }
+  .ph .fn { font-size: 17px; }
+  .ph .tm { font-size: 17px; color: var(--accent); }
+
+  /* ---------- 라우터 열기 ---------- */
+  #demo {
+    position: fixed; right: 32px; bottom: 32px; z-index: 5;
+    display: none; align-items: center; gap: 8px;
+    padding: 16px 24px; border-radius: 999px;
+    background: var(--accent); color: #fff;
+    font-size: 22px; font-weight: 600; text-decoration: none;
+    box-shadow: 0 8px 24px rgba(16,44,65,.35);
+  }
+  #demo.on { display: flex; }
+  #demo:hover { filter: brightness(1.08); }
+
+  /* ---------- 표시기 ---------- */
+  #hud {
+    position: fixed; left: 24px; bottom: 24px; z-index: 5;
+    display: flex; align-items: baseline; gap: 16px;
+    color: rgba(255,255,255,.55); font-size: 16px;
+    font-variant-numeric: tabular-nums; pointer-events: none;
+  }
+  #timer { display: none; font-size: 24px; font-weight: 600; }
+  #timer.on { display: inline; }
+  #timer.over { color: #FFC20E; }
+
+  /* ---------- 인쇄: 장당 한 페이지 ---------- */
+  @media print {
+    @page { size: landscape; margin: 0; }
+    html, body { background: #fff; height: auto; overflow: visible; }
+    #stage { position: static; display: block; }
+    #demo, #hud { display: none !important; }
+    .slide {
+      position: relative; display: block !important;
+      width: 100%; height: auto; aspect-ratio: 16 / 9;
+      max-width: none; max-height: none;
+      break-after: page; page-break-after: always;
+    }
+    .slide:last-child { break-after: auto; page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage"></div>
+
+<a id="demo" href="#" target="_blank" rel="noopener">▶ 라우터 열기</a>
+
+<div id="hud">
+  <span id="count"></span>
+  <span id="timer">0:00</span>
+</div>
+
+<script>
+/* =========================================================================
+   장 목록
+
+   파일명은 순서대로 00~09 이고, 04부터는 스피커노트의 절 번호와 같다.
+   01-1 과 02·03 이 한 칸씩 당겨 쓰는 자리라 02·03 만 어긋난다.
+   ========================================================================= */
+const SLIDES = [
+  { file: "00.png", 절: "표지",  이름: "담당 앱 안내",                    초: 0  },
+  { file: "01.png", 절: "01",    이름: "사용자가 아는 농협은 하나다",        초: 10 },
+  { file: "02.png", 절: "01-1",  이름: "농협 앱은 넷이다",                 초: 10 },
+  { file: "03.png", 절: "02·03", 이름: "나눠도 됐다 / 합쳐서 풀리지 않았다", 초: 20 },
+  { file: "04.png", 절: "04",    이름: "같은 질문인데 답이 넷이다",         초: 40 },
+  { file: "05.png", 절: "05",    이름: "라우터",                          초: 90, 데모: true },
+  { file: "06.png", 절: "06",    이름: "노린 것",                         초: 30 },
+  { file: "07.png", 절: "07",    이름: "잃는 것",                         초: 30 },
+  { file: "08.png", 절: "08",    이름: "얻는 것",                         초: 30 },
+  { file: "09.png", 절: "09",    이름: "사용자가 아는 농협은 하나다",        초: 10 }
+];
+
+/* 라우터 주소. 슬라이드를 router 폴더 아래에 두면 상대경로가 맞는다.
+   다른 자리에 두면 http://localhost:3000/bank-app.html 처럼 절대주소로 바꾼다. */
+const ROUTER_URL = "../../router/bank-app.html";
+
+/* ---------- 만들기 ---------- */
+const stage = document.getElementById("stage");
+const demo = document.getElementById("demo");
+const countEl = document.getElementById("count");
+const timerEl = document.getElementById("timer");
+
+const TOTAL = SLIDES.reduce((a, s) => a + s.초, 0);
+
+SLIDES.forEach((s, i) => {
+  const el = document.createElement("div");
+  el.className = "slide";
+  el.dataset.i = i;
+
+  /* 이미지가 있으면 배경으로 깔고, 없으면 자리표시자를 남긴다 */
+  const img = new Image();
+  img.onload = () => {
+    el.style.backgroundImage = `url("images/${s.file}")`;
+    const ph = el.querySelector(".ph");
+    if (ph) ph.remove();
+  };
+  img.src = "images/" + s.file;
+
+  const ph = document.createElement("div");
+  ph.className = "ph";
+  ph.innerHTML =
+    `<div class="no">${s.절}</div>` +
+    `<div class="nm">${s.이름}</div>` +
+    `<div class="fn">images/${s.file}</div>` +
+    (s.초 ? `<div class="tm">${s.초}초</div>` : `<div class="tm">흘림</div>`);
+  el.appendChild(ph);
+
+  stage.appendChild(el);
+});
+
+const slides = [...document.querySelectorAll(".slide")];
+let cur = 0;
+
+/* ---------- 넘기기 ---------- */
+function go(i, push = true) {
+  cur = Math.max(0, Math.min(slides.length - 1, i));
+  slides.forEach((el, n) => el.classList.toggle("on", n === cur));
+
+  const s = SLIDES[cur];
+  demo.classList.toggle("on", !!s.데모);
+  demo.href = ROUTER_URL;
+
+  countEl.textContent = `${cur} / ${slides.length - 1}`;
+  if (push) history.replaceState(null, "", "#" + cur);
+}
+
+function 다음() { go(cur + 1); }
+function 이전() { go(cur - 1); }
+
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  switch (e.key) {
+    case "ArrowRight": case " ": case "PageDown": e.preventDefault(); 다음(); break;
+    case "ArrowLeft": case "PageUp": e.preventDefault(); 이전(); break;
+    case "Home": e.preventDefault(); go(0); break;
+    case "End": e.preventDefault(); go(slides.length - 1); break;
+    case "d": case "D": case "ㅇ": window.open(ROUTER_URL, "_blank", "noopener"); break;
+    case "t": case "T": case "ㅅ": 타이머토글(); break;
+  }
+});
+
+/* 화면 클릭으로도 넘긴다. 라우터 버튼 클릭은 넘기지 않는다 */
+document.addEventListener("click", (e) => {
+  if (e.target.closest("#demo")) return;
+  다음();
+});
+
+/* ---------- 타이머 ---------- */
+/* 270초 안에 들어가는지 보기 위한 것이다. 기본은 꺼둔다 */
+let 시작 = null, 틱 = null;
+
+function 타이머토글() {
+  if (틱) {
+    clearInterval(틱); 틱 = null; 시작 = null;
+    timerEl.classList.remove("on", "over");
+    timerEl.textContent = "0:00";
+    return;
+  }
+  시작 = Date.now();
+  timerEl.classList.add("on");
+  틱 = setInterval(() => {
+    const 초 = Math.floor((Date.now() - 시작) / 1000);
+    const m = Math.floor(초 / 60), s = String(초 % 60).padStart(2, "0");
+    timerEl.textContent = `${m}:${s} / ${Math.floor(TOTAL / 60)}:${String(TOTAL % 60).padStart(2, "0")}`;
+    timerEl.classList.toggle("over", 초 > TOTAL);
+  }, 250);
+}
+
+/* ---------- 시작 ---------- */
+const 첫장 = parseInt(location.hash.slice(1), 10);
+go(Number.isFinite(첫장) ? 첫장 : 0, false);
+</script>
+</body>
+</html>
