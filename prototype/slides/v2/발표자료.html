@@ -26,9 +26,13 @@
     → · Space · PageDown · 화면 클릭     다음 장
     ← · PageUp                           이전 장
     Home / End                           처음 / 마지막
-    D                                    라우터 열기 (새 탭)
+    C                                    콘솔 열기 (새 탭)
+    D                                    앱 열기 (새 탭)
     T                                    타이머 켜기/끄기
-    H                                    핫스팟 조정 모드. 드래그해서 클릭 영역을 잡는다
+    H                                    클릭 영역 조정 모드. 드래그해서 좌표를 읽는다
+
+  05장은 왼쪽 캡처(콘솔)를 누르면 콘솔이, 오른쪽 캡처(앱)를 누르면 앱이 열린다.
+  오른쪽 아래 버튼 둘(콘솔 · 앱)과 C · D 키도 같은 일을 한다.
     Ctrl+P                               장당 한 페이지로 PDF 저장
 
   주소창 끝에 #5 를 붙이면 05장에서 시작한다. 발표 중 새로고침해도 자리를 잃지 않는다.
@@ -78,17 +82,26 @@
   .ph .fn { font-size: 17px; }
   .ph .tm { font-size: 17px; color: var(--accent); }
 
-  /* ---------- 라우터 열기 ---------- */
-  #demo {
+  /* ---------- 라우터 열기 버튼 둘 ---------- */
+  #fabs {
     position: fixed; right: 32px; bottom: 32px; z-index: 5;
-    display: none; align-items: center; gap: 8px;
-    padding: 16px 24px; border-radius: 999px;
+    display: none; gap: 12px;
+  }
+  #fabs.on { display: flex; }
+  .fab {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 22px; border-radius: 999px;
     background: var(--accent); color: #fff;
-    font-size: 22px; font-weight: 600; text-decoration: none;
+    font-size: 20px; font-weight: 600; text-decoration: none;
     box-shadow: 0 8px 24px rgba(16,44,65,.35);
   }
-  #demo.on { display: flex; }
-  #demo:hover { filter: brightness(1.08); }
+  .fab.alt { background: var(--ink); }
+  .fab:hover { filter: brightness(1.08); }
+  .fab kbd {
+    font: inherit; font-size: 14px; font-weight: 700;
+    padding: 2px 8px; border-radius: 6px;
+    background: rgba(255,255,255,.22);
+  }
 
   /* ---------- 핫스팟 ---------- */
   /* 이미지 위에 얹는 투명한 클릭 영역.
@@ -130,7 +143,7 @@
     @page { size: landscape; margin: 0; }
     html, body { background: #fff; height: auto; overflow: visible; }
     #stage { position: static; display: block; }
-    #demo, #hud, #tune, #drag { display: none !important; }
+    #fabs, #hud, #tune, #drag { display: none !important; }
     .hot { display: none !important; }
     .slide {
       position: relative; display: block !important;
@@ -146,7 +159,10 @@
 
 <div id="stage"></div>
 
-<a id="demo" href="#" target="_blank" rel="noopener">▶ 라우터 열기</a>
+<div id="fabs">
+  <a id="con"  class="fab"     href="#" target="_blank" rel="noopener">콘솔 열기 <kbd>C</kbd></a>
+  <a id="demo" class="fab alt" href="#" target="_blank" rel="noopener">앱 열기 <kbd>D</kbd></a>
+</div>
 
 <div id="tune"></div>
 
@@ -168,9 +184,14 @@ const SLIDES = [
   { file: "02.png", 절: "01-1",  이름: "농협 앱은 넷이다",                 초: 10 },
   { file: "03.png", 절: "02·03", 이름: "나눠도 됐다 / 합쳐서 풀리지 않았다", 초: 20 },
   { file: "04.png", 절: "04",    이름: "같은 질문인데 답이 넷이다",         초: 40 },
-  /* 핫스팟은 1920×1080 기준 백분율이다. H 키로 조정 모드를 켜고 드래그하면 값이 나온다 */
+  /* 클릭 영역은 1920×1080 기준 백분율. Figma 05 프레임의 「캡처 자리」 노드 좌표에서 계산했다
+     (칸1 x92 y241 852×553 · 칸2 x976 y241 852×553). 왼쪽 칸은 콘솔 캡처, 오른쪽 칸은 앱 캡처다.
+     디자인이 바뀌면 H 키 조정 모드로 드래그해 다시 읽는다 */
   { file: "05.png", 절: "05",    이름: "라우터",                          초: 90, 데모: true,
-    핫스팟: { x: 4.7, y: 44.0, w: 34.0, h: 7.0 } },
+    핫스팟: [
+      { x: 4.79,  y: 22.31, w: 44.38, h: 51.20, url: "console", label: "콘솔 열기" },
+      { x: 50.83, y: 22.31, w: 44.38, h: 51.20, url: "app",     label: "앱 열기" }
+    ] },
   { file: "06.png", 절: "06",    이름: "노린 것",                         초: 30 },
   { file: "07.png", 절: "07",    이름: "잃는 것",                         초: 30 },
   { file: "08.png", 절: "08",    이름: "얻는 것",                         초: 30 },
@@ -179,11 +200,15 @@ const SLIDES = [
 
 /* 라우터 주소. prototype/ 에서 서버를 띄우면 이 상대경로가 맞는다.
    포트를 타지 않으므로 3000이 아니어도 된다. */
-const ROUTER_URL = "../../router/bank-app.html";
+const APP_URL     = "../../router/bank-app.html";
+const CONSOLE_URL = "../../router/console.html";
+const URLS = { app: APP_URL, console: CONSOLE_URL };
 
 /* ---------- 만들기 ---------- */
 const stage = document.getElementById("stage");
+const fabs = document.getElementById("fabs");
 const demo = document.getElementById("demo");
+const con  = document.getElementById("con");
 const countEl = document.getElementById("count");
 const timerEl = document.getElementById("timer");
 
@@ -212,20 +237,21 @@ SLIDES.forEach((s, i) => {
     (s.초 ? `<div class="tm">${s.초}초</div>` : `<div class="tm">흘림</div>`);
   el.appendChild(ph);
 
-  /* 이미지 위에 얹는 클릭 영역 */
-  if (s.핫스팟) {
+  /* 이미지 위에 얹는 클릭 영역. 하나여도 배열로 다룬다 */
+  const hots = s.핫스팟 ? (Array.isArray(s.핫스팟) ? s.핫스팟 : [s.핫스팟]) : [];
+  hots.forEach(function (h) {
     const a = document.createElement("a");
     a.className = "hot";
-    a.href = ROUTER_URL;
+    a.href = URLS[h.url] || APP_URL;
     a.target = "_blank";
     a.rel = "noopener";
-    a.title = "라우터 열기";
-    a.style.left = s.핫스팟.x + "%";
-    a.style.top = s.핫스팟.y + "%";
-    a.style.width = s.핫스팟.w + "%";
-    a.style.height = s.핫스팟.h + "%";
+    a.title = h.label || "열기";
+    a.style.left = h.x + "%";
+    a.style.top = h.y + "%";
+    a.style.width = h.w + "%";
+    a.style.height = h.h + "%";
     el.appendChild(a);
-  }
+  });
 
   stage.appendChild(el);
 });
@@ -239,8 +265,9 @@ function go(i, push = true) {
   slides.forEach((el, n) => el.classList.toggle("on", n === cur));
 
   const s = SLIDES[cur];
-  demo.classList.toggle("on", !!s.데모);
-  demo.href = ROUTER_URL;
+  fabs.classList.toggle("on", !!s.데모);
+  demo.href = APP_URL;
+  con.href = CONSOLE_URL;
 
   countEl.textContent = `${cur} / ${slides.length - 1}`;
   if (push) history.replaceState(null, "", "#" + cur);
@@ -256,7 +283,8 @@ document.addEventListener("keydown", (e) => {
     case "ArrowLeft": case "PageUp": e.preventDefault(); 이전(); break;
     case "Home": e.preventDefault(); go(0); break;
     case "End": e.preventDefault(); go(slides.length - 1); break;
-    case "d": case "D": case "ㅇ": window.open(ROUTER_URL, "_blank", "noopener"); break;
+    case "d": case "D": case "ㅇ": window.open(APP_URL, "_blank", "noopener"); break;
+    case "c": case "C": case "ㅊ": window.open(CONSOLE_URL, "_blank", "noopener"); break;
     case "t": case "T": case "ㅅ": 타이머토글(); break;
     case "h": case "H": case "ㅗ": 조정토글(); break;
   }
@@ -265,7 +293,7 @@ document.addEventListener("keydown", (e) => {
 /* 화면 클릭으로도 넘긴다. 라우터 버튼과 핫스팟 클릭은 넘기지 않는다 */
 document.addEventListener("click", (e) => {
   if (document.body.classList.contains("tune")) return;
-  if (e.target.closest("#demo") || e.target.closest(".hot")) return;
+  if (e.target.closest("#fabs") || e.target.closest(".hot")) return;
   다음();
 });
 
