@@ -219,14 +219,16 @@ SLIDES.forEach((s, i) => {
   el.className = "slide";
   el.dataset.i = i;
 
-  /* 이미지가 있으면 배경으로 깔고, 없으면 자리표시자를 남긴다 */
+  /* 이미지가 있으면 배경으로 깔고, 없으면 자리표시자를 남긴다.
+     배포본은 build.mjs 가 window.EMBED 에 data URI 를 박아 넣으므로 옆 폴더가 없어도 뜬다 */
+  const src = (window.EMBED && window.EMBED[s.file]) || ("images/" + s.file);
   const img = new Image();
   img.onload = () => {
-    el.style.backgroundImage = `url("images/${s.file}")`;
+    el.style.backgroundImage = `url("${src}")`;
     const ph = el.querySelector(".ph");
     if (ph) ph.remove();
   };
-  img.src = "images/" + s.file;
+  img.src = src;
 
   const ph = document.createElement("div");
   ph.className = "ph";
