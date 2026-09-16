@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>발표 실패 대비 · 콘솔 발행 결과 미리 넣기</title>
+<!--
+  언제 쓰나
+    시연 2단계(콘솔에서 등록 → 승인 → 발행)가 무대에서 안 될 때만 연다.
+    콘솔이 발행했어야 할 스냅샷(seed/published.json)을 그 자리에 대신 넣는다.
+    그 뒤 앱 탭에서 [동기화] 를 누르면 3단계부터 그대로 이어진다.
+
+  무엇을 건드리나
+    routing:published 하나만 쓴다. 앱의 캐시(routing:snapshot 등)는 건드리지 않는다.
+    그래서 1단계(0건, 안내 없음)를 이미 보였다면 그 상태는 그대로다.
+
+  언제 쓰지 않나
+    시연 전에 미리 열지 않는다. 미리 넣어두면 콘솔이 2단계에서 "바뀐 내용이 없어 발행하지 않았습니다"
+    라고 답한다. 콘솔은 내용 해시로 같은 발행을 막기 때문이다. 실패했을 때만 여는 뒷문이다.
+
+  되돌리기
+    콘솔의 [전체 초기화] 가 이 페이지가 쓴 것도 함께 지운다.
+
+  주소
+    http://localhost:3000/router/seed.html          버튼을 눌러 넣는다
+    http://localhost:3000/router/seed.html#auto     열리면서 바로 넣는다
+    (?auto=1 도 받지만, serve 는 .html 을 떼는 301 에서 쿼리를 버린다. #auto 가 안전하다)
+-->
+<style>
+  body { font-family: "IBM Plex Sans KR", "Pretendard", -apple-system, "Segoe UI", sans-serif; margin: 0; padding: 32px 24px; color: #102C41; background: #fff; }
+  h1 { font-size: 22px; margin: 0 0 8px; }
+  p { font-size: 15px; color: #3C4C5E; line-height: 1.7; margin: 0 0 16px; }
+  button { font: inherit; font-size: 18px; font-weight: 600; padding: 14px 22px; border: 0; border-radius: 8px; background: #0066B3; color: #fff; cursor: pointer; }
+  #st { margin-top: 20px; padding: 14px 16px; border-radius: 8px; background: #F6F8F9; border: 1px solid #D9DFE6; font-size: 16px; line-height: 1.6; }
+  #st.ok { background: #E8F1F9; border-color: #0066B3; }
+  #st.bad { background: #FFF3F3; border-color: #C0392B; }
+  .k { font-family: ui-monospace, Consolas, monospace; font-size: 14px; color: #5B6B7C; }
+</style>
+</head>
+<body>
+<h1>콘솔 발행 결과 미리 넣기</h1>
+<p>시연 2단계가 안 될 때만 씁니다. 콘솔이 발행했어야 할 기준을 대신 넣습니다. 넣은 뒤 앱 탭에서 <b>동기화</b>를 누르면 3단계부터 이어집니다.</p>
+<p>시연 <b>전</b>에는 열지 않습니다. 미리 넣으면 콘솔이 "바뀐 내용이 없어 발행하지 않았습니다"라고 답합니다.</p>
+<button id="go">지금 넣기</button>
+<div id="st">대기 중</div>
+
+<script>
+(function () {
+  "use strict";
+  var PUBLISHED = "routing:published";
+  var st = document.getElementById("st");
+  var go = document.getElementById("go");
+
+  function done(cls, html) { st.className = cls; st.innerHTML = html; }
+
+  function seed() {
+    go.disabled = true;
+    done("", "seed/published.json 을 읽는 중");
+    fetch("seed/published.json", { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.text(); })
+      .then(function (text) {
+        var snap = JSON.parse(text);            // 깨진 파일이면 여기서 멈춘다. 깨진 걸 심지 않는다
+        localStorage.setItem(PUBLISHED, JSON.stringify(snap));
+        var nFn = Object.keys(snap.functions || {}).length, nKey = Object.keys(snap.index || {}).length;
+        done("ok",
+          "넣었습니다. <b>앱 탭에서 동기화를 누르세요.</b><br>" +
+          "<span class='k'>v" + snap.version + " · 기능 " + nFn + "건 · 표현 키 " + nKey + "개 · etag " + snap.etag + "</span>");
+      })
+      .catch(function (e) {
+        go.disabled = false;
+        done("bad", "넣지 못했습니다. " + (e && e.message ? e.message : String(e)) +
+          "<br><span class='k'>서버로 열었는지(http://), seed/published.json 이 있는지 확인</span>");
+      });
+  }
+
+  go.addEventListener("click", seed);
+  /* #auto 를 기본으로 쓴다. serve 같은 정적 서버가 .html 을 떼는 301 을 하면서 ?auto=1 은 버리지만
+     fragment 는 브라우저가 리다이렉트 뒤에도 붙여 준다. ?auto=1 도 그대로 받는다 */
+  if (location.hash === "#auto" || /(^|[?&])auto=1(&|$)/.test(location.search)) seed();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>콘솔 발행 경로 자동 검증 · 씨앗 만들기</title>
+<!--
+  무엇을 하나
+    같은 origin 에서 console.html 을 iframe 으로 열고, 사람이 누르는 순서대로 버튼을 코드로 누른다.
+      샘플 불러오기 → 등록 요청 → 일괄 검토 요청 → 일괄 승인 → 승인된 기준 발행
+    그런 다음 routing-client.js 로 동기화하고 조회한다. 콘솔이 쓴 것을 앱이 읽는지가 여기서 갈린다.
+    결과와 콘솔이 실제로 발행한 스냅샷을 <pre id="out"> 에 적는다.
+
+  왜 있나
+    1차 발표에서 콘솔이 발행한 것을 앱이 못 받았다. file:// 로 열어 저장소가 갈렸다는 진단이었고,
+    http:// 로 띄우면 된다는 결론이었다. 이 페이지가 그 결론을 사람 손 없이 확인한다.
+    브라우저를 헤드리스로 띄워 DOM 만 받아도 판정이 나온다.
+      msedge --headless=new --dump-dom --virtual-time-budget=10000 http://localhost:3000/router/seed-make.html
+
+  출력의 스냅샷 JSON 을 seed/published.json 으로 저장하면 seed.html 이 그것을 발표 때 실패 대비로 심는다.
+
+  주의
+    실행하면 이 origin 의 콘솔·발행·이력·앱 캐시를 전부 지우고 다시 만든다. 발표 직전에 돌리지 않는다.
+-->
+<style>
+  body { font-family: ui-monospace, Consolas, monospace; font-size: 13px; margin: 16px; color: #102C41; }
+  iframe { width: 100%; height: 320px; border: 1px solid #D9DFE6; }
+  pre { white-space: pre-wrap; background: #F6F8F9; padding: 12px; border: 1px solid #D9DFE6; }
+</style>
+</head>
+<body>
+<h1>콘솔 발행 경로 자동 검증</h1>
+<pre id="out">준비 중</pre>
+<iframe id="con" title="console"></iframe>
+
+<script src="routing-client.js"></script>
+<script>
+(function () {
+  "use strict";
+  var out = document.getElementById("out");
+  var lines = [];
+  function log(s) { lines.push(s); out.textContent = lines.join("\n"); }
+  function pass(name, cond, detail) { log((cond ? "PASS  " : "FAIL  ") + name + (detail ? "   " + detail : "")); return !!cond; }
+
+  var K = window.RoutingClient.KEYS;
+  var PUBLISHED = "routing:published";
+  var CONSOLE = "routing:console";
+  var HISTORY = "routing:history";
+
+  /* 1. 깨끗한 상태에서 시작한다. 콘솔이 load() 로 이전 상태를 되살리지 않게 iframe 을 열기 전에 지운다 */
+  [PUBLISHED, CONSOLE, HISTORY, K.SNAPSHOT, K.ETAG, K.SYNCED].forEach(function (k) { localStorage.removeItem(k); });
+  log("저장소를 비웠다");
+
+  var fr = document.getElementById("con");
+  fr.addEventListener("load", run);
+  fr.src = "console.html";
+
+  function run() {
+    var fw = fr.contentWindow, fd = fr.contentDocument;
+    var allOk = true;
+
+    /* 헤드리스에서는 confirm 이 false 로 닫힌다. 콘솔의 관문 대화상자를 통과시킨다 */
+    fw.alert = function () {};
+    fw.confirm = function () { return true; };
+
+    function click(id) {
+      var el = fd.getElementById(id);
+      if (!el) { allOk = pass("버튼 " + id, false, "없다"); return false; }
+      el.click();
+      return true;
+    }
+
+    /* 2. 샘플을 전부 등록 요청한다. 콘솔이 사람에게 시키는 순서와 같다 */
+    var sel = fd.getElementById("sampleSel");
+    var opts = Array.prototype.slice.call(sel.options).filter(function (o) { return o.value !== ""; });
+    allOk = pass("샘플 목록이 있다", opts.length > 0, opts.length + "개") && allOk;
+    var added = 0;
+    opts.forEach(function (o) {
+      sel.value = o.value;
+      sel.dispatchEvent(new fw.Event("change"));   // 콘솔이 textarea 를 채우고 analyze() 를 부른다
+      click("applyDefBtn");                          // 다음 행동·역할 기본값. 이게 없으면 addRows 가 전부 건너뛴다
+      if (click("addBtn")) added++;
+      var fl = fd.getElementById("addFlash");
+      log("  샘플 " + o.textContent.trim() + " → " + (fl ? fl.textContent : ""));
+    });
+    /* 직접 입력 탭의 교통비 환급 카드 신청. 시연에서 발표자가 손으로 넣는 한 건과 같다 */
+    click("addManualBtn");
+    var rowsAfterAdd = fd.querySelectorAll("button[data-act='req']").length;
+    allOk = pass("등록 요청이 표에 올라왔다", rowsAfterAdd > 0, "검토 요청 가능 " + rowsAfterAdd + "행") && allOk;
+
+    /* 3. 일괄 검토 요청 → 일괄 승인 → 발행 */
+    click("reqAllBtn");
+    var reviewRows = fd.querySelectorAll("button[data-act='appr']").length;
+    allOk = pass("검토 중으로 넘어갔다", reviewRows > 0, reviewRows + "행") && allOk;
+    click("apprAllBtn");
+    var stillReview = fd.querySelectorAll("button[data-act='appr']").length;
+    allOk = pass("전부 승인됐다", stillReview === 0, "남은 검토 " + stillReview) && allOk;
+    click("pubBtn");
+
+    /* 4. 콘솔이 실제로 발행한 것 */
+    var raw = localStorage.getItem(PUBLISHED);
+    allOk = pass("콘솔이 routing:published 에 썼다", !!raw, raw ? raw.length + " chars" : "비어 있다") && allOk;
+    var snap = null;
+    try { snap = JSON.parse(raw); } catch (e) {}
+    allOk = pass("스냅샷이 JSON 이다", !!snap) && allOk;
+    if (snap) {
+      allOk = pass("version 1", snap.version === 1, "v" + snap.version) && allOk;
+      allOk = pass("etag 형식 v{n}-{hash}", /^v\d+-[0-9a-z]+$/i.test(snap.etag || ""), snap.etag) && allOk;
+      var nFn = Object.keys(snap.functions || {}).length, nKey = Object.keys(snap.index || {}).length;
+      allOk = pass("기능이 들어 있다", nFn > 0, nFn + "건 · 표현 키 " + nKey + "개") && allOk;
+      var kp = snap.index[window.RoutingClient.normalize("케이패스")];
+      allOk = pass("index 에 케이패스가 있다", !!kp, kp || "없다") && allOk;
+    }
+
+    /* 5. 앱 쪽. 콕뱅크 클라이언트가 같은 origin 에서 받아 조회한다 */
+    var kok = new window.RoutingClient("kok", window.RoutingClient.transports.local(PUBLISHED));
+    var nhpay = new window.RoutingClient("nhpay", window.RoutingClient.transports.local(PUBLISHED));
+    kok.sync().then(function (r) {
+      allOk = pass("콕뱅크 sync → 200", r.status === 200 && r.changed === true, JSON.stringify(r)) && allOk;
+      var hit = kok.lookup("케이패스");
+      allOk = pass("콕뱅크 lookup(케이패스) 안내가 있다", !!hit, hit ? (hit.name + " → " + (hit.channels || []).map(function (c) { return c.name + "(" + c.role + ")"; }).join(", ")) : "null") && allOk;
+      allOk = pass("다음 행동이 온다", !!(hit && hit.next), hit && hit.next) && allOk;
+      return kok.sync();
+    }).then(function (r2) {
+      allOk = pass("두 번째 sync → 304 · 0 B", r2.status === 304 && r2.bytes === 0, JSON.stringify(r2)) && allOk;
+      return nhpay.sync();
+    }).then(function () {
+      var hitPay = nhpay.lookup("케이패스");
+      allOk = pass("NH Pay 에서는 미노출(null)", hitPay === null, hitPay ? "안내가 떴다" : "null") && allOk;
+      log("");
+      log(allOk ? "RESULT PASS" : "RESULT FAIL");
+      log("");
+      log("SNAPSHOT_BEGIN");
+      log(JSON.stringify(snap, null, 2));
+      log("SNAPSHOT_END");
+    }).catch(function (e) {
+      log("ERROR " + (e && e.message ? e.message : String(e)));
+      log("RESULT FAIL");
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -401,6 +401,26 @@ if (hit) render(AppComponents.guideCard(hit));   // 화면은 이 앱이 그린�
 9-1. 발행된 기준 한 줄을 `삭제` → 확인창이 `앱에 나가 있다`고 알린다 → 지운 뒤 발행 바에 `발행하면 앱에서 1건이 사라집니다`가 뜬다 → `승인된 기준 발행` → 빠지는 기준을 다시 확인받고 발행 → 앱에서 `동기화` → 그 안내가 사라진다
 10. 콘솔 `발행 이력`에서 이전 버전 `되돌리기` → 빠지는 기준을 확인하고 진행 → 앱 탭에서 `동기화` → 되돌린 내용이 반영됨
 
+## 브라우저에서 콘솔→앱 경로를 확인한다
+
+콘솔과 앱은 같은 origin의 localStorage로 주고받는다. `file://`로 열면 브라우저에 따라 저장소가 갈려 콘솔이 발행한 것을 앱이 못 받는다. 2026-08-26 발표에서 데모가 안 된 원인이다. **서버로 띄운다.**
+
+```bash
+cd prototype
+npx -y serve .
+# http://localhost:3000/router/console.html · bank-app.html
+```
+
+사람 손 없이 확인하려면 `seed-make.html`을 헤드리스 브라우저로 연다. 같은 origin에서 콘솔을 iframe으로 열어 사람이 누르는 순서대로 버튼을 코드로 누르고(샘플 불러오기 → 기본값 채우기 → 등록 요청 → 일괄 검토 → 일괄 승인 → 발행), 콕뱅크 클라이언트로 sync·lookup까지 한 뒤 결과를 DOM에 적는다.
+
+```bash
+msedge --headless=new --disable-gpu --user-data-dir=%TEMP%\edge-selftest --virtual-time-budget=12000 --dump-dom http://localhost:3000/router/seed-make.html
+```
+
+`RESULT PASS`가 나오면 콘솔이 실제로 발행한 스냅샷이 출력에 함께 있다. 그것을 `seed/published.json`으로 둔다. 실행하면 이 origin의 콘솔·발행·이력·앱 캐시를 전부 지우고 다시 만드니 발표 직전에는 돌리지 않는다.
+
+`seed.html`은 발표 뒷문이다. 시연 2단계(콘솔)가 무대에서 안 될 때 `seed.html#auto`을 열면 `seed/published.json`을 `routing:published`에 대신 넣는다. 앱 캐시는 건드리지 않으므로 그 뒤 앱에서 동기화하면 3단계부터 이어진다. 시연 전에 미리 열면 콘솔이 "바뀐 내용이 없어 발행하지 않았습니다"라고 답하니 실패했을 때만 연다.
+
 자동 검사는 저장소에 들어 있다. 외부 라이브러리 없이 돌아간다.
 
 마지막 묶음은 검사 자신을 겨눈다 — **건수가 다른 문서로 번지지 않았는지** 확인한다.
