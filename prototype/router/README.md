@@ -8,7 +8,7 @@
 
 ## 실행
 
-**서버로 띄운다.** `file://`로 직접 열면 브라우저에 따라 두 파일의 저장소가 갈려 연동이 안 된다(2026-08-26 발표에서 그랬다). `prototype/`에서 `npx -y serve .` 뒤 `http://localhost:3000/router/console.html`과 `bank-app.html`을 **탭 두 개로** 연다. 자세한 것은 아래 「브라우저에서 콘솔→앱 경로를 확인한다」.
+**서버로 띄운다.** `file://`로 직접 열면 Firefox에서는 두 파일의 저장소가 갈리고, 어느 브라우저든 seed.html의 fetch가 막힌다. `prototype/`에서 `npx -y serve .` 뒤 `http://localhost:3000/router/console.html`과 `bank-app.html`을 **탭 두 개로** 연다. 자세한 것은 아래 「브라우저에서 콘솔→앱 경로를 확인한다」.
 
 ```text
 console.html      라우터 관리 콘솔 — 기준 등록·승인·발행
@@ -403,7 +403,7 @@ if (hit) render(AppComponents.guideCard(hit));   // 화면은 이 앱이 그린�
 
 ## 브라우저에서 콘솔→앱 경로를 확인한다
 
-콘솔과 앱은 같은 origin의 localStorage로 주고받는다. `file://`로 열면 브라우저에 따라 저장소가 갈려 콘솔이 발행한 것을 앱이 못 받는다. 2026-08-26 발표에서 데모가 안 된 원인이다. **서버로 띄운다.**
+콘솔과 앱은 같은 origin의 localStorage로 주고받는다. **서버로 띄운다.** http://면 같은 origin이라 확실히 공유되고 seed.html의 fetch도 된다. `file://`은 Firefox가 폴더 단위로 저장소를 가르고, Edge·Chrome은 file:// 페이지끼리 나눠 쓴다(2026-09-16 실측. 같은 프로필에서 a.html이 쓴 값을 b.html과 하위 폴더 c.html이 읽었다). 2026-08-26 발표에서 데모가 안 된 원인이 file://이었는지는 그래서 확정하지 못했다.
 
 ```bash
 cd prototype
